@@ -1,35 +1,21 @@
-HOME OFFICE DASHBOARD V4
+HOME OFFICE DASHBOARD V5 ONLINE
 
-Fokus V4:
-- Data Karyawan lengkap
-- Tambah karyawan
-- Edit karyawan
-- Detail karyawan
-- Aktif / nonaktifkan karyawan
-- Nomor HP
-- Email
-- Tanggal masuk
-- Alamat
-- Username dan password
-- Login Admin/Karyawan
-- Absensi Masuk/Pulang
-- Absensi manual oleh Admin
-- Riwayat absensi
+Supabase project:
+https://ltffbxrggflevlilqmze.supabase.co
 
-AKUN DEMO
-Admin:
-username: admin
-password: admin123
+Fitur:
+- Login online via Supabase Auth
+- Admin profile dari tabel employees
+- Data karyawan online
+- Edit/detail/nonaktifkan karyawan
+- Absensi online
+- Sinkron antar perangkat
+- GitHub Pages compatible
 
-Karyawan:
-username: budi
-password: 123456
+PENTING:
+- Publishable key dipakai di frontend dan dilindungi oleh RLS.
+- Jangan pernah menaruh database password / service_role / secret key di GitHub.
+- Tambah akun login karyawan masih dilakukan melalui Supabase Auth terlebih dahulu, lalu auth_user_id perlu dihubungkan ke row employees.
 
-PENTING
-Versi ini masih memakai localStorage browser. Jangan gunakan password penting.
-Untuk sinkron antar HP/laptop, tahap berikutnya perlu database online/backend.
-
-CARA UPDATE GITHUB PAGES
-1. Upload/replace index.html, absensi.html, README.txt ke repo homeoffice-dashboard.
-2. Commit changes.
-3. GitHub Pages akan update otomatis dari branch main.
+Cara update:
+Replace index.html, absensi.html, README.txt di repo homeoffice-dashboard lalu commit.

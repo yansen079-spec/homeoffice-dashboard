@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HomeOffice V4</title>
+<title>HomeOffice V5 Online</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,system-ui;background:#f5f7fb;color:#172033}
 button,input,select,textarea{font:inherit}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
@@ -11,7 +12,6 @@ button,input,select,textarea{font:inherit}.hidden{display:none!important}.login{
 .logo{font-size:24px;font-weight:900;margin-bottom:7px}.muted{color:#7a8799;font-size:13px}.field{display:grid;gap:6px;margin-top:15px;font-size:13px}
 .field input,.field select,.field textarea{padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.field textarea{min-height:90px;resize:vertical}
 .btn{border:1px solid #dfe5ed;background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.primary{background:#2563eb;color:#fff;border-color:#2563eb}.danger{background:#feecec;color:#b91c1c;border-color:#fecaca}.wide{width:100%;margin-top:18px}
-.demo{background:#f7f9fc;border-radius:12px;padding:12px;margin-top:18px;font-size:12px;line-height:1.7}
 .app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid #e6eaf0;padding:25px 17px;position:sticky;top:0;height:100vh}
 .brand{font-size:20px;font-weight:900;margin:0 10px 28px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#596579;padding:12px 14px;border-radius:10px;margin:5px 0;cursor:pointer}.nav button.active,.nav button:hover{background:#eaf1ff;color:#2563eb;font-weight:700}
 .user{position:absolute;bottom:18px;left:17px;right:17px;border-top:1px solid #edf0f4;padding-top:14px}.main{padding:30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:12px}.top h1{margin:0 0 6px}
@@ -31,12 +31,11 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 <section id="login" class="login">
   <div class="loginbox">
     <div class="logo">🏠 HomeOffice</div>
-    <div class="muted">Masuk ke sistem administrasi kantor</div>
-    <label class="field">Username<input id="loginUser" autocomplete="username" placeholder="Masukkan username"></label>
-    <label class="field">Password<input id="loginPass" type="password" autocomplete="current-password" placeholder="Masukkan password"></label>
+    <div class="muted">Login online dengan Supabase</div>
+    <label class="field">Email<input id="loginEmail" type="email" placeholder="Email admin/karyawan"></label>
+    <label class="field">Password<input id="loginPass" type="password" placeholder="Password"></label>
     <button class="btn primary wide" id="loginBtn">Masuk</button>
     <div id="loginMsg" class="muted" style="margin-top:10px"></div>
-    <div class="demo"><b>Akun demo</b><br>Admin: <b>admin</b> / <b>admin123</b><br>Karyawan: <b>budi</b> / <b>123456</b><br><span class="muted">V4 masih menggunakan localStorage. Jangan gunakan password sungguhan.</span></div>
   </div>
 </section>
 
@@ -68,7 +67,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     </section>
 
     <section id="attendance" class="page hidden">
-      <div class="top"><div><h1>Absensi</h1><div class="muted">Riwayat kehadiran karyawan.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
+      <div class="top"><div><h1>Absensi</h1><div class="muted">Data tersimpan online di Supabase.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
       <div class="card">
         <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
@@ -76,7 +75,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     </section>
 
     <section id="employees" class="page hidden">
-      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Kelola data dan akun karyawan.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
+      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Data tersimpan online di Supabase.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
       <div class="card">
         <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
@@ -91,25 +90,20 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     <input type="hidden" id="eId">
     <div class="grid">
       <label class="field">Nama Lengkap<input id="eName"></label>
-      <label class="field">Jabatan<input id="eJob" placeholder="Contoh: Staff Gudang"></label>
+      <label class="field">Jabatan<input id="eJob"></label>
       <label class="field">Username<input id="eUser"></label>
-      <label class="field">Password<input id="ePass" type="password" placeholder="Isi untuk akun baru / ubah password"></label>
-      <label class="field">Nomor HP<input id="ePhone" placeholder="08xxxxxxxxxx"></label>
+      <label class="field">Nomor HP<input id="ePhone"></label>
       <label class="field">Tanggal Masuk<input id="eJoin" type="date"></label>
       <label class="field">Status<select id="eActive"><option value="true">Aktif</option><option value="false">Nonaktif</option></select></label>
-      <label class="field">Email<input id="eEmail" type="email" placeholder="Opsional"></label>
-      <label class="field" style="grid-column:1/-1">Alamat<textarea id="eAddress" placeholder="Alamat karyawan"></textarea></label>
+      <label class="field">Email<input id="eEmail" type="email"></label>
+      <label class="field" style="grid-column:1/-1">Alamat<textarea id="eAddress"></textarea></label>
     </div>
     <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveEmployee">Simpan</button></div>
   </div>
 </div>
 
 <div class="modal" id="employeeDetailModal">
-  <div class="box">
-    <h3>Detail Karyawan</h3>
-    <div id="employeeDetail"></div>
-    <div class="actions"><button class="btn modalCancel">Tutup</button></div>
-  </div>
+  <div class="box"><h3>Detail Karyawan</h3><div id="employeeDetail"></div><div class="actions"><button class="btn modalCancel">Tutup</button></div></div>
 </div>
 
 <div class="modal" id="attendanceModal">
@@ -128,179 +122,137 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 </div>
 
 <script>
+const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const keyUsers='ho_v4_users', keyAtt='ho_v4_attendance', keySession='ho_v4_session';
-
-const seed=[
- {id:'admin',name:'Administrator',username:'admin',password:'admin123',job:'Administrator',role:'admin',active:true,phone:'',email:'',joinDate:'',address:''},
- {id:'budi',name:'Budi Santoso',username:'budi',password:'123456',job:'Staff',role:'employee',active:true,phone:'081234567890',email:'',joinDate:'2026-08-01',address:''}
-];
-
-let users=JSON.parse(localStorage.getItem(keyUsers)||'null')||seed;
-let attendance=JSON.parse(localStorage.getItem(keyAtt)||'[]');
-let current=null;
-
-function persist(){localStorage.setItem(keyUsers,JSON.stringify(users));localStorage.setItem(keyAtt,JSON.stringify(attendance))}
-persist();
+let currentAuth=null,currentEmployee=null,employees=[],attendance=[];
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
-function showApp(u){
- current=u;
- $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
- $('#sideName').textContent=u.name; $('#sideRole').textContent=u.role==='admin'?'Admin':u.job;
- $('#welcome').textContent='Selamat datang, '+u.name+'.';
- $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',u.role!=='admin'));
- $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',u.role==='admin'));
- go('dashboard'); renderAll();
-}
-
-function login(){
- let u=users.find(x=>x.active&&x.username===$('#loginUser').value.trim()&&x.password===$('#loginPass').value);
- if(!u){$('#loginMsg').textContent='Username atau password salah.';return}
- localStorage.setItem(keySession,u.id); showApp(u);
+async function login(){
+  $('#loginMsg').textContent='Memproses...';
+  const {data,error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPass').value});
+  if(error){$('#loginMsg').textContent=error.message;return}
+  await boot(data.user);
 }
 $('#loginBtn').onclick=login;
 $('#loginPass').onkeydown=e=>{if(e.key==='Enter')login()};
-$('#logout').onclick=()=>{localStorage.removeItem(keySession);location.reload()};
+$('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+async function boot(user){
+  currentAuth=user;
+  const {data:emp,error}=await sb.from('employees').select('*').eq('auth_user_id',user.id).single();
+  if(error||!emp){$('#loginMsg').textContent='Akun Auth belum terhubung ke tabel employees.';return}
+  currentEmployee=emp;
+  $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
+  $('#sideName').textContent=emp.full_name;$('#sideRole').textContent=emp.role==='admin'?'Admin':emp.job_title||'Karyawan';
+  $('#welcome').textContent='Selamat datang, '+emp.full_name+'.';
+  $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
+  $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
+  go('dashboard'); await refreshData();
+}
 
 function go(id){
- if(id==='employees'&&current.role!=='admin') id='dashboard';
- $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
- $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  if(id==='employees'&&currentEmployee.role!=='admin')id='dashboard';
+  $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
+  $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
 }
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
-function badge(s){return '<span class="badge '+(s==='Hadir'?'hadir':s==='Terlambat'?'telat':s==='Izin'?'izin':'sakit')+'">'+esc(s)+'</span>'}
+async function refreshData(){
+  if(currentEmployee.role==='admin'){
+    const {data:e}=await sb.from('employees').select('*').order('full_name');
+    employees=e||[];
+    const {data:a}=await sb.from('attendance').select('*, employees(full_name)').order('attendance_date',{ascending:false});
+    attendance=(a||[]).map(x=>({...x,name:x.employees?.full_name||'-'}));
+  }else{
+    employees=[currentEmployee];
+    const {data:a}=await sb.from('attendance').select('*').eq('employee_id',currentEmployee.id).order('attendance_date',{ascending:false});
+    attendance=(a||[]).map(x=>({...x,name:currentEmployee.full_name}));
+  }
+  renderAll();
+}
 
+function badge(s){return '<span class="badge '+(s==='Hadir'?'hadir':s==='Terlambat'?'telat':s==='Izin'?'izin':'sakit')+'">'+esc(s)+'</span>'}
 function renderAll(){
- let td=attendance.filter(x=>x.date===ymd());
+ let td=attendance.filter(x=>x.attendance_date===ymd());
  $('#dH').textContent=td.filter(x=>x.status==='Hadir').length;
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
- $('#dE').textContent=users.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance(); renderEmployees(); renderNotice();
+ $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
+ renderAttendance();renderEmployees();renderNotice();
 }
 
 function renderAttendance(){
- let d=$('#filterDate').value, s=$('#filterStatus').value;
- let rows=attendance.filter(x=>(!d||x.date===d)&&(!s||x.status===s));
- if(current.role!=='admin') rows=rows.filter(x=>x.userId===current.id);
- rows.sort((a,b)=>b.date.localeCompare(a.date));
- $('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.date)}</td><td>${esc(x.in||'-')}</td><td>${esc(x.out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>';
+ let d=$('#filterDate').value,s=$('#filterStatus').value;
+ let rows=attendance.filter(x=>(!d||x.attendance_date===d)&&(!s||x.status===s));
+ $('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.attendance_date)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>';
 }
 
 function renderEmployees(){
- if(current.role!=='admin') return;
+ if(currentEmployee.role!=='admin')return;
  let q=$('#employeeSearch').value.toLowerCase().trim();
- let es=users.filter(x=>x.role==='employee' && (!q || [x.name,x.username,x.job,x.phone].some(v=>String(v||'').toLowerCase().includes(q))));
+ let es=employees.filter(x=>x.role==='employee'&&(!q||[x.full_name,x.username,x.job_title,x.phone].some(v=>String(v||'').toLowerCase().includes(q))));
  $('#employeeRows').innerHTML=es.length?es.map(x=>`<tr>
- <td><div class="empname"><div class="avatar">${esc((x.name||'?')[0].toUpperCase())}</div><b>${esc(x.name)}</b></div></td>
- <td>${esc(x.username)}</td><td>${esc(x.job||'-')}</td><td>${esc(x.phone||'-')}</td><td>${esc(x.joinDate||'-')}</td>
+ <td><div class="empname"><div class="avatar">${esc((x.full_name||'?')[0].toUpperCase())}</div><b>${esc(x.full_name)}</b></div></td>
+ <td>${esc(x.username)}</td><td>${esc(x.job_title||'-')}</td><td>${esc(x.phone||'-')}</td><td>${esc(x.join_date||'-')}</td>
  <td><span class="badge ${x.active?'aktif':'nonaktif'}">${x.active?'Aktif':'Nonaktif'}</span></td>
  <td><div class="rowactions"><button class="btn" onclick="viewEmployee('${x.id}')">Detail</button><button class="btn" onclick="editEmployee('${x.id}')">Edit</button><button class="btn ${x.active?'danger':''}" onclick="toggleEmployee('${x.id}')">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></td>
  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada karyawan.</td></tr>';
 }
 
 function renderNotice(){
- if(current.role==='admin') return;
- let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
- let n=$('#dashNotice'); n.classList.remove('hidden');
- n.textContent=!x?'Kamu belum melakukan absensi hari ini.':`Absensi hari ini: ${x.status} • Masuk ${x.in||'-'} • Pulang ${x.out||'-'}`;
+ if(currentEmployee.role==='admin')return;
+ let x=attendance.find(a=>a.attendance_date===ymd());
+ let n=$('#dashNotice');n.classList.remove('hidden');
+ n.textContent=!x?'Kamu belum melakukan absensi hari ini.':`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
 }
 
-$('#filterDate').value='';
-$('#filterDate').onchange=renderAttendance;
-$('#filterStatus').onchange=renderAttendance;
-$('#employeeSearch').oninput=renderEmployees;
+$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
 
-$('#clockIn').onclick=()=>{
- let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
- if(x&&x.in){alert('Kamu sudah absen masuk hari ini.');return}
+$('#clockIn').onclick=async()=>{
+ let x=attendance.find(a=>a.attendance_date===ymd());
+ if(x&&x.check_in){alert('Kamu sudah absen masuk hari ini.');return}
  let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';
- if(!x){x={id:String(Date.now()),userId:current.id,name:current.name,date:ymd(),in:t,out:'',status,note:''};attendance.push(x)}
- else{x.in=t;x.status=status}
- persist();renderAll();alert('Absensi masuk berhasil: '+t)
-};
-
-$('#clockOut').onclick=()=>{
- let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
- if(!x||!x.in){alert('Silakan absen masuk terlebih dahulu.');return}
- if(x.out){alert('Kamu sudah absen pulang.');return}
- x.out=hm();persist();renderAll();alert('Absensi pulang berhasil: '+x.out)
-};
-
-function openModal(id){$(id).classList.add('open')}
-$$('.modalCancel').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
-
-function resetEmployeeForm(){
- $('#eId').value='';$('#eName').value='';$('#eJob').value='';$('#eUser').value='';$('#ePass').value='';$('#ePhone').value='';$('#eJoin').value=ymd();$('#eActive').value='true';$('#eEmail').value='';$('#eAddress').value='';
+ let res;
+ if(x)res=await sb.from('attendance').update({check_in:t,status}).eq('id',x.id);
+ else res=await sb.from('attendance').insert({employee_id:currentEmployee.id,attendance_date:ymd(),check_in:t,status});
+ if(res.error){alert(res.error.message);return} await refreshData();alert('Absensi masuk berhasil: '+t);
 }
 
-$('#addEmployee').onclick=()=>{resetEmployeeForm();$('#employeeModalTitle').textContent='Tambah Karyawan';openModal('#employeeModal')};
+$('#clockOut').onclick=async()=>{
+ let x=attendance.find(a=>a.attendance_date===ymd());
+ if(!x||!x.check_in){alert('Silakan absen masuk terlebih dahulu.');return}
+ if(x.check_out){alert('Kamu sudah absen pulang.');return}
+ let t=hm();let {error}=await sb.from('attendance').update({check_out:t}).eq('id',x.id);
+ if(error){alert(error.message);return}await refreshData();alert('Absensi pulang berhasil: '+t);
+}
 
-window.editEmployee=id=>{
- let u=users.find(x=>x.id===id); if(!u)return;
- $('#employeeModalTitle').textContent='Edit Karyawan';
- $('#eId').value=u.id;$('#eName').value=u.name||'';$('#eJob').value=u.job||'';$('#eUser').value=u.username||'';$('#ePass').value='';$('#ePhone').value=u.phone||'';$('#eJoin').value=u.joinDate||'';$('#eActive').value=String(u.active);$('#eEmail').value=u.email||'';$('#eAddress').value=u.address||'';
- openModal('#employeeModal');
-};
+function openModal(id){$(id).classList.add('open')}$$('.modalCancel').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
+function resetEmployeeForm(){$('#eId').value='';$('#eName').value='';$('#eJob').value='';$('#eUser').value='';$('#ePhone').value='';$('#eJoin').value=ymd();$('#eActive').value='true';$('#eEmail').value='';$('#eAddress').value=''}
+$('#addEmployee').onclick=()=>{resetEmployeeForm();$('#employeeModalTitle').textContent='Tambah Data Karyawan';openModal('#employeeModal')};
 
-window.viewEmployee=id=>{
- let u=users.find(x=>x.id===id); if(!u)return;
- $('#employeeDetail').innerHTML=`<div class="detailgrid">
- <div class="detailitem"><span class="muted">Nama</span><b>${esc(u.name)}</b></div>
- <div class="detailitem"><span class="muted">Jabatan</span><b>${esc(u.job||'-')}</b></div>
- <div class="detailitem"><span class="muted">Username</span><b>${esc(u.username)}</b></div>
- <div class="detailitem"><span class="muted">Nomor HP</span><b>${esc(u.phone||'-')}</b></div>
- <div class="detailitem"><span class="muted">Email</span><b>${esc(u.email||'-')}</b></div>
- <div class="detailitem"><span class="muted">Tanggal Masuk</span><b>${esc(u.joinDate||'-')}</b></div>
- <div class="detailitem"><span class="muted">Status</span><b>${u.active?'Aktif':'Nonaktif'}</b></div>
- <div class="detailitem" style="grid-column:1/-1"><span class="muted">Alamat</span><b>${esc(u.address||'-')}</b></div>
- </div>`;
- openModal('#employeeDetailModal');
-};
+window.editEmployee=id=>{let u=employees.find(x=>x.id===id);if(!u)return;$('#employeeModalTitle').textContent='Edit Karyawan';$('#eId').value=u.id;$('#eName').value=u.full_name||'';$('#eJob').value=u.job_title||'';$('#eUser').value=u.username||'';$('#ePhone').value=u.phone||'';$('#eJoin').value=u.join_date||'';$('#eActive').value=String(u.active);$('#eEmail').value=u.email||'';$('#eAddress').value=u.address||'';openModal('#employeeModal')};
+window.viewEmployee=id=>{let u=employees.find(x=>x.id===id);if(!u)return;$('#employeeDetail').innerHTML=`<div class="detailgrid"><div class="detailitem"><span class="muted">Nama</span><b>${esc(u.full_name)}</b></div><div class="detailitem"><span class="muted">Jabatan</span><b>${esc(u.job_title||'-')}</b></div><div class="detailitem"><span class="muted">Username</span><b>${esc(u.username)}</b></div><div class="detailitem"><span class="muted">HP</span><b>${esc(u.phone||'-')}</b></div><div class="detailitem"><span class="muted">Email</span><b>${esc(u.email||'-')}</b></div><div class="detailitem"><span class="muted">Tanggal Masuk</span><b>${esc(u.join_date||'-')}</b></div><div class="detailitem"><span class="muted">Status</span><b>${u.active?'Aktif':'Nonaktif'}</b></div><div class="detailitem" style="grid-column:1/-1"><span class="muted">Alamat</span><b>${esc(u.address||'-')}</b></div></div>`;openModal('#employeeDetailModal')};
 
-window.toggleEmployee=id=>{
- let u=users.find(x=>x.id===id); if(!u)return;
- u.active=!u.active; persist(); renderAll();
-};
+window.toggleEmployee=async id=>{let u=employees.find(x=>x.id===id);if(!u)return;let {error}=await sb.from('employees').update({active:!u.active}).eq('id',id);if(error)alert(error.message);else await refreshData()};
 
-$('#saveEmployee').onclick=()=>{
- let id=$('#eId').value;
- let name=$('#eName').value.trim(), username=$('#eUser').value.trim(), password=$('#ePass').value, job=$('#eJob').value.trim()||'Staff';
+$('#saveEmployee').onclick=async()=>{
+ let id=$('#eId').value,name=$('#eName').value.trim(),username=$('#eUser').value.trim();
  if(!name||!username){alert('Nama dan username wajib diisi.');return}
- if(users.some(x=>x.username.toLowerCase()===username.toLowerCase()&&x.id!==id)){alert('Username sudah digunakan.');return}
- if(!id && !password){alert('Password wajib diisi untuk karyawan baru.');return}
- if(id){
-   let u=users.find(x=>x.id===id);
-   Object.assign(u,{name,username,job,phone:$('#ePhone').value.trim(),email:$('#eEmail').value.trim(),joinDate:$('#eJoin').value,address:$('#eAddress').value.trim(),active:$('#eActive').value==='true'});
-   if(password)u.password=password;
- }else{
-   users.push({id:'u'+Date.now(),name,username,password,job,role:'employee',active:$('#eActive').value==='true',phone:$('#ePhone').value.trim(),email:$('#eEmail').value.trim(),joinDate:$('#eJoin').value,address:$('#eAddress').value.trim()});
- }
- persist();$('#employeeModal').classList.remove('open');renderAll();
-};
+ let payload={full_name:name,username,job_title:$('#eJob').value.trim()||null,phone:$('#ePhone').value.trim()||null,email:$('#eEmail').value.trim()||null,join_date:$('#eJoin').value||null,address:$('#eAddress').value.trim()||null,active:$('#eActive').value==='true',role:'employee'};
+ let res=id?await sb.from('employees').update(payload).eq('id',id):await sb.from('employees').insert(payload);
+ if(res.error){alert(res.error.message);return}$('#employeeModal').classList.remove('open');await refreshData();
+}
 
-$('#manualAttendance').onclick=()=>{
- $('#aEmployee').innerHTML=users.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
- $('#aDate').value=ymd();$('#aIn').value='';$('#aOut').value='';$('#aStatus').value='Hadir';$('#aNote').value='';
- openModal('#attendanceModal');
-};
+$('#manualAttendance').onclick=()=>{$('#aEmployee').innerHTML=employees.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');$('#aDate').value=ymd();$('#aIn').value='';$('#aOut').value='';$('#aStatus').value='Hadir';$('#aNote').value='';openModal('#attendanceModal')};
+$('#saveAttendance').onclick=async()=>{let payload={employee_id:$('#aEmployee').value,attendance_date:$('#aDate').value,check_in:$('#aIn').value||null,check_out:$('#aOut').value||null,status:$('#aStatus').value,note:$('#aNote').value.trim()||null};let {error}=await sb.from('attendance').upsert(payload,{onConflict:'employee_id,attendance_date'});if(error){alert(error.message);return}$('#attendanceModal').classList.remove('open');await refreshData()};
 
-$('#saveAttendance').onclick=()=>{
- let u=users.find(x=>x.id===$('#aEmployee').value); if(!u||!$('#aDate').value)return;
- let existing=attendance.find(x=>x.userId===u.id&&x.date===$('#aDate').value);
- let obj={id:existing?.id||String(Date.now()),userId:u.id,name:u.name,date:$('#aDate').value,in:$('#aIn').value,out:$('#aOut').value,status:$('#aStatus').value,note:$('#aNote').value.trim()};
- if(existing)Object.assign(existing,obj); else attendance.push(obj);
- persist();$('#attendanceModal').classList.remove('open');renderAll();
-};
-
-let sid=localStorage.getItem(keySession),su=users.find(x=>x.id===sid&&x.active);
-if(su)showApp(su);
+sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>
 </body>
 </html>
