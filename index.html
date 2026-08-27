@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HomeOffice Dashboard</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e7eaf0;--primary:#5b6cff;--success:#22a06b;--warn:#f59e0b;--danger:#ef4444}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-weight:800;font-size:20px;margin:4px 10px 24px}.brand span{color:var(--primary)}
+.nav a{display:flex;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border-radius:10px;color:#485266;text-decoration:none}.nav a.active,.nav a:hover{background:#eef1ff;color:#3f4eea}.foot{position:absolute;bottom:18px;left:16px;right:16px;font-size:12px;color:var(--muted)}
+.main{padding:28px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px}.top h1{margin:0;font-size:28px}.sub{color:var(--muted);margin-top:6px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer}.btn.primary{background:var(--primary);color:#fff}.btn.out{background:#fff;border:1px solid var(--line);color:var(--text)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(30,40,80,.04)}.kpi .label{color:var(--muted);font-size:13px}.kpi .value{font-size:30px;font-weight:800;margin:8px 0}.pill{font-size:12px;font-weight:700}.green{color:var(--success)}.amber{color:var(--warn)}.red{color:var(--danger)}
+.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-title h3{margin:0;font-size:17px}.chart{height:220px;display:flex;align-items:end;gap:14px;padding:18px 6px 0}.bar-wrap{flex:1;text-align:center;color:var(--muted);font-size:11px}.bar{width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#7380ff,#5362f2)}
+.task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}.task input{margin-top:3px}.task.done .title{text-decoration:line-through;color:#9aa2b1}.title{font-weight:700}.meta{font-size:12px;color:var(--muted);margin-top:4px}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.employee{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.employee:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px}.dot.on{background:var(--success)}.dot.off{background:#cbd1dc}
+.notice{background:#eef8f3;border:1px solid #cdebdc;padding:12px;border-radius:12px;margin-top:14px;font-size:13px}.time{font-size:13px;color:var(--muted)}
+@media(max-width:950px){.app{grid-template-columns:1fr}.side{position:relative;height:auto}.nav{display:flex;overflow:auto}.nav a{white-space:nowrap}.foot{display:none}.grid4{grid-template-columns:repeat(2,1fr)}.layout,.row{grid-template-columns:1fr}}
+@media(max-width:560px){.main{padding:18px}.grid4{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><a href="absensi.html" style="position:fixed;right:20px;bottom:20px;z-index:9999;background:#2563eb;color:white;text-decoration:none;padding:12px 16px;border-radius:12px;font-family:Arial,system-ui;font-weight:700;box-shadow:0 8px 25px #0002">Buka Absensi V2 →</a>
+<div class="app">
+  <aside class="side">
+    <div class="brand">Home<span>Office</span></div>
+    <nav class="nav">
+      <a class="active" href="#">🏠 Dashboard</a><a href="#">🕘 Absensi</a><a href="#">✅ Tugas</a><a href="#">👥 Karyawan</a><a href="#">📅 Kalender</a><a href="#">📊 Laporan</a><a href="#">⚙️ Pengaturan</a>
+    </nav>
+    <div class="foot">Versi demo tanpa npm • Data tersimpan di browser ini</div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div><h1>Selamat datang 👋</h1><div class="sub" id="today">Dashboard operasional office kecil</div></div>
+      <div class="actions"><button class="btn out" id="checkout">Absen Pulang</button><button class="btn primary" id="checkin">Absen Masuk</button></div>
+    </div>
+
+    <div class="grid4">
+      <div class="card kpi"><div class="label">Hadir Hari Ini</div><div class="value" id="present">8</div><div class="pill green">+2 dari kemarin</div></div>
+      <div class="card kpi"><div class="label">Terlambat</div><div class="value">1</div><div class="pill amber">Perlu perhatian</div></div>
+      <div class="card kpi"><div class="label">Tugas Aktif</div><div class="value" id="activeTasks">6</div><div class="pill">Hari ini</div></div>
+      <div class="card kpi"><div class="label">Tugas Selesai</div><div class="value" id="doneTasks">3</div><div class="pill green">50% progres</div></div>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="section-title"><h3>Kehadiran 7 Hari</h3><span class="time">Demo</span></div>
+        <div class="chart" id="chart"></div>
+      </section>
+      <section class="card">
+        <div class="section-title"><h3>Tugas Hari Ini</h3><span class="time" id="taskCount"></span></div>
+        <div id="tasks"></div>
+      </section>
+    </div>
+
+    <div class="row">
+      <section class="card"><div class="section-title"><h3>Siapa yang Sedang Bekerja</h3><span class="time">Live demo</span></div>
+        <div class="employee"><span><span class="dot on"></span>Rina • Admin</span><span class="green">Online</span></div>
+        <div class="employee"><span><span class="dot on"></span>Dimas • Operasional</span><span class="green">Online</span></div>
+        <div class="employee"><span><span class="dot on"></span>Sari • Finance</span><span class="green">Online</span></div>
+        <div class="employee"><span><span class="dot off"></span>Andi • Sales</span><span class="time">Belum absen</span></div>
+      </section>
+      <section class="card"><div class="section-title"><h3>Aktivitas Terbaru</h3><span class="time">Hari ini</span></div>
+        <div class="task"><div><div class="title">Rina menyelesaikan laporan stok</div><div class="meta">10:14</div></div></div>
+        <div class="task"><div><div class="title">Dimas absen masuk</div><div class="meta">08:02</div></div></div>
+        <div class="task"><div><div class="title">Tugas baru dibuat: follow up supplier</div><div class="meta">07:45</div></div></div>
+      </section>
+    </div>
+    <div class="notice" id="notice">Belum ada absensi hari ini.</div>
+  </main>
+</div>
+<script>
+const tasks=[
+{id:1,title:'Cek stok dan kebutuhan gudang',meta:'Prioritas tinggi • Deadline 11:00',done:false},
+{id:2,title:'Follow up supplier garam industri',meta:'Sales • Deadline 13:00',done:true},
+{id:3,title:'Rekap transaksi hari ini',meta:'Finance • Deadline 16:30',done:false},
+{id:4,title:'Update laporan absensi',meta:'Admin • Deadline 17:00',done:true},
+{id:5,title:'Susun daftar pekerjaan besok',meta:'Operasional • Deadline 17:30',done:false}
+];
+const chart=[62,78,70,88,84,94,76], days=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+function renderChart(){const c=document.getElementById('chart');c.innerHTML=chart.map((v,i)=>`<div class="bar-wrap"><div class="bar" style="height:${v*1.8}px"></div><div style="margin-top:7px">${days[i]}</div></div>`).join('')}
+function renderTasks(){const box=document.getElementById('tasks');box.innerHTML=tasks.map(t=>`<label class="task ${t.done?'done':''}"><input type="checkbox" data-id="${t.id}" ${t.done?'checked':''}><div><div class="title">${t.title}</div><div class="meta">${t.meta}</div></div></label>`).join('');
+box.querySelectorAll('input').forEach(x=>x.onchange=e=>{const t=tasks.find(a=>a.id==e.target.dataset.id);t.done=e.target.checked;save();renderTasks();updateKpi();});document.getElementById('taskCount').textContent=`${tasks.filter(t=>!t.done).length} belum selesai`}
+function updateKpi(){document.getElementById('doneTasks').textContent=tasks.filter(t=>t.done).length;document.getElementById('activeTasks').textContent=tasks.filter(t=>!t.done).length}
+function save(){localStorage.setItem('homeoffice_tasks',JSON.stringify(tasks))}
+const saved=localStorage.getItem('homeoffice_tasks');if(saved){const s=JSON.parse(saved);s.forEach((v,i)=>tasks[i]&&Object.assign(tasks[i],v))}
+function setNotice(){const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');const n=document.getElementById('notice');if(a.in){n.textContent=`Absen masuk: ${a.in}${a.out?` • Absen pulang: ${a.out}`:' • Belum absen pulang'}`;n.style.background='#eef8f3'}else n.textContent='Belum ada absensi hari ini.'}
+function now(){return new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
+document.getElementById('checkin').onclick=()=>{const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');if(!a.in)a.in=now();localStorage.setItem('homeoffice_attendance',JSON.stringify(a));setNotice();alert('Absen masuk tercatat pukul '+a.in)};
+document.getElementById('checkout').onclick=()=>{const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');if(!a.in){alert('Silakan absen masuk dulu.');return}a.out=now();localStorage.setItem('homeoffice_attendance',JSON.stringify(a));setNotice();alert('Absen pulang tercatat pukul '+a.out)};
+document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+renderChart();renderTasks();updateKpi();setNotice();
+</script>
+</body>
+</html>
