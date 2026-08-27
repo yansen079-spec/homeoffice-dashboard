@@ -1,26 +1,35 @@
-HOME OFFICE DASHBOARD V3
+HOME OFFICE DASHBOARD V4
 
-FITUR:
-- Login Admin dan Karyawan
-- Data karyawan
-- Tambah/nonaktifkan karyawan
-- Absensi Masuk/Pulang berdasarkan akun login
+Fokus V4:
+- Data Karyawan lengkap
+- Tambah karyawan
+- Edit karyawan
+- Detail karyawan
+- Aktif / nonaktifkan karyawan
+- Nomor HP
+- Email
+- Tanggal masuk
+- Alamat
+- Username dan password
+- Login Admin/Karyawan
+- Absensi Masuk/Pulang
+- Absensi manual oleh Admin
 - Riwayat absensi
-- Admin bisa input absensi manual
-- Cocok untuk GitHub Pages
 
-AKUN DEMO:
-Admin: admin / admin123
-Karyawan: budi / 123456
+AKUN DEMO
+Admin:
+username: admin
+password: admin123
 
-CATATAN PENTING:
-V3 ini masih memakai localStorage browser.
-Artinya data belum sinkron antar perangkat dan password belum aman untuk produksi.
-Jangan gunakan password penting/sungguhan.
-Tahap berikutnya: pasang database + autentikasi aman.
+Karyawan:
+username: budi
+password: 123456
 
-CARA UPLOAD KE GITHUB:
-1. Buka repository homeoffice-dashboard.
-2. Replace file index.html dengan index.html V3 ini.
-3. README.txt boleh ikut di-replace.
-4. GitHub Pages akan memakai index.html sebagai halaman utama.
+PENTING
+Versi ini masih memakai localStorage browser. Jangan gunakan password penting.
+Untuk sinkron antar HP/laptop, tahap berikutnya perlu database online/backend.
+
+CARA UPDATE GITHUB PAGES
+1. Upload/replace index.html, absensi.html, README.txt ke repo homeoffice-dashboard.
+2. Commit changes.
+3. GitHub Pages akan update otomatis dari branch main.

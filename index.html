@@ -3,116 +3,304 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HomeOffice V3</title>
+<title>HomeOffice V4</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#718096;--line:#e7ebf2;--blue:#2563eb;--blue2:#eaf1ff;--green:#16a34a;--amber:#d97706;--red:#dc2626;--shadow:0 10px 30px rgba(30,45,80,.06)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,system-ui,sans-serif;background:var(--bg);color:var(--text)}button,input,select{font:inherit}.hidden{display:none!important}
-.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
-.loginbox{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 24px 70px rgba(30,45,80,.12)}
-.brand{font-size:23px;font-weight:900;margin-bottom:6px}.muted{color:var(--muted);font-size:13px}.field{display:grid;gap:6px;margin-top:15px;font-size:13px}.field input,.field select{padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.btn{border:1px solid #dfe5ed;background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.danger{background:#fff1f1;color:#b91c1c;border-color:#ffd4d4}.wide{width:100%;margin-top:18px}.demo{background:#f7f9fc;border-radius:12px;padding:12px;margin-top:18px;font-size:12px;line-height:1.7}
-.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:25px 17px;position:sticky;top:0;height:100vh}.sidebrand{font-size:20px;font-weight:900;margin:0 10px 28px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#596579;padding:12px 14px;border-radius:10px;margin:5px 0;cursor:pointer}.nav button.active,.nav button:hover{background:var(--blue2);color:var(--blue);font-weight:700}.userbox{position:absolute;bottom:18px;left:17px;right:17px;border-top:1px solid #edf0f4;padding-top:14px}.main{padding:30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:12px}.top h1{margin:0 0 6px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:18px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.stat b{display:block;font-size:29px;margin-top:8px}.quick{display:grid;grid-template-columns:1fr 1fr;gap:15px}.bigaction{text-align:center;padding:28px}.bigaction b{display:block;font-size:18px;margin-bottom:7px}.notice{padding:12px 14px;border-radius:10px;background:#eef4ff;color:#1d4ed8;margin-top:16px}
-.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.toolbar>div{display:flex;gap:8px;flex-wrap:wrap}.input{padding:10px 12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{font-size:12px;color:#78859a}.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.hadir{background:#e8f7ed;color:#15803d}.terlambat{background:#fff3dc;color:#b45309}.izin{background:#eaf1ff;color:#2563eb}.sakit{background:#feecec;color:#b91c1c}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.box{width:min(560px,100%);background:#fff;padding:22px;border-radius:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-@media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.userbox{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.stats,.quick,.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,system-ui;background:#f5f7fb;color:#172033}
+button,input,select,textarea{font:inherit}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
+.loginbox{width:min(430px,100%);background:white;padding:30px;border:1px solid #e5eaf1;border-radius:20px;box-shadow:0 20px 60px #1e293b12}
+.logo{font-size:24px;font-weight:900;margin-bottom:7px}.muted{color:#7a8799;font-size:13px}.field{display:grid;gap:6px;margin-top:15px;font-size:13px}
+.field input,.field select,.field textarea{padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.field textarea{min-height:90px;resize:vertical}
+.btn{border:1px solid #dfe5ed;background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.primary{background:#2563eb;color:#fff;border-color:#2563eb}.danger{background:#feecec;color:#b91c1c;border-color:#fecaca}.wide{width:100%;margin-top:18px}
+.demo{background:#f7f9fc;border-radius:12px;padding:12px;margin-top:18px;font-size:12px;line-height:1.7}
+.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid #e6eaf0;padding:25px 17px;position:sticky;top:0;height:100vh}
+.brand{font-size:20px;font-weight:900;margin:0 10px 28px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#596579;padding:12px 14px;border-radius:10px;margin:5px 0;cursor:pointer}.nav button.active,.nav button:hover{background:#eaf1ff;color:#2563eb;font-weight:700}
+.user{position:absolute;bottom:18px;left:17px;right:17px;border-top:1px solid #edf0f4;padding-top:14px}.main{padding:30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:12px}.top h1{margin:0 0 6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:18px}.card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:20px;box-shadow:0 10px 30px #1e2d5008}.stat b{display:block;font-size:29px;margin-top:8px}
+.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.toolbar>div{display:flex;gap:8px;flex-wrap:wrap}.input{padding:10px 12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{font-size:12px;color:#78859a}.table{overflow:auto}
+.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.hadir{background:#e8f7ed;color:#15803d}.telat{background:#fff3dc;color:#b45309}.izin{background:#eaf1ff;color:#2563eb}.sakit{background:#feecec;color:#b91c1c}.aktif{background:#e8f7ed;color:#15803d}.nonaktif{background:#eef1f5;color:#64748b}
+.modal{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.box{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;padding:22px;border-radius:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:15px}.bigaction{padding:25px;text-align:center}.bigaction b{display:block;font-size:18px;margin-bottom:7px}.notice{padding:12px;border-radius:10px;background:#eef4ff;color:#1d4ed8;margin-bottom:15px}
+.empname{display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;border-radius:50%;background:#e8efff;color:#3157a6;display:grid;place-items:center;font-weight:800}.rowactions{display:flex;gap:6px}
+.detailgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.detailitem{background:#f8fafc;border-radius:10px;padding:12px}.detailitem b{display:block;margin-top:4px}
+@media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.user{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}.detailgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.stats,.quick,.grid,.detailgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
 <section id="login" class="login">
   <div class="loginbox">
-    <div class="brand">🏠 HomeOffice</div>
-    <div class="muted">Sistem office kecil untuk absensi dan data karyawan.</div>
+    <div class="logo">🏠 HomeOffice</div>
+    <div class="muted">Masuk ke sistem administrasi kantor</div>
     <label class="field">Username<input id="loginUser" autocomplete="username" placeholder="Masukkan username"></label>
     <label class="field">Password<input id="loginPass" type="password" autocomplete="current-password" placeholder="Masukkan password"></label>
     <button class="btn primary wide" id="loginBtn">Masuk</button>
     <div id="loginMsg" class="muted" style="margin-top:10px"></div>
-    <div class="demo"><b>Akun demo awal</b><br>Admin: <b>admin</b> / <b>admin123</b><br>Karyawan: <b>budi</b> / <b>123456</b><br><span class="muted">V3 ini menyimpan data di browser. Cocok untuk demo/pengujian malam ini. Tahap berikutnya baru kita sambungkan database agar data sinkron antar perangkat.</span></div>
+    <div class="demo"><b>Akun demo</b><br>Admin: <b>admin</b> / <b>admin123</b><br>Karyawan: <b>budi</b> / <b>123456</b><br><span class="muted">V4 masih menggunakan localStorage. Jangan gunakan password sungguhan.</span></div>
   </div>
 </section>
 
 <div id="app" class="app hidden">
-<aside class="side">
-  <div class="sidebrand">🏠 HomeOffice</div>
-  <nav class="nav">
-    <button data-page="dashboard" class="active">⌂ Dashboard</button>
-    <button data-page="attendance">◷ Absensi</button>
-    <button data-page="employees" class="adminOnly">♙ Karyawan</button>
-  </nav>
-  <div class="userbox"><b id="sideName"></b><div class="muted" id="sideRole"></div><button class="btn" id="logout" style="margin-top:10px;width:100%">Keluar</button></div>
-</aside>
-<main class="main">
-<section id="dashboard" class="page">
-  <div class="top"><div><h1>Dashboard</h1><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
-  <div class="stats">
-    <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
-    <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
-    <div class="card stat"><span class="muted">Izin / Sakit</span><b id="dI">0</b></div>
-    <div class="card stat"><span class="muted">Total Karyawan</span><b id="dE">0</b></div>
-  </div>
-  <div class="quick employeeOnly">
-    <div class="card bigaction"><b>Absen Masuk</b><div class="muted">Catat jam masuk hari ini.</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
-    <div class="card bigaction"><b>Absen Pulang</b><div class="muted">Catat jam pulang hari ini.</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
-  </div>
-  <div id="dashNotice" class="notice hidden"></div>
-</section>
+  <aside class="side">
+    <div class="brand">🏠 HomeOffice</div>
+    <nav class="nav">
+      <button data-page="dashboard" class="active">⌂ Dashboard</button>
+      <button data-page="attendance">◷ Absensi</button>
+      <button data-page="employees" class="adminOnly">♙ Karyawan</button>
+    </nav>
+    <div class="user"><b id="sideName"></b><div class="muted" id="sideRole"></div><button class="btn" id="logout" style="margin-top:10px;width:100%">Keluar</button></div>
+  </aside>
 
-<section id="attendance" class="page hidden">
-  <div class="top"><div><h1>Absensi</h1><div class="muted">Riwayat kehadiran karyawan.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
-  <div class="card">
-    <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
-    <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
-  </div>
-</section>
+  <main class="main">
+    <section id="dashboard" class="page">
+      <div class="top"><div><h1>Dashboard</h1><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
+        <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
+        <div class="card stat"><span class="muted">Izin / Sakit</span><b id="dI">0</b></div>
+        <div class="card stat"><span class="muted">Karyawan Aktif</span><b id="dE">0</b></div>
+      </div>
+      <div class="quick employeeOnly">
+        <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
+        <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
+      </div>
+      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div>
+    </section>
 
-<section id="employees" class="page hidden">
-  <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Kelola akun karyawan HomeOffice.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
-  <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="employeeRows"></tbody></table></div></div>
-</section>
-</main>
+    <section id="attendance" class="page hidden">
+      <div class="top"><div><h1>Absensi</h1><div class="muted">Riwayat kehadiran karyawan.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
+      <div class="card">
+        <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
+        <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="employees" class="page hidden">
+      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Kelola data dan akun karyawan.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
+      <div class="card">
+        <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
+        <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div class="modal" id="employeeModal"><div class="box"><h3>Tambah Karyawan</h3><div class="grid">
-<label class="field">Nama<input id="eName"></label><label class="field">Jabatan<input id="eJob" placeholder="Staff"></label>
-<label class="field">Username<input id="eUser"></label><label class="field">Password<input id="ePass" type="password"></label>
-</div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveEmployee">Simpan</button></div></div></div>
+<div class="modal" id="employeeModal">
+  <div class="box">
+    <h3 id="employeeModalTitle">Tambah Karyawan</h3>
+    <input type="hidden" id="eId">
+    <div class="grid">
+      <label class="field">Nama Lengkap<input id="eName"></label>
+      <label class="field">Jabatan<input id="eJob" placeholder="Contoh: Staff Gudang"></label>
+      <label class="field">Username<input id="eUser"></label>
+      <label class="field">Password<input id="ePass" type="password" placeholder="Isi untuk akun baru / ubah password"></label>
+      <label class="field">Nomor HP<input id="ePhone" placeholder="08xxxxxxxxxx"></label>
+      <label class="field">Tanggal Masuk<input id="eJoin" type="date"></label>
+      <label class="field">Status<select id="eActive"><option value="true">Aktif</option><option value="false">Nonaktif</option></select></label>
+      <label class="field">Email<input id="eEmail" type="email" placeholder="Opsional"></label>
+      <label class="field" style="grid-column:1/-1">Alamat<textarea id="eAddress" placeholder="Alamat karyawan"></textarea></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveEmployee">Simpan</button></div>
+  </div>
+</div>
 
-<div class="modal" id="attendanceModal"><div class="box"><h3>Tambah Absensi</h3><div class="grid">
-<label class="field">Karyawan<select id="aEmployee"></select></label><label class="field">Tanggal<input id="aDate" type="date"></label>
-<label class="field">Jam Masuk<input id="aIn" type="time"></label><label class="field">Jam Pulang<input id="aOut" type="time"></label>
-<label class="field">Status<select id="aStatus"><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></label><label class="field">Catatan<input id="aNote"></label>
-</div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveAttendance">Simpan</button></div></div></div>
+<div class="modal" id="employeeDetailModal">
+  <div class="box">
+    <h3>Detail Karyawan</h3>
+    <div id="employeeDetail"></div>
+    <div class="actions"><button class="btn modalCancel">Tutup</button></div>
+  </div>
+</div>
+
+<div class="modal" id="attendanceModal">
+  <div class="box">
+    <h3>Tambah Absensi</h3>
+    <div class="grid">
+      <label class="field">Karyawan<select id="aEmployee"></select></label>
+      <label class="field">Tanggal<input id="aDate" type="date"></label>
+      <label class="field">Jam masuk<input id="aIn" type="time"></label>
+      <label class="field">Jam pulang<input id="aOut" type="time"></label>
+      <label class="field">Status<select id="aStatus"><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></label>
+      <label class="field">Catatan<input id="aNote"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveAttendance">Simpan</button></div>
+  </div>
+</div>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const keyUsers='ho_v3_users',keyAtt='ho_v3_attendance',keySession='ho_v3_session';
+const keyUsers='ho_v4_users', keyAtt='ho_v4_attendance', keySession='ho_v4_session';
+
 const seed=[
-{id:'admin',name:'Administrator',username:'admin',password:'admin123',job:'Administrator',role:'admin',active:true},
-{id:'budi',name:'Budi Santoso',username:'budi',password:'123456',job:'Staff',role:'employee',active:true}
+ {id:'admin',name:'Administrator',username:'admin',password:'admin123',job:'Administrator',role:'admin',active:true,phone:'',email:'',joinDate:'',address:''},
+ {id:'budi',name:'Budi Santoso',username:'budi',password:'123456',job:'Staff',role:'employee',active:true,phone:'081234567890',email:'',joinDate:'2026-08-01',address:''}
 ];
+
 let users=JSON.parse(localStorage.getItem(keyUsers)||'null')||seed;
 let attendance=JSON.parse(localStorage.getItem(keyAtt)||'[]');
 let current=null;
-function persist(){localStorage.setItem(keyUsers,JSON.stringify(users));localStorage.setItem(keyAtt,JSON.stringify(attendance))}persist();
-function ymd(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function hm(){let d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function showApp(u){current=u;$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#sideName').textContent=u.name;$('#sideRole').textContent=u.role==='admin'?'Admin':u.job;$('#welcome').textContent='Selamat datang, '+u.name+'.';$('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});$$('.adminOnly').forEach(x=>x.classList.toggle('hidden',u.role!=='admin'));$$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',u.role==='admin'));go('dashboard');renderAll()}
-function login(){let u=users.find(x=>x.active&&x.username===$('#loginUser').value.trim()&&x.password===$('#loginPass').value);if(!u){$('#loginMsg').textContent='Username atau password salah.';return}localStorage.setItem(keySession,u.id);showApp(u)}
-$('#loginBtn').onclick=login;$('#loginPass').onkeydown=e=>{if(e.key==='Enter')login()};$('#logout').onclick=()=>{localStorage.removeItem(keySession);location.reload()};
-function go(id){if(id==='employees'&&current.role!=='admin')id='dashboard';$$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id))}$$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
-function badge(s){let c=s==='Hadir'?'hadir':s==='Terlambat'?'terlambat':s==='Izin'?'izin':'sakit';return '<span class="badge '+c+'">'+esc(s)+'</span>'}
-function renderAll(){let td=attendance.filter(x=>x.date===ymd());$('#dH').textContent=td.filter(x=>x.status==='Hadir').length;$('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;$('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;$('#dE').textContent=users.filter(x=>x.role==='employee'&&x.active).length;renderAttendance();renderEmployees();renderNotice()}
-function renderAttendance(){let d=$('#filterDate').value,s=$('#filterStatus').value;let rows=attendance.filter(x=>(!d||x.date===d)&&(!s||x.status===s));if(current.role!=='admin')rows=rows.filter(x=>x.userId===current.id);rows.sort((a,b)=>b.date.localeCompare(a.date));$('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.date)}</td><td>${esc(x.in||'-')}</td><td>${esc(x.out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>'}
-function renderEmployees(){if(current.role!=='admin')return;let es=users.filter(x=>x.role==='employee');$('#employeeRows').innerHTML=es.length?es.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.username)}</td><td>${esc(x.job)}</td><td>Karyawan</td><td>${x.active?'Aktif':'Nonaktif'}</td><td><button class="btn danger toggleEmp" data-id="${x.id}">${x.active?'Nonaktifkan':'Aktifkan'}</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada karyawan.</td></tr>';$$('.toggleEmp').forEach(b=>b.onclick=()=>{let u=users.find(x=>x.id===b.dataset.id);u.active=!u.active;persist();renderAll()})}
-function renderNotice(){if(current.role==='admin')return;let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());let n=$('#dashNotice');n.classList.remove('hidden');n.textContent=x?`Absensi hari ini: ${x.status} • Masuk ${x.in||'-'} • Pulang ${x.out||'-'}`:'Kamu belum melakukan absensi hari ini.'}
-$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;
-$('#clockIn').onclick=()=>{let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());if(x&&x.in){alert('Kamu sudah absen masuk hari ini.');return}let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';if(!x){x={id:String(Date.now()),userId:current.id,name:current.name,date:ymd(),in:t,out:'',status,note:''};attendance.push(x)}else{x.in=t;x.status=status}persist();renderAll();alert('Absensi masuk berhasil: '+t)};
-$('#clockOut').onclick=()=>{let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());if(!x||!x.in){alert('Silakan absen masuk terlebih dahulu.');return}if(x.out){alert('Kamu sudah absen pulang.');return}x.out=hm();persist();renderAll();alert('Absensi pulang berhasil: '+x.out)};
-function openModal(id){$(id).classList.add('open')}$$('.modalCancel').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
-$('#addEmployee').onclick=()=>openModal('#employeeModal');
-$('#saveEmployee').onclick=()=>{let name=$('#eName').value.trim(),user=$('#eUser').value.trim(),pass=$('#ePass').value,job=$('#eJob').value.trim()||'Staff';if(!name||!user||!pass){alert('Nama, username, dan password wajib diisi.');return}if(users.some(x=>x.username.toLowerCase()===user.toLowerCase())){alert('Username sudah digunakan.');return}users.push({id:'u'+Date.now(),name,username:user,password:pass,job,role:'employee',active:true});persist();$('#employeeModal').classList.remove('open');['#eName','#eUser','#ePass','#eJob'].forEach(s=>$(s).value='');renderAll()};
-$('#manualAttendance').onclick=()=>{$('#aEmployee').innerHTML=users.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');$('#aDate').value=ymd();openModal('#attendanceModal')};
-$('#saveAttendance').onclick=()=>{let u=users.find(x=>x.id===$('#aEmployee').value);if(!u||!$('#aDate').value)return;let existing=attendance.find(x=>x.userId===u.id&&x.date===$('#aDate').value);let obj={id:existing?.id||String(Date.now()),userId:u.id,name:u.name,date:$('#aDate').value,in:$('#aIn').value,out:$('#aOut').value,status:$('#aStatus').value,note:$('#aNote').value.trim()};if(existing)Object.assign(existing,obj);else attendance.push(obj);persist();$('#attendanceModal').classList.remove('open');renderAll()};
-let sid=localStorage.getItem(keySession),su=users.find(x=>x.id===sid&&x.active);if(su)showApp(su);
+
+function persist(){localStorage.setItem(keyUsers,JSON.stringify(users));localStorage.setItem(keyAtt,JSON.stringify(attendance))}
+persist();
+
+const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+function showApp(u){
+ current=u;
+ $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+ $('#sideName').textContent=u.name; $('#sideRole').textContent=u.role==='admin'?'Admin':u.job;
+ $('#welcome').textContent='Selamat datang, '+u.name+'.';
+ $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',u.role!=='admin'));
+ $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',u.role==='admin'));
+ go('dashboard'); renderAll();
+}
+
+function login(){
+ let u=users.find(x=>x.active&&x.username===$('#loginUser').value.trim()&&x.password===$('#loginPass').value);
+ if(!u){$('#loginMsg').textContent='Username atau password salah.';return}
+ localStorage.setItem(keySession,u.id); showApp(u);
+}
+$('#loginBtn').onclick=login;
+$('#loginPass').onkeydown=e=>{if(e.key==='Enter')login()};
+$('#logout').onclick=()=>{localStorage.removeItem(keySession);location.reload()};
+
+function go(id){
+ if(id==='employees'&&current.role!=='admin') id='dashboard';
+ $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
+ $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+}
+$$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+function badge(s){return '<span class="badge '+(s==='Hadir'?'hadir':s==='Terlambat'?'telat':s==='Izin'?'izin':'sakit')+'">'+esc(s)+'</span>'}
+
+function renderAll(){
+ let td=attendance.filter(x=>x.date===ymd());
+ $('#dH').textContent=td.filter(x=>x.status==='Hadir').length;
+ $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
+ $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
+ $('#dE').textContent=users.filter(x=>x.role==='employee'&&x.active).length;
+ renderAttendance(); renderEmployees(); renderNotice();
+}
+
+function renderAttendance(){
+ let d=$('#filterDate').value, s=$('#filterStatus').value;
+ let rows=attendance.filter(x=>(!d||x.date===d)&&(!s||x.status===s));
+ if(current.role!=='admin') rows=rows.filter(x=>x.userId===current.id);
+ rows.sort((a,b)=>b.date.localeCompare(a.date));
+ $('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.date)}</td><td>${esc(x.in||'-')}</td><td>${esc(x.out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>';
+}
+
+function renderEmployees(){
+ if(current.role!=='admin') return;
+ let q=$('#employeeSearch').value.toLowerCase().trim();
+ let es=users.filter(x=>x.role==='employee' && (!q || [x.name,x.username,x.job,x.phone].some(v=>String(v||'').toLowerCase().includes(q))));
+ $('#employeeRows').innerHTML=es.length?es.map(x=>`<tr>
+ <td><div class="empname"><div class="avatar">${esc((x.name||'?')[0].toUpperCase())}</div><b>${esc(x.name)}</b></div></td>
+ <td>${esc(x.username)}</td><td>${esc(x.job||'-')}</td><td>${esc(x.phone||'-')}</td><td>${esc(x.joinDate||'-')}</td>
+ <td><span class="badge ${x.active?'aktif':'nonaktif'}">${x.active?'Aktif':'Nonaktif'}</span></td>
+ <td><div class="rowactions"><button class="btn" onclick="viewEmployee('${x.id}')">Detail</button><button class="btn" onclick="editEmployee('${x.id}')">Edit</button><button class="btn ${x.active?'danger':''}" onclick="toggleEmployee('${x.id}')">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></td>
+ </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada karyawan.</td></tr>';
+}
+
+function renderNotice(){
+ if(current.role==='admin') return;
+ let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
+ let n=$('#dashNotice'); n.classList.remove('hidden');
+ n.textContent=!x?'Kamu belum melakukan absensi hari ini.':`Absensi hari ini: ${x.status} • Masuk ${x.in||'-'} • Pulang ${x.out||'-'}`;
+}
+
+$('#filterDate').value='';
+$('#filterDate').onchange=renderAttendance;
+$('#filterStatus').onchange=renderAttendance;
+$('#employeeSearch').oninput=renderEmployees;
+
+$('#clockIn').onclick=()=>{
+ let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
+ if(x&&x.in){alert('Kamu sudah absen masuk hari ini.');return}
+ let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';
+ if(!x){x={id:String(Date.now()),userId:current.id,name:current.name,date:ymd(),in:t,out:'',status,note:''};attendance.push(x)}
+ else{x.in=t;x.status=status}
+ persist();renderAll();alert('Absensi masuk berhasil: '+t)
+};
+
+$('#clockOut').onclick=()=>{
+ let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());
+ if(!x||!x.in){alert('Silakan absen masuk terlebih dahulu.');return}
+ if(x.out){alert('Kamu sudah absen pulang.');return}
+ x.out=hm();persist();renderAll();alert('Absensi pulang berhasil: '+x.out)
+};
+
+function openModal(id){$(id).classList.add('open')}
+$$('.modalCancel').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
+
+function resetEmployeeForm(){
+ $('#eId').value='';$('#eName').value='';$('#eJob').value='';$('#eUser').value='';$('#ePass').value='';$('#ePhone').value='';$('#eJoin').value=ymd();$('#eActive').value='true';$('#eEmail').value='';$('#eAddress').value='';
+}
+
+$('#addEmployee').onclick=()=>{resetEmployeeForm();$('#employeeModalTitle').textContent='Tambah Karyawan';openModal('#employeeModal')};
+
+window.editEmployee=id=>{
+ let u=users.find(x=>x.id===id); if(!u)return;
+ $('#employeeModalTitle').textContent='Edit Karyawan';
+ $('#eId').value=u.id;$('#eName').value=u.name||'';$('#eJob').value=u.job||'';$('#eUser').value=u.username||'';$('#ePass').value='';$('#ePhone').value=u.phone||'';$('#eJoin').value=u.joinDate||'';$('#eActive').value=String(u.active);$('#eEmail').value=u.email||'';$('#eAddress').value=u.address||'';
+ openModal('#employeeModal');
+};
+
+window.viewEmployee=id=>{
+ let u=users.find(x=>x.id===id); if(!u)return;
+ $('#employeeDetail').innerHTML=`<div class="detailgrid">
+ <div class="detailitem"><span class="muted">Nama</span><b>${esc(u.name)}</b></div>
+ <div class="detailitem"><span class="muted">Jabatan</span><b>${esc(u.job||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Username</span><b>${esc(u.username)}</b></div>
+ <div class="detailitem"><span class="muted">Nomor HP</span><b>${esc(u.phone||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Email</span><b>${esc(u.email||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Tanggal Masuk</span><b>${esc(u.joinDate||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Status</span><b>${u.active?'Aktif':'Nonaktif'}</b></div>
+ <div class="detailitem" style="grid-column:1/-1"><span class="muted">Alamat</span><b>${esc(u.address||'-')}</b></div>
+ </div>`;
+ openModal('#employeeDetailModal');
+};
+
+window.toggleEmployee=id=>{
+ let u=users.find(x=>x.id===id); if(!u)return;
+ u.active=!u.active; persist(); renderAll();
+};
+
+$('#saveEmployee').onclick=()=>{
+ let id=$('#eId').value;
+ let name=$('#eName').value.trim(), username=$('#eUser').value.trim(), password=$('#ePass').value, job=$('#eJob').value.trim()||'Staff';
+ if(!name||!username){alert('Nama dan username wajib diisi.');return}
+ if(users.some(x=>x.username.toLowerCase()===username.toLowerCase()&&x.id!==id)){alert('Username sudah digunakan.');return}
+ if(!id && !password){alert('Password wajib diisi untuk karyawan baru.');return}
+ if(id){
+   let u=users.find(x=>x.id===id);
+   Object.assign(u,{name,username,job,phone:$('#ePhone').value.trim(),email:$('#eEmail').value.trim(),joinDate:$('#eJoin').value,address:$('#eAddress').value.trim(),active:$('#eActive').value==='true'});
+   if(password)u.password=password;
+ }else{
+   users.push({id:'u'+Date.now(),name,username,password,job,role:'employee',active:$('#eActive').value==='true',phone:$('#ePhone').value.trim(),email:$('#eEmail').value.trim(),joinDate:$('#eJoin').value,address:$('#eAddress').value.trim()});
+ }
+ persist();$('#employeeModal').classList.remove('open');renderAll();
+};
+
+$('#manualAttendance').onclick=()=>{
+ $('#aEmployee').innerHTML=users.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+ $('#aDate').value=ymd();$('#aIn').value='';$('#aOut').value='';$('#aStatus').value='Hadir';$('#aNote').value='';
+ openModal('#attendanceModal');
+};
+
+$('#saveAttendance').onclick=()=>{
+ let u=users.find(x=>x.id===$('#aEmployee').value); if(!u||!$('#aDate').value)return;
+ let existing=attendance.find(x=>x.userId===u.id&&x.date===$('#aDate').value);
+ let obj={id:existing?.id||String(Date.now()),userId:u.id,name:u.name,date:$('#aDate').value,in:$('#aIn').value,out:$('#aOut').value,status:$('#aStatus').value,note:$('#aNote').value.trim()};
+ if(existing)Object.assign(existing,obj); else attendance.push(obj);
+ persist();$('#attendanceModal').classList.remove('open');renderAll();
+};
+
+let sid=localStorage.getItem(keySession),su=users.find(x=>x.id===sid&&x.active);
+if(su)showApp(su);
 </script>
-</body></html>
+</body>
+</html>
