@@ -1,6 +1,26 @@
-HOME OFFICE DASHBOARD V2
+HOME OFFICE DASHBOARD V3
 
-1. Extract ZIP.
-2. Double-click index.html untuk tes.
-3. Tombol 'Buka Absensi V2' membuka halaman absensi.
-4. Untuk UPDATE situs Netlify yang sama: buka project homeofficedashboardyanstore > Deploys/Production deploys > drag folder V2 ke deploy dropzone. Jangan buat project baru.
+FITUR:
+- Login Admin dan Karyawan
+- Data karyawan
+- Tambah/nonaktifkan karyawan
+- Absensi Masuk/Pulang berdasarkan akun login
+- Riwayat absensi
+- Admin bisa input absensi manual
+- Cocok untuk GitHub Pages
+
+AKUN DEMO:
+Admin: admin / admin123
+Karyawan: budi / 123456
+
+CATATAN PENTING:
+V3 ini masih memakai localStorage browser.
+Artinya data belum sinkron antar perangkat dan password belum aman untuk produksi.
+Jangan gunakan password penting/sungguhan.
+Tahap berikutnya: pasang database + autentikasi aman.
+
+CARA UPLOAD KE GITHUB:
+1. Buka repository homeoffice-dashboard.
+2. Replace file index.html dengan index.html V3 ini.
+3. README.txt boleh ikut di-replace.
+4. GitHub Pages akan memakai index.html sebagai halaman utama.

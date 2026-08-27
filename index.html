@@ -1,93 +1,118 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>HomeOffice Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HomeOffice V3</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e7eaf0;--primary:#5b6cff;--success:#22a06b;--warn:#f59e0b;--danger:#ef4444}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
-.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-weight:800;font-size:20px;margin:4px 10px 24px}.brand span{color:var(--primary)}
-.nav a{display:flex;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border-radius:10px;color:#485266;text-decoration:none}.nav a.active,.nav a:hover{background:#eef1ff;color:#3f4eea}.foot{position:absolute;bottom:18px;left:16px;right:16px;font-size:12px;color:var(--muted)}
-.main{padding:28px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px}.top h1{margin:0;font-size:28px}.sub{color:var(--muted);margin-top:6px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer}.btn.primary{background:var(--primary);color:#fff}.btn.out{background:#fff;border:1px solid var(--line);color:var(--text)}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(30,40,80,.04)}.kpi .label{color:var(--muted);font-size:13px}.kpi .value{font-size:30px;font-weight:800;margin:8px 0}.pill{font-size:12px;font-weight:700}.green{color:var(--success)}.amber{color:var(--warn)}.red{color:var(--danger)}
-.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-title h3{margin:0;font-size:17px}.chart{height:220px;display:flex;align-items:end;gap:14px;padding:18px 6px 0}.bar-wrap{flex:1;text-align:center;color:var(--muted);font-size:11px}.bar{width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#7380ff,#5362f2)}
-.task{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}.task input{margin-top:3px}.task.done .title{text-decoration:line-through;color:#9aa2b1}.title{font-weight:700}.meta{font-size:12px;color:var(--muted);margin-top:4px}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.employee{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.employee:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px}.dot.on{background:var(--success)}.dot.off{background:#cbd1dc}
-.notice{background:#eef8f3;border:1px solid #cdebdc;padding:12px;border-radius:12px;margin-top:14px;font-size:13px}.time{font-size:13px;color:var(--muted)}
-@media(max-width:950px){.app{grid-template-columns:1fr}.side{position:relative;height:auto}.nav{display:flex;overflow:auto}.nav a{white-space:nowrap}.foot{display:none}.grid4{grid-template-columns:repeat(2,1fr)}.layout,.row{grid-template-columns:1fr}}
-@media(max-width:560px){.main{padding:18px}.grid4{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#718096;--line:#e7ebf2;--blue:#2563eb;--blue2:#eaf1ff;--green:#16a34a;--amber:#d97706;--red:#dc2626;--shadow:0 10px 30px rgba(30,45,80,.06)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,system-ui,sans-serif;background:var(--bg);color:var(--text)}button,input,select{font:inherit}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
+.loginbox{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 24px 70px rgba(30,45,80,.12)}
+.brand{font-size:23px;font-weight:900;margin-bottom:6px}.muted{color:var(--muted);font-size:13px}.field{display:grid;gap:6px;margin-top:15px;font-size:13px}.field input,.field select{padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.btn{border:1px solid #dfe5ed;background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.danger{background:#fff1f1;color:#b91c1c;border-color:#ffd4d4}.wide{width:100%;margin-top:18px}.demo{background:#f7f9fc;border-radius:12px;padding:12px;margin-top:18px;font-size:12px;line-height:1.7}
+.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:25px 17px;position:sticky;top:0;height:100vh}.sidebrand{font-size:20px;font-weight:900;margin:0 10px 28px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#596579;padding:12px 14px;border-radius:10px;margin:5px 0;cursor:pointer}.nav button.active,.nav button:hover{background:var(--blue2);color:var(--blue);font-weight:700}.userbox{position:absolute;bottom:18px;left:17px;right:17px;border-top:1px solid #edf0f4;padding-top:14px}.main{padding:30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:12px}.top h1{margin:0 0 6px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:18px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.stat b{display:block;font-size:29px;margin-top:8px}.quick{display:grid;grid-template-columns:1fr 1fr;gap:15px}.bigaction{text-align:center;padding:28px}.bigaction b{display:block;font-size:18px;margin-bottom:7px}.notice{padding:12px 14px;border-radius:10px;background:#eef4ff;color:#1d4ed8;margin-top:16px}
+.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.toolbar>div{display:flex;gap:8px;flex-wrap:wrap}.input{padding:10px 12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{font-size:12px;color:#78859a}.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.hadir{background:#e8f7ed;color:#15803d}.terlambat{background:#fff3dc;color:#b45309}.izin{background:#eaf1ff;color:#2563eb}.sakit{background:#feecec;color:#b91c1c}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.box{width:min(560px,100%);background:#fff;padding:22px;border-radius:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.userbox{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.stats,.quick,.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
-<body><a href="absensi.html" style="position:fixed;right:20px;bottom:20px;z-index:9999;background:#2563eb;color:white;text-decoration:none;padding:12px 16px;border-radius:12px;font-family:Arial,system-ui;font-weight:700;box-shadow:0 8px 25px #0002">Buka Absensi V2 →</a>
-<div class="app">
-  <aside class="side">
-    <div class="brand">Home<span>Office</span></div>
-    <nav class="nav">
-      <a class="active" href="#">🏠 Dashboard</a><a href="#">🕘 Absensi</a><a href="#">✅ Tugas</a><a href="#">👥 Karyawan</a><a href="#">📅 Kalender</a><a href="#">📊 Laporan</a><a href="#">⚙️ Pengaturan</a>
-    </nav>
-    <div class="foot">Versi demo tanpa npm • Data tersimpan di browser ini</div>
-  </aside>
-  <main class="main">
-    <div class="top">
-      <div><h1>Selamat datang 👋</h1><div class="sub" id="today">Dashboard operasional office kecil</div></div>
-      <div class="actions"><button class="btn out" id="checkout">Absen Pulang</button><button class="btn primary" id="checkin">Absen Masuk</button></div>
-    </div>
+<body>
+<section id="login" class="login">
+  <div class="loginbox">
+    <div class="brand">🏠 HomeOffice</div>
+    <div class="muted">Sistem office kecil untuk absensi dan data karyawan.</div>
+    <label class="field">Username<input id="loginUser" autocomplete="username" placeholder="Masukkan username"></label>
+    <label class="field">Password<input id="loginPass" type="password" autocomplete="current-password" placeholder="Masukkan password"></label>
+    <button class="btn primary wide" id="loginBtn">Masuk</button>
+    <div id="loginMsg" class="muted" style="margin-top:10px"></div>
+    <div class="demo"><b>Akun demo awal</b><br>Admin: <b>admin</b> / <b>admin123</b><br>Karyawan: <b>budi</b> / <b>123456</b><br><span class="muted">V3 ini menyimpan data di browser. Cocok untuk demo/pengujian malam ini. Tahap berikutnya baru kita sambungkan database agar data sinkron antar perangkat.</span></div>
+  </div>
+</section>
 
-    <div class="grid4">
-      <div class="card kpi"><div class="label">Hadir Hari Ini</div><div class="value" id="present">8</div><div class="pill green">+2 dari kemarin</div></div>
-      <div class="card kpi"><div class="label">Terlambat</div><div class="value">1</div><div class="pill amber">Perlu perhatian</div></div>
-      <div class="card kpi"><div class="label">Tugas Aktif</div><div class="value" id="activeTasks">6</div><div class="pill">Hari ini</div></div>
-      <div class="card kpi"><div class="label">Tugas Selesai</div><div class="value" id="doneTasks">3</div><div class="pill green">50% progres</div></div>
-    </div>
+<div id="app" class="app hidden">
+<aside class="side">
+  <div class="sidebrand">🏠 HomeOffice</div>
+  <nav class="nav">
+    <button data-page="dashboard" class="active">⌂ Dashboard</button>
+    <button data-page="attendance">◷ Absensi</button>
+    <button data-page="employees" class="adminOnly">♙ Karyawan</button>
+  </nav>
+  <div class="userbox"><b id="sideName"></b><div class="muted" id="sideRole"></div><button class="btn" id="logout" style="margin-top:10px;width:100%">Keluar</button></div>
+</aside>
+<main class="main">
+<section id="dashboard" class="page">
+  <div class="top"><div><h1>Dashboard</h1><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
+  <div class="stats">
+    <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
+    <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
+    <div class="card stat"><span class="muted">Izin / Sakit</span><b id="dI">0</b></div>
+    <div class="card stat"><span class="muted">Total Karyawan</span><b id="dE">0</b></div>
+  </div>
+  <div class="quick employeeOnly">
+    <div class="card bigaction"><b>Absen Masuk</b><div class="muted">Catat jam masuk hari ini.</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
+    <div class="card bigaction"><b>Absen Pulang</b><div class="muted">Catat jam pulang hari ini.</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
+  </div>
+  <div id="dashNotice" class="notice hidden"></div>
+</section>
 
-    <div class="layout">
-      <section class="card">
-        <div class="section-title"><h3>Kehadiran 7 Hari</h3><span class="time">Demo</span></div>
-        <div class="chart" id="chart"></div>
-      </section>
-      <section class="card">
-        <div class="section-title"><h3>Tugas Hari Ini</h3><span class="time" id="taskCount"></span></div>
-        <div id="tasks"></div>
-      </section>
-    </div>
+<section id="attendance" class="page hidden">
+  <div class="top"><div><h1>Absensi</h1><div class="muted">Riwayat kehadiran karyawan.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
+  <div class="card">
+    <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
+    <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+  </div>
+</section>
 
-    <div class="row">
-      <section class="card"><div class="section-title"><h3>Siapa yang Sedang Bekerja</h3><span class="time">Live demo</span></div>
-        <div class="employee"><span><span class="dot on"></span>Rina • Admin</span><span class="green">Online</span></div>
-        <div class="employee"><span><span class="dot on"></span>Dimas • Operasional</span><span class="green">Online</span></div>
-        <div class="employee"><span><span class="dot on"></span>Sari • Finance</span><span class="green">Online</span></div>
-        <div class="employee"><span><span class="dot off"></span>Andi • Sales</span><span class="time">Belum absen</span></div>
-      </section>
-      <section class="card"><div class="section-title"><h3>Aktivitas Terbaru</h3><span class="time">Hari ini</span></div>
-        <div class="task"><div><div class="title">Rina menyelesaikan laporan stok</div><div class="meta">10:14</div></div></div>
-        <div class="task"><div><div class="title">Dimas absen masuk</div><div class="meta">08:02</div></div></div>
-        <div class="task"><div><div class="title">Tugas baru dibuat: follow up supplier</div><div class="meta">07:45</div></div></div>
-      </section>
-    </div>
-    <div class="notice" id="notice">Belum ada absensi hari ini.</div>
-  </main>
+<section id="employees" class="page hidden">
+  <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Kelola akun karyawan HomeOffice.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
+  <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="employeeRows"></tbody></table></div></div>
+</section>
+</main>
 </div>
+
+<div class="modal" id="employeeModal"><div class="box"><h3>Tambah Karyawan</h3><div class="grid">
+<label class="field">Nama<input id="eName"></label><label class="field">Jabatan<input id="eJob" placeholder="Staff"></label>
+<label class="field">Username<input id="eUser"></label><label class="field">Password<input id="ePass" type="password"></label>
+</div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveEmployee">Simpan</button></div></div></div>
+
+<div class="modal" id="attendanceModal"><div class="box"><h3>Tambah Absensi</h3><div class="grid">
+<label class="field">Karyawan<select id="aEmployee"></select></label><label class="field">Tanggal<input id="aDate" type="date"></label>
+<label class="field">Jam Masuk<input id="aIn" type="time"></label><label class="field">Jam Pulang<input id="aOut" type="time"></label>
+<label class="field">Status<select id="aStatus"><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></label><label class="field">Catatan<input id="aNote"></label>
+</div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveAttendance">Simpan</button></div></div></div>
+
 <script>
-const tasks=[
-{id:1,title:'Cek stok dan kebutuhan gudang',meta:'Prioritas tinggi • Deadline 11:00',done:false},
-{id:2,title:'Follow up supplier garam industri',meta:'Sales • Deadline 13:00',done:true},
-{id:3,title:'Rekap transaksi hari ini',meta:'Finance • Deadline 16:30',done:false},
-{id:4,title:'Update laporan absensi',meta:'Admin • Deadline 17:00',done:true},
-{id:5,title:'Susun daftar pekerjaan besok',meta:'Operasional • Deadline 17:30',done:false}
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const keyUsers='ho_v3_users',keyAtt='ho_v3_attendance',keySession='ho_v3_session';
+const seed=[
+{id:'admin',name:'Administrator',username:'admin',password:'admin123',job:'Administrator',role:'admin',active:true},
+{id:'budi',name:'Budi Santoso',username:'budi',password:'123456',job:'Staff',role:'employee',active:true}
 ];
-const chart=[62,78,70,88,84,94,76], days=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
-function renderChart(){const c=document.getElementById('chart');c.innerHTML=chart.map((v,i)=>`<div class="bar-wrap"><div class="bar" style="height:${v*1.8}px"></div><div style="margin-top:7px">${days[i]}</div></div>`).join('')}
-function renderTasks(){const box=document.getElementById('tasks');box.innerHTML=tasks.map(t=>`<label class="task ${t.done?'done':''}"><input type="checkbox" data-id="${t.id}" ${t.done?'checked':''}><div><div class="title">${t.title}</div><div class="meta">${t.meta}</div></div></label>`).join('');
-box.querySelectorAll('input').forEach(x=>x.onchange=e=>{const t=tasks.find(a=>a.id==e.target.dataset.id);t.done=e.target.checked;save();renderTasks();updateKpi();});document.getElementById('taskCount').textContent=`${tasks.filter(t=>!t.done).length} belum selesai`}
-function updateKpi(){document.getElementById('doneTasks').textContent=tasks.filter(t=>t.done).length;document.getElementById('activeTasks').textContent=tasks.filter(t=>!t.done).length}
-function save(){localStorage.setItem('homeoffice_tasks',JSON.stringify(tasks))}
-const saved=localStorage.getItem('homeoffice_tasks');if(saved){const s=JSON.parse(saved);s.forEach((v,i)=>tasks[i]&&Object.assign(tasks[i],v))}
-function setNotice(){const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');const n=document.getElementById('notice');if(a.in){n.textContent=`Absen masuk: ${a.in}${a.out?` • Absen pulang: ${a.out}`:' • Belum absen pulang'}`;n.style.background='#eef8f3'}else n.textContent='Belum ada absensi hari ini.'}
-function now(){return new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
-document.getElementById('checkin').onclick=()=>{const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');if(!a.in)a.in=now();localStorage.setItem('homeoffice_attendance',JSON.stringify(a));setNotice();alert('Absen masuk tercatat pukul '+a.in)};
-document.getElementById('checkout').onclick=()=>{const a=JSON.parse(localStorage.getItem('homeoffice_attendance')||'{}');if(!a.in){alert('Silakan absen masuk dulu.');return}a.out=now();localStorage.setItem('homeoffice_attendance',JSON.stringify(a));setNotice();alert('Absen pulang tercatat pukul '+a.out)};
-document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-renderChart();renderTasks();updateKpi();setNotice();
+let users=JSON.parse(localStorage.getItem(keyUsers)||'null')||seed;
+let attendance=JSON.parse(localStorage.getItem(keyAtt)||'[]');
+let current=null;
+function persist(){localStorage.setItem(keyUsers,JSON.stringify(users));localStorage.setItem(keyAtt,JSON.stringify(attendance))}persist();
+function ymd(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function hm(){let d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function showApp(u){current=u;$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#sideName').textContent=u.name;$('#sideRole').textContent=u.role==='admin'?'Admin':u.job;$('#welcome').textContent='Selamat datang, '+u.name+'.';$('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});$$('.adminOnly').forEach(x=>x.classList.toggle('hidden',u.role!=='admin'));$$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',u.role==='admin'));go('dashboard');renderAll()}
+function login(){let u=users.find(x=>x.active&&x.username===$('#loginUser').value.trim()&&x.password===$('#loginPass').value);if(!u){$('#loginMsg').textContent='Username atau password salah.';return}localStorage.setItem(keySession,u.id);showApp(u)}
+$('#loginBtn').onclick=login;$('#loginPass').onkeydown=e=>{if(e.key==='Enter')login()};$('#logout').onclick=()=>{localStorage.removeItem(keySession);location.reload()};
+function go(id){if(id==='employees'&&current.role!=='admin')id='dashboard';$$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id))}$$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function badge(s){let c=s==='Hadir'?'hadir':s==='Terlambat'?'terlambat':s==='Izin'?'izin':'sakit';return '<span class="badge '+c+'">'+esc(s)+'</span>'}
+function renderAll(){let td=attendance.filter(x=>x.date===ymd());$('#dH').textContent=td.filter(x=>x.status==='Hadir').length;$('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;$('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;$('#dE').textContent=users.filter(x=>x.role==='employee'&&x.active).length;renderAttendance();renderEmployees();renderNotice()}
+function renderAttendance(){let d=$('#filterDate').value,s=$('#filterStatus').value;let rows=attendance.filter(x=>(!d||x.date===d)&&(!s||x.status===s));if(current.role!=='admin')rows=rows.filter(x=>x.userId===current.id);rows.sort((a,b)=>b.date.localeCompare(a.date));$('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.date)}</td><td>${esc(x.in||'-')}</td><td>${esc(x.out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>'}
+function renderEmployees(){if(current.role!=='admin')return;let es=users.filter(x=>x.role==='employee');$('#employeeRows').innerHTML=es.length?es.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.username)}</td><td>${esc(x.job)}</td><td>Karyawan</td><td>${x.active?'Aktif':'Nonaktif'}</td><td><button class="btn danger toggleEmp" data-id="${x.id}">${x.active?'Nonaktifkan':'Aktifkan'}</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada karyawan.</td></tr>';$$('.toggleEmp').forEach(b=>b.onclick=()=>{let u=users.find(x=>x.id===b.dataset.id);u.active=!u.active;persist();renderAll()})}
+function renderNotice(){if(current.role==='admin')return;let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());let n=$('#dashNotice');n.classList.remove('hidden');n.textContent=x?`Absensi hari ini: ${x.status} • Masuk ${x.in||'-'} • Pulang ${x.out||'-'}`:'Kamu belum melakukan absensi hari ini.'}
+$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;
+$('#clockIn').onclick=()=>{let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());if(x&&x.in){alert('Kamu sudah absen masuk hari ini.');return}let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';if(!x){x={id:String(Date.now()),userId:current.id,name:current.name,date:ymd(),in:t,out:'',status,note:''};attendance.push(x)}else{x.in=t;x.status=status}persist();renderAll();alert('Absensi masuk berhasil: '+t)};
+$('#clockOut').onclick=()=>{let x=attendance.find(a=>a.userId===current.id&&a.date===ymd());if(!x||!x.in){alert('Silakan absen masuk terlebih dahulu.');return}if(x.out){alert('Kamu sudah absen pulang.');return}x.out=hm();persist();renderAll();alert('Absensi pulang berhasil: '+x.out)};
+function openModal(id){$(id).classList.add('open')}$$('.modalCancel').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
+$('#addEmployee').onclick=()=>openModal('#employeeModal');
+$('#saveEmployee').onclick=()=>{let name=$('#eName').value.trim(),user=$('#eUser').value.trim(),pass=$('#ePass').value,job=$('#eJob').value.trim()||'Staff';if(!name||!user||!pass){alert('Nama, username, dan password wajib diisi.');return}if(users.some(x=>x.username.toLowerCase()===user.toLowerCase())){alert('Username sudah digunakan.');return}users.push({id:'u'+Date.now(),name,username:user,password:pass,job,role:'employee',active:true});persist();$('#employeeModal').classList.remove('open');['#eName','#eUser','#ePass','#eJob'].forEach(s=>$(s).value='');renderAll()};
+$('#manualAttendance').onclick=()=>{$('#aEmployee').innerHTML=users.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');$('#aDate').value=ymd();openModal('#attendanceModal')};
+$('#saveAttendance').onclick=()=>{let u=users.find(x=>x.id===$('#aEmployee').value);if(!u||!$('#aDate').value)return;let existing=attendance.find(x=>x.userId===u.id&&x.date===$('#aDate').value);let obj={id:existing?.id||String(Date.now()),userId:u.id,name:u.name,date:$('#aDate').value,in:$('#aIn').value,out:$('#aOut').value,status:$('#aStatus').value,note:$('#aNote').value.trim()};if(existing)Object.assign(existing,obj);else attendance.push(obj);persist();$('#attendanceModal').classList.remove('open');renderAll()};
+let sid=localStorage.getItem(keySession),su=users.find(x=>x.id===sid&&x.active);if(su)showApp(su);
 </script>
-</body>
-</html>
+</body></html>
