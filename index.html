@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HomeOffice V5 Online</title>
+<title>HomeOffice V6 Role Access</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,system-ui;background:#f5f7fb;color:#172033}
@@ -23,6 +23,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:15px}.bigaction{padding:25px;text-align:center}.bigaction b{display:block;font-size:18px;margin-bottom:7px}.notice{padding:12px;border-radius:10px;background:#eef4ff;color:#1d4ed8;margin-bottom:15px}
 .empname{display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;border-radius:50%;background:#e8efff;color:#3157a6;display:grid;place-items:center;font-weight:800}.rowactions{display:flex;gap:6px}
 .detailgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.detailitem{background:#f8fafc;border-radius:10px;padding:12px}.detailitem b{display:block;margin-top:4px}
+.rolebox{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font-size:12px;font-weight:800}
 @media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.user{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}.detailgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.stats,.quick,.grid,.detailgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
 </style>
@@ -31,8 +32,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 <section id="login" class="login">
   <div class="loginbox">
     <div class="logo">🏠 HomeOffice</div>
-    <div class="muted">Login online dengan Supabase</div>
-    <label class="field">Email<input id="loginEmail" type="email" placeholder="Email admin/karyawan"></label>
+    <div class="muted">Login online dengan akun masing-masing</div>
+    <label class="field">Email<input id="loginEmail" type="email" placeholder="Email"></label>
     <label class="field">Password<input id="loginPass" type="password" placeholder="Password"></label>
     <button class="btn primary wide" id="loginBtn">Masuk</button>
     <div id="loginMsg" class="muted" style="margin-top:10px"></div>
@@ -46,8 +47,14 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="dashboard" class="active">⌂ Dashboard</button>
       <button data-page="attendance">◷ Absensi</button>
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
+      <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
     </nav>
-    <div class="user"><b id="sideName"></b><div class="muted" id="sideRole"></div><button class="btn" id="logout" style="margin-top:10px;width:100%">Keluar</button></div>
+    <div class="user">
+      <b id="sideName"></b>
+      <div class="muted" id="sideRole"></div>
+      <div class="rolebox" id="roleBadge" style="margin-top:8px"></div>
+      <button class="btn" id="logout" style="margin-top:10px;width:100%">Keluar</button>
+    </div>
   </aside>
 
   <main class="main">
@@ -57,7 +64,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
         <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
         <div class="card stat"><span class="muted">Izin / Sakit</span><b id="dI">0</b></div>
-        <div class="card stat"><span class="muted">Karyawan Aktif</span><b id="dE">0</b></div>
+        <div class="card stat adminOnly"><span class="muted">Karyawan Aktif</span><b id="dE">0</b></div>
       </div>
       <div class="quick employeeOnly">
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
@@ -67,7 +74,10 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     </section>
 
     <section id="attendance" class="page hidden">
-      <div class="top"><div><h1>Absensi</h1><div class="muted">Data tersimpan online di Supabase.</div></div><button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button></div>
+      <div class="top">
+        <div><h1>Absensi</h1><div class="muted" id="attendanceSubtitle">Riwayat absensi.</div></div>
+        <button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button>
+      </div>
       <div class="card">
         <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
@@ -75,11 +85,16 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     </section>
 
     <section id="employees" class="page hidden">
-      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Data tersimpan online di Supabase.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
+      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Hanya Bos/Admin yang dapat mengakses halaman ini.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
       <div class="card">
         <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
       </div>
+    </section>
+
+    <section id="profile" class="page hidden">
+      <div class="top"><div><h1>Profil Saya</h1><div class="muted">Informasi akun karyawan.</div></div></div>
+      <div class="card"><div id="profileContent"></div></div>
     </section>
   </main>
 </div>
@@ -145,12 +160,15 @@ $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 async function boot(user){
   currentAuth=user;
   const {data:emp,error}=await sb.from('employees').select('*').eq('auth_user_id',user.id).single();
-  if(error||!emp){$('#loginMsg').textContent='Akun Auth belum terhubung ke tabel employees.';return}
+  if(error||!emp){$('#loginMsg').textContent='Akun ini belum dihubungkan ke data karyawan.';await sb.auth.signOut();return}
   currentEmployee=emp;
   $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
-  $('#sideName').textContent=emp.full_name;$('#sideRole').textContent=emp.role==='admin'?'Admin':emp.job_title||'Karyawan';
-  $('#welcome').textContent='Selamat datang, '+emp.full_name+'.';
+  $('#sideName').textContent=emp.full_name;
+  $('#sideRole').textContent=emp.role==='admin'?'Bos / Administrator':emp.job_title||'Karyawan';
+  $('#roleBadge').textContent=emp.role==='admin'?'AKSES BOS':'AKSES KARYAWAN';
+  $('#welcome').textContent=emp.role==='admin'?'Selamat datang, Bos.':'Selamat bekerja, '+emp.full_name+'.';
   $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('#attendanceSubtitle').textContent=emp.role==='admin'?'Lihat absensi semua karyawan.':'Riwayat absensi milik kamu sendiri.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
   go('dashboard'); await refreshData();
@@ -158,8 +176,10 @@ async function boot(user){
 
 function go(id){
   if(id==='employees'&&currentEmployee.role!=='admin')id='dashboard';
+  if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  if(id==='profile')renderProfile();
 }
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
@@ -184,7 +204,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();
 }
 
 function renderAttendance(){
@@ -194,7 +214,7 @@ function renderAttendance(){
 }
 
 function renderEmployees(){
- if(currentEmployee.role!=='admin')return;
+ if(!currentEmployee||currentEmployee.role!=='admin')return;
  let q=$('#employeeSearch').value.toLowerCase().trim();
  let es=employees.filter(x=>x.role==='employee'&&(!q||[x.full_name,x.username,x.job_title,x.phone].some(v=>String(v||'').toLowerCase().includes(q))));
  $('#employeeRows').innerHTML=es.length?es.map(x=>`<tr>
@@ -206,10 +226,23 @@ function renderEmployees(){
 }
 
 function renderNotice(){
- if(currentEmployee.role==='admin')return;
+ if(!currentEmployee||currentEmployee.role==='admin')return;
  let x=attendance.find(a=>a.attendance_date===ymd());
  let n=$('#dashNotice');n.classList.remove('hidden');
  n.textContent=!x?'Kamu belum melakukan absensi hari ini.':`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
+}
+
+function renderProfile(){
+ if(!currentEmployee||currentEmployee.role==='admin')return;
+ $('#profileContent').innerHTML=`<div class="detailgrid">
+ <div class="detailitem"><span class="muted">Nama</span><b>${esc(currentEmployee.full_name)}</b></div>
+ <div class="detailitem"><span class="muted">Jabatan</span><b>${esc(currentEmployee.job_title||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Username</span><b>${esc(currentEmployee.username||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Email</span><b>${esc(currentEmployee.email||currentAuth?.email||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Nomor HP</span><b>${esc(currentEmployee.phone||'-')}</b></div>
+ <div class="detailitem"><span class="muted">Tanggal Masuk</span><b>${esc(currentEmployee.join_date||'-')}</b></div>
+ <div class="detailitem" style="grid-column:1/-1"><span class="muted">Alamat</span><b>${esc(currentEmployee.address||'-')}</b></div>
+ </div>`;
 }
 
 $('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
@@ -218,10 +251,8 @@ $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
  if(x&&x.check_in){alert('Kamu sudah absen masuk hari ini.');return}
  let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';
- let res;
- if(x)res=await sb.from('attendance').update({check_in:t,status}).eq('id',x.id);
- else res=await sb.from('attendance').insert({employee_id:currentEmployee.id,attendance_date:ymd(),check_in:t,status});
- if(res.error){alert(res.error.message);return} await refreshData();alert('Absensi masuk berhasil: '+t);
+ let res=x?await sb.from('attendance').update({check_in:t,status}).eq('id',x.id):await sb.from('attendance').insert({employee_id:currentEmployee.id,attendance_date:ymd(),check_in:t,status});
+ if(res.error){alert(res.error.message);return}await refreshData();alert('Absensi masuk berhasil: '+t);
 }
 
 $('#clockOut').onclick=async()=>{
