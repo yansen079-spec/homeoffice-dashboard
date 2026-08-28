@@ -176,6 +176,54 @@ aside .userbox{
 }
 /* ===== END V19.1 SIDEBAR SCROLL FIX ===== */
 
+
+/* ===== V19.2 TRUE SIDEBAR FIX ===== */
+@media(min-width:769px){
+  aside.side{
+    height:100vh!important;
+    max-height:100vh!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    padding-bottom:14px!important;
+  }
+  aside.side .brand{
+    flex:0 0 auto!important;
+  }
+  aside.side nav.nav{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    display:block!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:4px!important;
+    scrollbar-width:thin;
+  }
+  aside.side nav.nav button{
+    display:block!important;
+    width:100%!important;
+    margin:4px 0!important;
+  }
+  aside.side .user{
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    flex:0 0 auto!important;
+    margin-top:10px!important;
+    padding-top:12px!important;
+    background:#fff!important;
+    z-index:5!important;
+  }
+}
+@media(max-width:768px){
+  aside.side .user{
+    position:static!important;
+    margin-top:8px!important;
+  }
+}
+/* ===== END V19.2 TRUE SIDEBAR FIX ===== */
+
 </style>
 </head>
 <body>

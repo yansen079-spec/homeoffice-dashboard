@@ -1,8 +1,9 @@
-HOME OFFICE V19.1 - SIDEBAR FIX
+HOME OFFICE V19.2 - TRUE SIDEBAR FIX
 
 Perbaikan:
-- Sidebar desktop sekarang bisa scroll vertikal.
-- Menu tidak menimpa profil Administrator.
-- Profil/Keluar berada setelah seluruh menu.
-- Mobile V18 tetap responsive.
-- Tidak ada perubahan database atau logika V19.
+- Selector profil diperbaiki dari .userbox menjadi .user.
+- Menu sidebar mempunyai area scroll sendiri.
+- Profil Administrator dan tombol Keluar selalu berada di bawah.
+- Menu tidak bisa lagi menimpa profil.
+- Desktop dan mobile tetap responsive.
+- Tidak ada perubahan database atau fitur operasional.
