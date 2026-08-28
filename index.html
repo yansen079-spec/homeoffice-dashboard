@@ -49,6 +49,14 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .stock-ok{background:#e8f7ed;color:#15803d}.stock-low{background:#fff3dc;color:#b45309}.stock-out{background:#feecec;color:#b91c1c}
 .stock-history-item{padding:12px 0;border-bottom:1px solid #edf0f4}
 
+
+.bossdash{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.bosscard{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:18px}
+.bosscard b{display:block;font-size:26px;margin-top:8px}
+.bosslist{display:grid;gap:10px}
+.bossrow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f4}
+@media(max-width:900px){.bossdash{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.bossdash{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -100,7 +108,22 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
         <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
       </div>
-      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div>
+      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div><div id="bossDashboardExtra" class="adminOnly" style="margin-top:18px">
+        <div class="bossdash">
+          <div class="bosscard"><span class="muted">Belum Absen</span><b id="bNotIn">0</b></div>
+          <div class="bosscard"><span class="muted">Belum Pulang</span><b id="bNotOut">0</b></div>
+          <div class="bosscard"><span class="muted">Pengajuan Menunggu</span><b id="bPendingLeave">0</b></div>
+          <div class="bosscard"><span class="muted">Tugas Belum Selesai</span><b id="bOpenTasks">0</b></div>
+          <div class="bosscard"><span class="muted">Stok Menipis</span><b id="bLowStock">0</b></div>
+          <div class="bosscard"><span class="muted">Stok Habis</span><b id="bOutStock">0</b></div>
+          <div class="bosscard"><span class="muted">Hari Kerja Dibayar</span><b id="bPaidDays">0</b></div>
+          <div class="bosscard"><span class="muted">Estimasi Gaji Berjalan</span><b id="bPayroll">Rp0</b></div>
+        </div>
+        <div class="card">
+          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Ringkasan Karyawan Hari Ini</h3><div class="muted">Status absensi semua karyawan aktif.</div></div></div>
+          <div class="bosslist" id="bossEmployeeSummary"></div>
+        </div>
+      </div>
     </section>
 
     <section id="attendance" class="page hidden">
@@ -495,7 +518,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderSettings();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();
 }
 
 function renderAttendance(){
@@ -931,7 +954,7 @@ async function loadStockSafe(){
     }else{
       stockHistory=[];
     }
-    renderStockSafe();
+    renderStockSafe(); if(currentEmployee?.role==='admin')renderBossDashboard();
   }catch(err){
     console.error('Stock module:',err);
     const info=$('#stockLoadInfo');
@@ -939,7 +962,7 @@ async function loadStockSafe(){
       info.classList.remove('hidden');
       info.textContent='Modul stok gagal dimuat. Fitur HomeOffice lain tetap aman.';
     }
-    renderStockSafe();
+    renderStockSafe(); if(currentEmployee?.role==='admin')renderBossDashboard();
   }
 }
 
@@ -1174,6 +1197,51 @@ $('#resetAttendanceAll').onclick=async()=>{
     renderRecap();
     alert('Semua absensi hari ini berhasil di-reset.');
   }catch(err){alert('Reset gagal: '+err.message)}
+}
+
+
+
+function renderBossDashboard(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return;
+
+  const activeEmployees=employees.filter(x=>x.role==='employee'&&x.active);
+  const today=ymd();
+  const todayAtt=attendance.filter(x=>x.attendance_date===today);
+
+  const notIn=activeEmployees.filter(e=>!todayAtt.some(a=>a.employee_id===e.id&&a.check_in));
+  const notOut=activeEmployees.filter(e=>todayAtt.some(a=>a.employee_id===e.id&&a.check_in&&!a.check_out));
+  const pendingLeave=leaveRequests.filter(x=>x.status==='Menunggu').length;
+  const openTasks=tasks.filter(x=>x.status!=='Selesai').length;
+  const lowStock=productStocks.filter(x=>Number(x.stock)>0&&Number(x.stock)<=Number(x.minimum_stock)).length;
+  const outStock=productStocks.filter(x=>Number(x.stock)<=0).length;
+
+  let payrollRows=[];
+  try{ payrollRows=getPayrollRows(); }catch(e){ payrollRows=[]; }
+  const paidDays=payrollRows.reduce((s,x)=>s+Number(x.paidDays||0),0);
+  const payroll=payrollRows.reduce((s,x)=>s+Number(x.net||0),0);
+
+  $('#bNotIn').textContent=notIn.length;
+  $('#bNotOut').textContent=notOut.length;
+  $('#bPendingLeave').textContent=pendingLeave;
+  $('#bOpenTasks').textContent=openTasks;
+  $('#bLowStock').textContent=lowStock;
+  $('#bOutStock').textContent=outStock;
+  $('#bPaidDays').textContent=paidDays;
+  $('#bPayroll').textContent=rupiah(payroll);
+
+  const summary=$('#bossEmployeeSummary');
+  summary.innerHTML=activeEmployees.length?activeEmployees.map(e=>{
+    const a=todayAtt.find(x=>x.employee_id===e.id);
+    let status='Belum Absen',cls='nonaktif';
+    if(a){
+      if(a.check_in&&!a.check_out){status='Sudah Masuk',cls='izin'}
+      if(a.check_in&&a.check_out){status='Selesai',cls='hadir'}
+      if(a.status==='Terlambat'){status='Terlambat',cls='telat'}
+      if(a.status==='Izin'){status='Izin',cls='izin'}
+      if(a.status==='Sakit'){status='Sakit',cls='sakit'}
+    }
+    return `<div class="bossrow"><div><b>${esc(e.full_name)}</b><div class="muted">${esc(e.job_title||'Karyawan')}</div></div><div style="text-align:right"><span class="badge ${cls}">${status}</span><div class="muted" style="margin-top:5px">${a?`${esc(a.check_in||'-')} → ${esc(a.check_out||'-')}`:'-'}</div></div></div>`;
+  }).join(''):'<div class="muted">Belum ada karyawan aktif.</div>';
 }
 
 
