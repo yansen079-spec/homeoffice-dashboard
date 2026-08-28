@@ -25,6 +25,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .detailgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.detailitem{background:#f8fafc;border-radius:10px;padding:12px}.detailitem b{display:block;margin-top:4px}
 .rolebox{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font-size:12px;font-weight:800}
 .taskcards{display:grid;gap:12px}.taskcard{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:17px}.taskhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.tasktitle{font-weight:800;font-size:16px}.taskmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.taskdesc{margin-top:10px;color:#596579;line-height:1.45}.prio-Tinggi{background:#feecec;color:#b91c1c}.prio-Normal{background:#fff3dc;color:#b45309}.prio-Rendah{background:#eaf1ff;color:#2563eb}.status-Belum{background:#eef1f5;color:#64748b}.status-Dikerjakan{background:#fff3dc;color:#b45309}.status-Selesai{background:#e8f7ed;color:#15803d}
+.leavecards{display:grid;gap:12px}.leavecard{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:17px}.leavehead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.leave-title{font-weight:800;font-size:16px}.leave-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.leave-reason{margin-top:10px;color:#596579;line-height:1.45}.menunggu{background:#fff3dc;color:#b45309}.disetujui{background:#e8f7ed;color:#15803d}.ditolak{background:#feecec;color:#b91c1c}
 @media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.user{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}.detailgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.stats,.quick,.grid,.detailgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
 </style>
@@ -49,6 +50,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="attendance">◷ Absensi</button>
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
       <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
+      <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
     </nav>
@@ -85,6 +87,20 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
       </div>
+    </section>
+
+    <section id="leave" class="page hidden">
+      <div class="top">
+        <div><h1 id="leaveTitle">Pengajuan</h1><div class="muted" id="leaveSubtitle"></div></div>
+        <button class="btn primary employeeOnly" id="addLeave">+ Ajukan Izin / Sakit / Cuti</button>
+      </div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Menunggu</span><b id="lWait">0</b></div>
+        <div class="card stat"><span class="muted">Disetujui</span><b id="lApproved">0</b></div>
+        <div class="card stat"><span class="muted">Ditolak</span><b id="lRejected">0</b></div>
+        <div class="card stat"><span class="muted">Total</span><b id="lTotal">0</b></div>
+      </div>
+      <div class="leavecards" id="leaveRows"></div>
     </section>
 
     <section id="recap" class="page hidden">
@@ -162,12 +178,25 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 </div>
 
 <div class="modal" id="taskModal"><div class="box"><h3 id="taskModalTitle">Tambah Tugas</h3><input type="hidden" id="tId"><div class="grid"><label class="field">Judul Tugas<input id="tTitle"></label><label class="field">Karyawan<select id="tEmployee"></select></label><label class="field">Deadline<input id="tDue" type="date"></label><label class="field">Prioritas<select id="tPriority"><option>Rendah</option><option selected>Normal</option><option>Tinggi</option></select></label><label class="field" style="grid-column:1/-1">Keterangan<textarea id="tDescription"></textarea></label></div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveTask">Simpan Tugas</button></div></div></div>
+<div class="modal" id="leaveModal">
+  <div class="box">
+    <h3>Ajukan Izin / Sakit / Cuti</h3>
+    <div class="grid">
+      <label class="field">Jenis<select id="lvType"><option>Izin</option><option>Sakit</option><option>Cuti</option></select></label>
+      <label class="field">Tanggal Mulai<input id="lvStart" type="date"></label>
+      <label class="field">Tanggal Selesai<input id="lvEnd" type="date"></label>
+      <label class="field" style="grid-column:1/-1">Alasan<textarea id="lvReason" placeholder="Jelaskan alasan pengajuan..."></textarea></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveLeave">Kirim Pengajuan</button></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[];
+let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[];
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -220,12 +249,16 @@ async function refreshData(){
     attendance=(a||[]).map(x=>({...x,name:x.employees?.full_name||'-'}));
     const {data:t}=await sb.from('tasks').select('*, assignee:employees!tasks_assigned_to_fkey(full_name)').order('created_at',{ascending:false});
     tasks=(t||[]).map(x=>({...x,assignee_name:x.assignee?.full_name||'-'}));
+    const {data:l}=await sb.from('leave_requests').select('*, employees(full_name)').order('created_at',{ascending:false});
+    leaveRequests=(l||[]).map(x=>({...x,employee_name:x.employees?.full_name||'-'}));
   }else{
     employees=[currentEmployee];
     const {data:a}=await sb.from('attendance').select('*').eq('employee_id',currentEmployee.id).order('attendance_date',{ascending:false});
     attendance=(a||[]).map(x=>({...x,name:currentEmployee.full_name}));
     const {data:t}=await sb.from('tasks').select('*').eq('assigned_to',currentEmployee.id).order('created_at',{ascending:false});
     tasks=(t||[]).map(x=>({...x,assignee_name:currentEmployee.full_name}));
+    const {data:l}=await sb.from('leave_requests').select('*').eq('employee_id',currentEmployee.id).order('created_at',{ascending:false});
+    leaveRequests=(l||[]).map(x=>({...x,employee_name:currentEmployee.full_name}));
   }
   renderAll();
 }
@@ -237,7 +270,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();
 }
 
 function renderAttendance(){
@@ -287,6 +320,73 @@ window.editTask=id=>{let x=tasks.find(t=>t.id===id);if(!x)return;resetTaskForm()
 $('#saveTask').onclick=async()=>{let id=$('#tId').value,title=$('#tTitle').value.trim(),assigned=$('#tEmployee').value;if(!title||!assigned){alert('Judul tugas dan karyawan wajib diisi.');return}let payload={title,description:$('#tDescription').value.trim()||null,assigned_to:assigned,due_date:$('#tDue').value||null,priority:$('#tPriority').value};if(!id)payload.created_by=currentEmployee.id;let res=id?await sb.from('tasks').update(payload).eq('id',id):await sb.from('tasks').insert(payload);if(res.error){alert(res.error.message);return}$('#taskModal').classList.remove('open');await refreshData()};
 window.deleteTask=async id=>{if(!confirm('Hapus tugas ini?'))return;let {error}=await sb.from('tasks').delete().eq('id',id);if(error)alert(error.message);else await refreshData()};
 window.setTaskStatus=async(id,status)=>{let {error}=await sb.from('tasks').update({status,completed_at:status==='Selesai'?new Date().toISOString():null}).eq('id',id);if(error){alert(error.message);return}await refreshData()};
+
+
+function leaveStatusClass(s){return s==='Disetujui'?'disetujui':s==='Ditolak'?'ditolak':'menunggu'}
+function renderLeave(){
+  if(!currentEmployee)return;
+  $('#lWait').textContent=leaveRequests.filter(x=>x.status==='Menunggu').length;
+  $('#lApproved').textContent=leaveRequests.filter(x=>x.status==='Disetujui').length;
+  $('#lRejected').textContent=leaveRequests.filter(x=>x.status==='Ditolak').length;
+  $('#lTotal').textContent=leaveRequests.length;
+  $('#leaveRows').innerHTML=leaveRequests.length?leaveRequests.map(x=>{
+    let actions='';
+    if(currentEmployee.role==='admin'&&x.status==='Menunggu'){
+      actions=`<div class="rowactions"><button class="btn primary" onclick="approveLeave('${x.id}')">Setujui</button><button class="btn danger" onclick="rejectLeave('${x.id}')">Tolak</button></div>`;
+    }
+    return `<div class="leavecard"><div class="leavehead"><div><div class="leave-title">${currentEmployee.role==='admin'?esc(x.employee_name)+' • ':''}${esc(x.leave_type)}</div>
+      <div class="leave-meta"><span class="badge ${leaveStatusClass(x.status)}">${esc(x.status)}</span><span class="badge nonaktif">${esc(x.start_date)} s/d ${esc(x.end_date)}</span></div></div>${actions}</div>
+      <div class="leave-reason">${esc(x.reason)}</div>${x.admin_note?`<div class="muted" style="margin-top:8px">Catatan Bos: ${esc(x.admin_note)}</div>`:''}</div>`;
+  }).join(''):'<div class="card" style="text-align:center;color:#8793a5">Belum ada pengajuan.</div>';
+}
+
+$('#addLeave').onclick=()=>{
+  $('#lvType').value='Izin';$('#lvStart').value=ymd();$('#lvEnd').value=ymd();$('#lvReason').value='';
+  openModal('#leaveModal');
+};
+
+$('#saveLeave').onclick=async()=>{
+  let start=$('#lvStart').value,end=$('#lvEnd').value,reason=$('#lvReason').value.trim();
+  if(!start||!end||!reason){alert('Tanggal dan alasan wajib diisi.');return}
+  if(end<start){alert('Tanggal selesai tidak boleh sebelum tanggal mulai.');return}
+  let {error}=await sb.from('leave_requests').insert({
+    employee_id:currentEmployee.id,leave_type:$('#lvType').value,start_date:start,end_date:end,reason
+  });
+  if(error){alert(error.message);return}
+  $('#leaveModal').classList.remove('open');await refreshData();
+};
+
+window.approveLeave=async id=>{
+  let req=leaveRequests.find(x=>x.id===id);if(!req)return;
+  let note=prompt('Catatan Bos (opsional):','')||null;
+  let {error}=await sb.from('leave_requests').update({
+    status:'Disetujui',admin_note:note,approved_by:currentEmployee.id,approved_at:new Date().toISOString()
+  }).eq('id',id);
+  if(error){alert(error.message);return}
+
+  let d=new Date(req.start_date+'T00:00:00'),end=new Date(req.end_date+'T00:00:00');
+  while(d<=end){
+    if(d.getDay()!==0){
+      let ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      let attStatus=req.leave_type==='Sakit'?'Sakit':'Izin';
+      let res=await sb.from('attendance').upsert({
+        employee_id:req.employee_id,attendance_date:ds,status:attStatus,note:req.leave_type+' - '+req.reason
+      },{onConflict:'employee_id,attendance_date'});
+      if(res.error){alert('Pengajuan disetujui, tapi rekap absensi gagal: '+res.error.message);break}
+    }
+    d.setDate(d.getDate()+1);
+  }
+  await refreshData();
+};
+
+window.rejectLeave=async id=>{
+  let note=prompt('Alasan penolakan (opsional):','')||null;
+  let {error}=await sb.from('leave_requests').update({
+    status:'Ditolak',admin_note:note,approved_by:currentEmployee.id,approved_at:new Date().toISOString()
+  }).eq('id',id);
+  if(error){alert(error.message);return}
+  await refreshData();
+};
 
 function renderRecap(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;

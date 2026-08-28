@@ -1,8 +1,19 @@
-HOME OFFICE V7 - ABSENSI & REKAP
-Jam kerja Senin-Sabtu.
-Masuk 09:00. Toleransi sampai 09:15. Lewat 09:15 = Terlambat.
-Pulang normal 21:00. Sebelum 21:00 ditandai Pulang Cepat pada rekap.
-Minggu libur.
+HOME OFFICE V8 - IZIN / SAKIT / CUTI
 
-V7 mempertahankan role Bos/Karyawan, Data Karyawan, Absensi, Profil dan Tugas.
-Bos mendapat menu Rekap Absensi bulanan dengan filter karyawan.
+Mempertahankan:
+- Role Bos/Karyawan
+- Data Karyawan
+- Absensi
+- Rekap Bulanan
+- Tugas Karyawan / Tugas Saya
+
+Tambahan:
+- Karyawan ajukan Izin / Sakit / Cuti
+- Tanggal mulai dan selesai
+- Alasan
+- Status Menunggu / Disetujui / Ditolak
+- Bos dapat Setujui / Tolak
+- Pengajuan disetujui otomatis masuk ke rekap absensi
+- Hari Minggu dilewati saat membuat rekap otomatis
+
+Data tetap tersimpan di Supabase.
