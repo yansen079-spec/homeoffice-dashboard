@@ -168,7 +168,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 
     <section id="payroll" class="page hidden">
       <div class="top">
-        <div><h1>Penggajian</h1><div class="muted">Hitung gaji bulanan dengan potongan yang bisa diatur Bos.</div></div>
+        <div><h1>Penggajian</h1><div class="muted">Gaji harian berdasarkan absensi Masuk + Pulang lengkap, periode tanggal 1–30.</div></div>
         <button class="btn primary" id="payrollSettingsBtn">⚙ Atur Potongan</button>
         <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
       </div>
@@ -181,7 +181,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       </div>
 
       <div class="stats">
-        <div class="card stat"><span class="muted">Total Gaji Pokok</span><b id="pBase">Rp0</b></div>
+        <div class="card stat"><span class="muted">Total Gaji Kotor</span><b id="pBase">Rp0</b></div>
         <div class="card stat"><span class="muted">Total Terlambat</span><b id="pLate">0</b></div>
         <div class="card stat"><span class="muted">Total Potongan</span><b id="pPenalty">Rp0</b></div>
         <div class="card stat"><span class="muted">Total Gaji Bersih</span><b id="pNet">Rp0</b></div>
@@ -189,7 +189,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 
       <div class="card">
         <div class="table"><table>
-          <thead><tr><th>Nama</th><th>Gaji Pokok</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Nama</th><th>Gaji / Hari</th><th>Hari Dibayar</th><th>Gaji Kotor</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
           <tbody id="payrollRows"></tbody>
         </table></div>
       </div>
@@ -319,7 +319,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     <input type="hidden" id="salaryEmployeeId">
     <div class="grid">
       <label class="field">Nama Karyawan<input id="salaryEmployeeName" disabled></label>
-      <label class="field">Gaji Pokok<input id="salaryAmount" type="number" min="0" step="1000"></label>
+      <label class="field">Gaji Harian<input id="salaryAmount" type="number" min="0" step="1000"></label>
     </div>
     <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveSalary">Simpan Gaji</button></div>
   </div>
@@ -333,7 +333,9 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div style="text-align:right"><b id="slipPeriod">-</b><div class="muted">Periode</div></div>
       </div>
       <div class="sliprow"><span>Nama Karyawan</span><b id="slipName">-</b></div>
-      <div class="sliprow"><span>Gaji Pokok</span><b id="slipBase">Rp0</b></div>
+      <div class="sliprow"><span>Gaji / Hari</span><b id="slipDaily">Rp0</b></div>
+      <div class="sliprow"><span>Hari Dibayar</span><b id="slipPaidDays">0 hari</b></div>
+      <div class="sliprow"><span>Gaji Kotor</span><b id="slipBase">Rp0</b></div>
       <div class="sliprow"><span>Keterlambatan</span><b id="slipLate">0 kejadian</b></div>
       <div class="sliprow"><span>Potongan Terlambat</span><b id="slipPenalty">Rp0</b></div>
       <div class="sliprow"><span>Izin</span><b id="slipIzin">0 hari</b></div>
@@ -650,9 +652,11 @@ function buildSalarySlip(){
   let [yy,mm]=month.split('-');
   let period=new Date(Number(yy),Number(mm)-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
   $('#slipOffice').textContent=(officeSettings&&officeSettings.office_name)||'HomeOffice';
-  $('#slipPeriod').textContent=period;
+  $('#slipPeriod').textContent='Tanggal 1–30 • '+period;
   $('#slipName').textContent=x.emp.full_name;
-  $('#slipBase').textContent=rupiah(x.base);
+  $('#slipDaily').textContent=rupiah(x.daily);
+  $('#slipPaidDays').textContent=x.paidDays+' hari';
+  $('#slipBase').textContent=rupiah(x.gross);
   $('#slipLate').textContent=x.late+' kejadian × '+rupiah(payrollSettings?.late_penalty||5000);
   $('#slipPenalty').textContent=rupiah(x.penalty);
   $('#slipIzin').textContent=x.izin+' hari';
@@ -707,18 +711,22 @@ function getPayrollRows(){
 
   return staff.map(emp=>{
     let a=attendance.filter(x=>x.employee_id===emp.id && x.attendance_date && x.attendance_date.startsWith(month));
+    // V16: periode payroll hanya tanggal 1–30. Tanggal 31 tidak dihitung.
+    a=a.filter(x=>Number((x.attendance_date||'').slice(-2))<=30);
+    let paidDays=a.filter(x=>x.check_in&&x.check_out).length;
     let late=a.filter(x=>x.status==='Terlambat').length;
     let izin=a.filter(x=>x.status==='Izin').length;
     let sakit=a.filter(x=>x.status==='Sakit').length;
-    let cuti=leaveRequests.filter(x=>x.employee_id===emp.id&&x.status==='Disetujui'&&x.leave_type==='Cuti'&&x.start_date&&x.start_date.startsWith(month)).length;
-    let base=Number(emp.base_salary||0);
+    let cuti=leaveRequests.filter(x=>x.employee_id===emp.id&&x.status==='Disetujui'&&x.leave_type==='Cuti'&&x.start_date&&x.start_date.startsWith(month)&&Number(x.start_date.slice(-2))<=30).length;
+    let daily=Number(emp.daily_salary||0);
+    let gross=paidDays*daily;
     let latePenalty=late*Number(payrollSettings?.late_penalty||0);
     let izinPenalty=izin*Number(payrollSettings?.izin_penalty||0);
     let sakitPenalty=sakit*Number(payrollSettings?.sakit_penalty||0);
     let cutiPenalty=cuti*Number(payrollSettings?.cuti_penalty||0);
     let penalty=latePenalty+izinPenalty+sakitPenalty+cutiPenalty;
-    let net=Math.max(0,base-penalty);
-    return {emp,late,izin,sakit,cuti,base,latePenalty,izinPenalty,sakitPenalty,cutiPenalty,penalty,net};
+    let net=Math.max(0,gross-penalty);
+    return {emp,paidDays,daily,gross,late,izin,sakit,cuti,base:gross,latePenalty,izinPenalty,sakitPenalty,cutiPenalty,penalty,net};
   });
 }
 
@@ -733,15 +741,17 @@ function renderPayroll(){
 
   $('#payrollRows').innerHTML=rows.length?rows.map(x=>`<tr>
     <td><b>${esc(x.emp.full_name)}</b></td>
-    <td>${rupiah(x.base)}</td>
+    <td>${rupiah(x.daily)}</td>
+    <td><b>${x.paidDays} hari</b></td>
+    <td>${rupiah(x.gross)}</td>
     <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||0)}</td>
     <td>${x.izin} × ${rupiah(payrollSettings?.izin_penalty||0)}</td>
     <td>${x.sakit} × ${rupiah(payrollSettings?.sakit_penalty||0)}</td>
     <td>${x.cuti} × ${rupiah(payrollSettings?.cuti_penalty||0)}</td>
     <td>${rupiah(x.penalty)}</td>
     <td><b>${rupiah(x.net)}</b></td>
-    <td><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji</button></td>
-  </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
+    <td><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji Harian</button></td>
+  </tr>`).join(''):'<tr><td colspan="11" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
 }
 
 $('#payrollMonth').onchange=renderPayroll;
