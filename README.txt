@@ -1,18 +1,15 @@
-HOME OFFICE V12 - SLIP GAJI
+HOME OFFICE V13 - STOK PRODUK YANSTORE (VERSI AMAN)
 
-Mempertahankan semua fitur V11.
+Basis: V12 yang stabil.
 
-Tambahan:
-- Tombol Buat Slip Gaji khusus Bos
-- Pilih periode/bulan dan satu karyawan dari halaman Penggajian
-- Slip berisi nama kantor, nama karyawan, periode, gaji pokok,
-  keterlambatan, potongan, izin, sakit, dan gaji bersih
-- Cetak / Simpan PDF melalui fitur print browser
-- Data slip diambil langsung dari payroll V11, tidak perlu input ulang
+Prinsip V13:
+- Modul stok dipisahkan dari refreshData utama.
+- Error stok tidak membuat Data Karyawan / Absensi / Payroll blank.
+- Bos dapat tambah/edit/tambah stok/kurangi stok/hapus produk.
+- Karyawan hanya melihat Stok Hari Ini.
+- Status Aman / Menipis / Habis.
+- Riwayat perubahan stok untuk Bos.
+- Supabase Realtime untuk product_stock.
+- Semua fitur V12 tetap dipertahankan.
 
-Cara pakai:
-1. Buka Penggajian.
-2. Pilih bulan.
-3. Pilih satu karyawan.
-4. Klik Buat Slip Gaji.
-5. Klik Cetak / Simpan PDF.
+Jika realtime gagal tersambung, fitur utama HomeOffice tetap bekerja dan stok masih bisa dimuat normal.
