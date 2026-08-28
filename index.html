@@ -132,6 +132,50 @@ table{max-width:100%}
 .claimbox{background:#f8fafc;border:1px dashed #ccd5e1;border-radius:12px;padding:12px;margin-top:10px}
 .secretbox{font-family:monospace;background:#111827;color:#fff;border-radius:10px;padding:12px;word-break:break-word;margin-top:8px}
 
+
+/* ===== V19.1 SIDEBAR SCROLL FIX ===== */
+aside{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-width:thin;
+}
+aside nav{
+  flex-shrink:0;
+}
+aside .userbox{
+  position:relative!important;
+  bottom:auto!important;
+  margin-top:18px!important;
+  flex-shrink:0!important;
+}
+@media(min-width:769px){
+  aside{
+    height:100vh!important;
+    max-height:100vh!important;
+    display:flex!important;
+    flex-direction:column!important;
+    padding-bottom:18px!important;
+  }
+  aside nav{
+    display:block!important;
+    overflow:visible!important;
+  }
+  aside nav button{
+    margin-bottom:4px!important;
+  }
+}
+@media(max-width:768px){
+  aside{
+    overflow:visible!important;
+    height:auto!important;
+    max-height:none!important;
+  }
+  aside .userbox{
+    margin-top:8px!important;
+  }
+}
+/* ===== END V19.1 SIDEBAR SCROLL FIX ===== */
+
 </style>
 </head>
 <body>
