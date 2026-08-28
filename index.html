@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HomeOffice V6 Role Access</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,system-ui;background:#f5f7fb;color:#172033}
 button,input,select,textarea{font:inherit}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
@@ -51,6 +52,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
       <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
       <button data-page="settings" class="adminOnly">⚙ Pengaturan Kantor</button>
+      <button data-page="reports" class="adminOnly">▤ Laporan</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -117,6 +119,31 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
       </div>
       <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
+    </section>
+
+    <section id="reports" class="page hidden">
+      <div class="top">
+        <div><h1>Laporan Absensi Bulanan</h1><div class="muted">Rekap bulanan khusus Bos. Bisa difilter dan diekspor ke Excel.</div></div>
+        <button class="btn primary" id="exportReport">⬇ Export Excel</button>
+      </div>
+      <div class="card" style="margin-bottom:15px">
+        <div class="toolbar"><div>
+          <input class="input" id="reportMonth" type="month">
+          <select class="input" id="reportEmployee"><option value="">Semua karyawan</option></select>
+        </div></div>
+      </div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Hadir</span><b id="repHadir">0</b></div>
+        <div class="card stat"><span class="muted">Terlambat</span><b id="repLate">0</b></div>
+        <div class="card stat"><span class="muted">Izin / Sakit</span><b id="repLeave">0</b></div>
+        <div class="card stat"><span class="muted">Pulang Cepat</span><b id="repEarly">0</b></div>
+      </div>
+      <div class="card">
+        <div class="table"><table>
+          <thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Pulang Cepat</th><th>Catatan</th></tr></thead>
+          <tbody id="reportRows"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <section id="settings" class="page hidden">
@@ -254,7 +281,7 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap'||id==='settings')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings'||id==='reports')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
@@ -293,7 +320,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderSettings();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderSettings();
 }
 
 function renderAttendance(){
@@ -434,6 +461,74 @@ $('#saveSettings').onclick=async()=>{
  if(!payload.work_start||!payload.late_after||!payload.work_end){alert('Jam masuk, toleransi, dan pulang wajib diisi.');return}
  let {error}=await sb.from('office_settings').update(payload).eq('id',1);
  if(error){alert(error.message);return} await refreshData(); alert('Pengaturan kantor berhasil disimpan.');
+};
+
+
+function getReportRows(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return [];
+  if(!$('#reportMonth').value) $('#reportMonth').value=ymd().slice(0,7);
+  let month=$('#reportMonth').value;
+  let emp=$('#reportEmployee').value;
+
+  const prev=emp;
+  $('#reportEmployee').innerHTML='<option value="">Semua karyawan</option>'+
+    employees.filter(x=>x.role==='employee').map(x=>`<option value="${x.id}" ${x.id===prev?'selected':''}>${esc(x.full_name)}</option>`).join('');
+
+  let rows=attendance.filter(x=>x.attendance_date && x.attendance_date.startsWith(month));
+  if(emp) rows=rows.filter(x=>x.employee_id===emp);
+  return rows.sort((a,b)=>a.attendance_date.localeCompare(b.attendance_date) || String(a.name).localeCompare(String(b.name)));
+}
+
+function renderReports(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return;
+  let rows=getReportRows();
+  let early=x=>x.check_out && officeSettings && x.check_out < officeSettings.work_end.slice(0,5);
+
+  $('#repHadir').textContent=rows.filter(x=>x.status==='Hadir').length;
+  $('#repLate').textContent=rows.filter(x=>x.status==='Terlambat').length;
+  $('#repLeave').textContent=rows.filter(x=>x.status==='Izin'||x.status==='Sakit').length;
+  $('#repEarly').textContent=rows.filter(early).length;
+
+  $('#reportRows').innerHTML=rows.length?rows.map(x=>{
+    let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
+    return `<tr>
+      <td><b>${esc(x.name)}</b></td>
+      <td>${esc(x.attendance_date)}</td>
+      <td>${esc(day)}</td>
+      <td>${esc(x.check_in||'-')}</td>
+      <td>${esc(x.check_out||'-')}</td>
+      <td>${badge(x.status)}</td>
+      <td>${early(x)?'<span class="badge telat">Ya</span>':'Tidak'}</td>
+      <td>${esc(x.note||'-')}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:28px">Belum ada data laporan bulan ini.</td></tr>';
+}
+
+$('#reportMonth').onchange=renderReports;
+$('#reportEmployee').onchange=renderReports;
+
+$('#exportReport').onclick=()=>{
+  let rows=getReportRows();
+  if(!rows.length){alert('Belum ada data untuk diekspor.');return}
+  let early=x=>x.check_out && officeSettings && x.check_out < officeSettings.work_end.slice(0,5);
+  let data=rows.map(x=>({
+    'Nama':x.name,
+    'Tanggal':x.attendance_date,
+    'Hari':new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'}),
+    'Jam Masuk':x.check_in||'',
+    'Jam Pulang':x.check_out||'',
+    'Status':x.status,
+    'Pulang Cepat':early(x)?'Ya':'Tidak',
+    'Catatan':x.note||''
+  }));
+  let ws=XLSX.utils.json_to_sheet(data);
+  ws['!cols']=[{wch:25},{wch:12},{wch:12},{wch:12},{wch:12},{wch:15},{wch:14},{wch:35}];
+  let wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Absensi');
+  let month=$('#reportMonth').value||ymd().slice(0,7);
+  let selectedName=$('#reportEmployee').selectedOptions[0]?.textContent||'Semua';
+  let safe=selectedName.replace(/[^a-z0-9_-]+/gi,'_');
+  XLSX.writeFile(wb,`Laporan_Absensi_${safe}_${month}.xlsx`);
 };
 
 function renderRecap(){

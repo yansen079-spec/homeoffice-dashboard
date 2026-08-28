@@ -1,11 +1,21 @@
-HOME OFFICE V9 - PENGATURAN KANTOR
+HOME OFFICE V10 - LAPORAN ABSENSI + EXPORT EXCEL
 
-Tambahan V9:
-- Menu Pengaturan Kantor khusus Bos/Admin
-- Ubah nama kantor, jam masuk, batas toleransi, jam pulang
-- Pilih hari kerja Senin-Minggu
-- Aturan absensi dibaca langsung dari Supabase
-- Hari non-kerja tidak dapat melakukan absen masuk
-- Rekap Pulang Cepat mengikuti jam pulang dari pengaturan
+Mempertahankan:
+- Role Bos/Karyawan
+- Data Karyawan
+- Absensi online
+- Rekap Bulanan
+- Tugas
+- Izin/Sakit/Cuti + approval
+- Pengaturan Kantor dinamis
 
-Semua fitur V8 tetap dipertahankan.
+Tambahan V10:
+- Menu Laporan khusus Bos
+- Filter bulan
+- Filter karyawan
+- Ringkasan Hadir, Terlambat, Izin/Sakit, Pulang Cepat
+- Tabel laporan bulanan
+- Export Excel (.xlsx) langsung dari browser
+- Jam pulang cepat mengikuti Pengaturan Kantor
+
+Data tetap tersimpan di Supabase.
