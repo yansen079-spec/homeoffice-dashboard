@@ -123,6 +123,15 @@ table{max-width:100%}
 }
 /* ===== END V18 MOBILE POLISH ===== */
 
+
+.routinegrid,.digitalgrid{display:grid;gap:12px}
+.routinecard,.digitalcard{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:16px}
+.routinehead,.digitalhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.progressbar{height:9px;background:#eef1f5;border-radius:999px;overflow:hidden;margin-top:8px}
+.progressbar>span{display:block;height:100%;background:#2563eb;border-radius:999px}
+.claimbox{background:#f8fafc;border:1px dashed #ccd5e1;border-radius:12px;padding:12px;margin-top:10px}
+.secretbox{font-family:monospace;background:#111827;color:#fff;border-radius:10px;padding:12px;word-break:break-word;margin-top:8px}
+
 </style>
 </head>
 <body>
@@ -148,8 +157,10 @@ table{max-width:100%}
       <button data-page="settings" class="adminOnly">⚙ Pengaturan Kantor</button>
       <button data-page="reports" class="adminOnly">▤ Laporan</button>
       <button data-page="payroll" class="adminOnly">💰 Penggajian</button>
+      <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
       <button data-page="stock" id="stockNav">▣ Stok Produk</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
+      <button data-page="routine" id="routineNav">☑ Job Harian</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
     </nav>
@@ -234,6 +245,20 @@ table{max-width:100%}
         <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
       </div>
       <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
+    </section>
+
+    <section id="digitalstock" class="page hidden">
+      <div class="top">
+        <div><h1 id="digitalStockTitle">Gudang Digital</h1><div class="muted" id="digitalStockSubtitle"></div></div>
+        <button class="btn primary adminOnly" id="addDigitalItem">+ Tambah Stok Digital</button>
+      </div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Tersedia</span><b id="dsAvailable">0</b></div>
+        <div class="card stat"><span class="muted">Sudah Diambil</span><b id="dsClaimed">0</b></div>
+        <div class="card stat"><span class="muted">Sudah Dikirim</span><b id="dsDelivered">0</b></div>
+        <div class="card stat"><span class="muted">Total Item</span><b id="dsTotal">0</b></div>
+      </div>
+      <div class="digitalgrid" id="digitalRows"></div>
     </section>
 
     <section id="stock" class="page hidden">
@@ -335,6 +360,20 @@ table{max-width:100%}
         <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
       </div>
+    </section>
+
+    <section id="routine" class="page hidden">
+      <div class="top">
+        <div><h1 id="routineTitle">Job Harian</h1><div class="muted" id="routineSubtitle"></div></div>
+        <button class="btn primary adminOnly" id="addRoutineJob">+ Tambah Job Harian</button>
+      </div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Total Hari Ini</span><b id="rjTotal">0</b></div>
+        <div class="card stat"><span class="muted">Selesai</span><b id="rjDone">0</b></div>
+        <div class="card stat"><span class="muted">Belum Selesai</span><b id="rjOpen">0</b></div>
+        <div class="card stat"><span class="muted">Progress</span><b id="rjProgress">0%</b></div>
+      </div>
+      <div class="routinegrid" id="routineRows"></div>
     </section>
 
     <section id="tasks" class="page hidden">
@@ -492,6 +531,41 @@ table{max-width:100%}
   </div>
 </div>
 
+<div class="modal" id="routineModal">
+  <div class="box">
+    <h3>Tambah Job Harian</h3>
+    <div class="grid">
+      <label class="field">Karyawan<select id="routineEmployee"></select></label>
+      <label class="field">Judul Job<input id="routineJobTitle" placeholder="Contoh: Cek chat buyer"></label>
+      <label class="field" style="grid-column:1/-1">Keterangan<textarea id="routineJobDesc"></textarea></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveRoutineJob">Simpan</button></div>
+  </div>
+</div>
+
+<div class="modal" id="digitalModal">
+  <div class="box">
+    <h3>Tambah Stok Digital</h3>
+    <div class="grid">
+      <label class="field">Produk<input id="digitalProductName" placeholder="Contoh: Netflix Premium"></label>
+      <label class="field">Kode/Link/Akun<input id="digitalSecret" placeholder="Data yang akan diberikan ke buyer"></label>
+      <label class="field" style="grid-column:1/-1">Catatan<textarea id="digitalNote" placeholder="Opsional"></textarea></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveDigitalItem">Simpan Item</button></div>
+  </div>
+</div>
+
+<div class="modal" id="claimBuyerModal">
+  <div class="box">
+    <h3>Ambil untuk Buyer</h3>
+    <input type="hidden" id="claimItemId">
+    <div class="grid">
+      <label class="field">Nama / ID Buyer<input id="claimBuyer" placeholder="Contoh: Buyer A / WA 08xxxx"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="confirmClaimItem">Ambil Stok</button></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -500,6 +574,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
 let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 let attendanceArchive=[];
+let routineJobs=[],routineChecks=[],digitalItems=[];
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -534,12 +609,21 @@ async function boot(user){
   $('#stockNav').textContent=emp.role==='admin'?'▣ Stok Produk':'▣ Stok Hari Ini';
   $('#stockTitle').textContent=emp.role==='admin'?'Stok Produk YANSTORE':'Stok Hari Ini';
   $('#stockSubtitle').textContent=emp.role==='admin'?'Kelola stok produk premium.':'Lihat stok produk premium terbaru secara realtime.';
+  $('#routineNav').textContent=emp.role==='admin'?'☑ Job Harian Karyawan':'☑ Job Harian Saya';
+  $('#routineTitle').textContent=emp.role==='admin'?'Job Harian Karyawan':'Job Harian Saya';
+  $('#routineSubtitle').textContent=emp.role==='admin'?'Atur pekerjaan rutin yang otomatis muncul setiap hari.':'Checklist pekerjaan rutin kamu hari ini.';
+  $('#digitalStockNav').textContent=emp.role==='admin'?'⬡ Gudang Digital':'⬡ Ambil Stok Buyer';
+  $('#digitalStockTitle').textContent=emp.role==='admin'?'Gudang Digital YANSTORE':'Ambil Stok untuk Buyer';
+  $('#digitalStockSubtitle').textContent=emp.role==='admin'?'Kelola item digital satu-per-satu.':'Ambil satu item untuk buyer, lalu tandai setelah dikirim.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
   go('dashboard'); await refreshData();
   await loadAttendanceArchiveSafe();
   await loadStockSafe();
+  await loadRoutineSafe();
+  await loadDigitalSafe();
   setupStockRealtimeSafe();
+  setupOpsRealtime();
 }
 
 function go(id){
@@ -1139,6 +1223,8 @@ $('#saveStockProduct').onclick=async()=>{
   }
   $('#stockProductModal').classList.remove('open');
   await loadStockSafe();
+  await loadRoutineSafe();
+  await loadDigitalSafe();
 };
 
 window.openStockChange=(id,mode)=>{
@@ -1179,6 +1265,8 @@ $('#saveStockChange').onclick=async()=>{
 
   $('#stockChangeModal').classList.remove('open');
   await loadStockSafe();
+  await loadRoutineSafe();
+  await loadDigitalSafe();
 };
 
 window.removeStockProduct=async id=>{
@@ -1189,6 +1277,8 @@ window.removeStockProduct=async id=>{
   const r=await sb.from('product_stock').delete().eq('id',id);
   if(r.error){alert(r.error.message);return}
   await loadStockSafe();
+  await loadRoutineSafe();
+  await loadDigitalSafe();
 };
 /* ===== END STOCK MODULE ===== */
 
@@ -1310,6 +1400,162 @@ function renderBossDashboard(){
   }).join(''):'<div class="muted">Belum ada karyawan aktif.</div>';
 }
 
+
+
+/* ===== V19 JOB HARIAN ===== */
+async function loadRoutineSafe(){
+  try{
+    const today=ymd();
+    if(currentEmployee.role==='admin'){
+      const {data:j}=await sb.from('routine_jobs').select('*, employees(full_name)').eq('active',true).order('created_at');
+      routineJobs=j||[];
+      const {data:c}=await sb.from('routine_job_checks').select('*').eq('check_date',today);
+      routineChecks=c||[];
+    }else{
+      const {data:j}=await sb.from('routine_jobs').select('*').eq('employee_id',currentEmployee.id).eq('active',true).order('created_at');
+      routineJobs=j||[];
+      const {data:c}=await sb.from('routine_job_checks').select('*').eq('employee_id',currentEmployee.id).eq('check_date',today);
+      routineChecks=c||[];
+    }
+    renderRoutine();
+  }catch(e){console.error('routine',e)}
+}
+
+function renderRoutine(){
+  if(!currentEmployee)return;
+  const today=ymd();
+  $('#rjTotal').textContent=routineJobs.length;
+  const done=routineJobs.filter(j=>routineChecks.some(c=>c.job_id===j.id&&c.completed)).length;
+  $('#rjDone').textContent=done;
+  $('#rjOpen').textContent=Math.max(0,routineJobs.length-done);
+  $('#rjProgress').textContent=routineJobs.length?Math.round(done/routineJobs.length*100)+'%':'0%';
+
+  $('#routineRows').innerHTML=routineJobs.length?routineJobs.map(j=>{
+    const check=routineChecks.find(c=>c.job_id===j.id);
+    const isDone=!!check?.completed;
+    const name=j.employees?.full_name||currentEmployee.full_name;
+    const action=currentEmployee.role==='admin'
+      ? `<button class="btn danger" onclick="disableRoutine('${j.id}')">Nonaktifkan</button>`
+      : `<button class="btn ${isDone?'':'primary'}" onclick="toggleRoutine('${j.id}',${isDone})">${isDone?'Batalkan Centang':'✓ Tandai Selesai'}</button>`;
+    return `<div class="routinecard"><div class="routinehead"><div><b>${esc(j.title)}</b><div class="muted">${currentEmployee.role==='admin'?esc(name)+' • ':''}${esc(j.description||'')}</div></div>${action}</div>
+      <div class="progressbar"><span style="width:${isDone?'100':'0'}%"></span></div>
+      <div class="muted" style="margin-top:7px">${isDone?'Selesai hari ini':'Belum selesai hari ini'}</div></div>`;
+  }).join(''):'<div class="card">Belum ada job harian.</div>';
+}
+
+$('#addRoutineJob').onclick=()=>{
+  $('#routineEmployee').innerHTML=employees.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');
+  $('#routineJobTitle').value='';$('#routineJobDesc').value='';
+  openModal('#routineModal');
+};
+
+$('#saveRoutineJob').onclick=async()=>{
+  const employee_id=$('#routineEmployee').value,title=$('#routineJobTitle').value.trim();
+  if(!employee_id||!title){alert('Karyawan dan judul wajib diisi.');return}
+  const {error}=await sb.from('routine_jobs').insert({employee_id,title,description:$('#routineJobDesc').value.trim()||null,active:true,created_by:currentEmployee.id});
+  if(error){alert(error.message);return}
+  $('#routineModal').classList.remove('open');await loadRoutineSafe();
+};
+
+window.toggleRoutine=async(jobId,isDone)=>{
+  const existing=routineChecks.find(c=>c.job_id===jobId);
+  if(existing){
+    const {error}=await sb.from('routine_job_checks').update({completed:!isDone,completed_at:!isDone?new Date().toISOString():null}).eq('id',existing.id);
+    if(error){alert(error.message);return}
+  }else{
+    const {error}=await sb.from('routine_job_checks').insert({job_id:jobId,employee_id:currentEmployee.id,check_date:ymd(),completed:true,completed_at:new Date().toISOString()});
+    if(error){alert(error.message);return}
+  }
+  await loadRoutineSafe();
+};
+
+window.disableRoutine=async id=>{
+  const {error}=await sb.from('routine_jobs').update({active:false}).eq('id',id);
+  if(error)alert(error.message);else await loadRoutineSafe();
+};
+
+/* ===== V20 GUDANG DIGITAL ===== */
+async function loadDigitalSafe(){
+  try{
+    let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:true});
+    if(currentEmployee.role!=='admin') q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
+    const {data,error}=await q;
+    if(error)throw error;
+    digitalItems=data||[];
+    renderDigital();
+  }catch(e){console.error('digital',e)}
+}
+
+function renderDigital(){
+  if(!currentEmployee)return;
+  $('#dsAvailable').textContent=digitalItems.filter(x=>x.status==='available').length;
+  $('#dsClaimed').textContent=digitalItems.filter(x=>x.status==='claimed').length;
+  $('#dsDelivered').textContent=digitalItems.filter(x=>x.status==='delivered').length;
+  $('#dsTotal').textContent=digitalItems.length;
+
+  $('#digitalRows').innerHTML=digitalItems.length?digitalItems.map(x=>{
+    let buttons='';
+    let secret='';
+    if(currentEmployee.role==='admin'){
+      buttons=`<div class="stockactions"><button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button></div>`;
+      secret=`<div class="claimbox"><b>Data Item</b><div class="secretbox">${esc(x.secret_value)}</div></div>`;
+    }else if(x.status==='available'){
+      buttons=`<button class="btn primary" onclick="openClaimDigital('${x.id}')">Ambil untuk Buyer</button>`;
+    }else if(x.claimed_by===currentEmployee.id){
+      secret=`<div class="claimbox"><b>Data untuk Buyer</b><div class="secretbox">${esc(x.secret_value)}</div><div class="muted">Buyer: ${esc(x.buyer_ref||'-')}</div></div>`;
+      buttons=x.status==='claimed'?`<button class="btn primary" onclick="markDelivered('${x.id}')">✓ Sudah Dikirim ke Buyer</button>`:'<span class="badge hadir">Sudah Dikirim</span>';
+    }
+    return `<div class="digitalcard"><div class="digitalhead"><div><b>${esc(x.product_name)}</b><div class="muted">${esc(x.note||'')}</div></div><span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span></div>${secret}<div class="stockactions">${buttons}</div></div>`;
+  }).join(''):'<div class="card">Belum ada stok digital.</div>';
+}
+
+$('#addDigitalItem').onclick=()=>{
+  $('#digitalProductName').value='';$('#digitalSecret').value='';$('#digitalNote').value='';
+  openModal('#digitalModal');
+};
+
+$('#saveDigitalItem').onclick=async()=>{
+  const product_name=$('#digitalProductName').value.trim(),secret_value=$('#digitalSecret').value.trim();
+  if(!product_name||!secret_value){alert('Produk dan data item wajib diisi.');return}
+  const {error}=await sb.from('digital_inventory').insert({product_name,secret_value,note:$('#digitalNote').value.trim()||null,status:'available'});
+  if(error){alert(error.message);return}
+  $('#digitalModal').classList.remove('open');await loadDigitalSafe();
+};
+
+window.openClaimDigital=id=>{
+  $('#claimItemId').value=id;$('#claimBuyer').value='';
+  openModal('#claimBuyerModal');
+};
+
+$('#confirmClaimItem').onclick=async()=>{
+  const id=$('#claimItemId').value,buyer=$('#claimBuyer').value.trim();
+  if(!buyer){alert('Isi nama/ID buyer.');return}
+  const {data,error}=await sb.from('digital_inventory').update({
+    status:'claimed',claimed_by:currentEmployee.id,claimed_at:new Date().toISOString(),buyer_ref:buyer
+  }).eq('id',id).eq('status','available').select().single();
+  if(error||!data){alert('Item sudah diambil orang lain. Coba item lain.');await loadDigitalSafe();return}
+  $('#claimBuyerModal').classList.remove('open');await loadDigitalSafe();
+};
+
+window.markDelivered=async id=>{
+  const {error}=await sb.from('digital_inventory').update({status:'delivered',delivered_at:new Date().toISOString()}).eq('id',id).eq('claimed_by',currentEmployee.id);
+  if(error)alert(error.message);else await loadDigitalSafe();
+};
+
+window.deleteDigital=async id=>{
+  if(!confirm('Hapus item stok digital ini?'))return;
+  const {error}=await sb.from('digital_inventory').delete().eq('id',id);
+  if(error)alert(error.message);else await loadDigitalSafe();
+};
+
+function setupOpsRealtime(){
+  try{
+    sb.channel('yanstore-ops-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'routine_job_checks'},()=>loadRoutineSafe())
+      .on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>loadDigitalSafe())
+      .subscribe();
+  }catch(e){console.error(e)}
+}
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>

@@ -1,14 +1,19 @@
-HOME OFFICE V18 - MOBILE POLISH
+HOME OFFICE V19 OPERASIONAL YANSTORE
 
-Basis: V17 stabil.
+Fitur baru:
+1. Job Harian per karyawan
+   - Bos membuat job rutin
+   - Muncul setiap hari
+   - Karyawan centang selesai
+   - Progress harian terlihat
 
-Perubahan hanya tampilan/responsive:
-- Navigasi mobile lebih ringkas dan bisa digeser horizontal
-- Dashboard card menyesuaikan 2 kolom / 1 kolom
-- Form dan tombol lebih nyaman disentuh
-- Modal rapi di layar HP
-- Tabel dapat digeser horizontal tanpa merusak layout
-- Stok, payroll, absensi, dashboard Bos dan halaman lain responsive
-- Input memakai ukuran 16px untuk mencegah auto-zoom di browser HP
-- Desktop tetap dipertahankan
-- Tidak ada perubahan database atau logika fitur V17
+2. Gudang Digital
+   - Bos memasukkan stok item digital satu-per-satu
+   - Karyawan hanya melihat item tersedia
+   - Klik Ambil untuk Buyer
+   - Item dikunci ke karyawan tersebut
+   - Data item terbuka hanya setelah diklaim
+   - Karyawan tandai Sudah Dikirim
+
+WAJIB jalankan SQL_SETUP_V19.sql terlebih dahulu.
+Basis: V18 mobile stabil.
