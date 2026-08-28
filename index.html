@@ -710,10 +710,11 @@ aside .userbox{
 
 <div class="modal" id="digitalModal">
   <div class="box">
-    <h3>Tambah Stok Digital</h3>
+    <h3 id="digitalModalTitle">Tambah Stok Digital</h3>
+    <input type="hidden" id="digitalEditId">
     <div class="grid">
       <label class="field">Produk<input id="digitalProductName" placeholder="Contoh: Netflix Premium"></label>
-      <label class="field">Kode/Link/Akun<input id="digitalSecret" placeholder="Data yang akan diberikan ke buyer"></label>
+      <label class="field">Akun / Link / Kode<input id="digitalSecret" placeholder="Email akun, link invite, kode redeem, dll"></label>
       <label class="field" style="grid-column:1/-1">Catatan<textarea id="digitalNote" placeholder="Opsional"></textarea></label>
     </div>
     <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveDigitalItem">Simpan Item</button></div>
@@ -1677,8 +1678,8 @@ function renderDigital(){
     let buttons='';
     let secret='';
     if(currentEmployee.role==='admin'){
-      buttons=`<div class="stockactions"><button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button></div>`;
-      secret=`<div class="claimbox"><b>Data Item</b><div class="secretbox">${esc(x.secret_value)}</div></div>`;
+      buttons=`<div class="stockactions"><button class="btn" onclick="editDigital('${x.id}')">Edit</button><button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button></div>`;
+      secret=`<div class="claimbox"><b>Data Akun / Link / Kode</b><div class="secretbox">${esc(x.secret_value)}</div></div>`;
     }else if(x.status==='available'){
       buttons=`<button class="btn primary" onclick="openClaimDigital('${x.id}')">Ambil untuk Buyer</button>`;
     }else if(x.claimed_by===currentEmployee.id){
@@ -1690,18 +1691,50 @@ function renderDigital(){
 }
 
 $('#addDigitalItem').onclick=()=>{
-  $('#digitalProductName').value='';$('#digitalSecret').value='';$('#digitalNote').value='';
+  $('#digitalEditId').value='';
+  $('#digitalModalTitle').textContent='Tambah Stok Digital';
+  $('#digitalProductName').value='';
+  $('#digitalSecret').value='';
+  $('#digitalNote').value='';
+  openModal('#digitalModal');
+};
+
+window.editDigital=id=>{
+  const item=digitalItems.find(x=>x.id===id);
+  if(!item)return;
+  $('#digitalEditId').value=item.id;
+  $('#digitalModalTitle').textContent='Edit Stok Digital';
+  $('#digitalProductName').value=item.product_name||'';
+  $('#digitalSecret').value=item.secret_value||'';
+  $('#digitalNote').value=item.note||'';
   openModal('#digitalModal');
 };
 
 $('#saveDigitalItem').onclick=async()=>{
-  const product_name=$('#digitalProductName').value.trim(),secret_value=$('#digitalSecret').value.trim();
-  if(!product_name||!secret_value){alert('Produk dan data item wajib diisi.');return}
-  const {error}=await sb.from('digital_inventory').insert({product_name,secret_value,note:$('#digitalNote').value.trim()||null,status:'available'});
-  if(error){alert(error.message);return}
-  $('#digitalModal').classList.remove('open');await loadDigitalSafe();
+  const id=$('#digitalEditId').value;
+  const product_name=$('#digitalProductName').value.trim();
+  const secret_value=$('#digitalSecret').value.trim();
+  const note=$('#digitalNote').value.trim()||null;
+
+  if(!product_name||!secret_value){
+    alert('Produk dan akun/link/kode wajib diisi.');
+    return;
+  }
+
+  if(id){
+    const {error}=await sb.from('digital_inventory')
+      .update({product_name,secret_value,note})
+      .eq('id',id);
+    if(error){alert(error.message);return}
+  }else{
+    const {error}=await sb.from('digital_inventory')
+      .insert({product_name,secret_value,note,status:'available'});
+    if(error){alert(error.message);return}
+  }
+
+  $('#digitalModal').classList.remove('open');
+  await loadDigitalSafe();
   await loadSalesSafe();
-  setupSalesRealtime();
 };
 
 window.openClaimDigital=id=>{
