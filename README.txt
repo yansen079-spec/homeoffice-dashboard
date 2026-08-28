@@ -1,24 +1,18 @@
-HOME OFFICE V11 - PAYROLL / PENGGAJIAN
+HOME OFFICE V12 - SLIP GAJI
 
-Aturan payroll:
-- Gaji pokok berbeda per karyawan
-- Bos dapat Edit Gaji
-- Terlambat: potong Rp5.000 per kejadian
-- Izin: tidak dipotong
-- Cuti: tidak dipotong
-- Sakit: tidak dipotong
-- Tidak ada lembur
-- Gaji Bersih = Gaji Pokok - Potongan Terlambat
+Mempertahankan semua fitur V11.
 
-Tambahan V11:
-- Menu Penggajian khusus Bos
-- Filter bulan
-- Filter karyawan
-- Total Gaji Pokok
-- Total Terlambat
-- Total Potongan
-- Total Gaji Bersih
-- Edit gaji per karyawan
-- Semua data tetap tersimpan di Supabase
+Tambahan:
+- Tombol Buat Slip Gaji khusus Bos
+- Pilih periode/bulan dan satu karyawan dari halaman Penggajian
+- Slip berisi nama kantor, nama karyawan, periode, gaji pokok,
+  keterlambatan, potongan, izin, sakit, dan gaji bersih
+- Cetak / Simpan PDF melalui fitur print browser
+- Data slip diambil langsung dari payroll V11, tidak perlu input ulang
 
-Mempertahankan fitur V10 dan sebelumnya.
+Cara pakai:
+1. Buka Penggajian.
+2. Pilih bulan.
+3. Pilih satu karyawan.
+4. Klik Buat Slip Gaji.
+5. Klik Cetak / Simpan PDF.

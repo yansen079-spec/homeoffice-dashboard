@@ -29,6 +29,17 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .leavecards{display:grid;gap:12px}.leavecard{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:17px}.leavehead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.leave-title{font-weight:800;font-size:16px}.leave-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.leave-reason{margin-top:10px;color:#596579;line-height:1.45}.menunggu{background:#fff3dc;color:#b45309}.disetujui{background:#e8f7ed;color:#15803d}.ditolak{background:#feecec;color:#b91c1c}
 @media(max-width:850px){.app{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.user{position:static;margin-top:15px}.main{padding:16px}.stats{grid-template-columns:1fr 1fr}.detailgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.stats,.quick,.grid,.detailgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+
+@media print{
+  body *{visibility:hidden!important}
+  #salarySlip,#salarySlip *{visibility:visible!important}
+  #salarySlip{position:absolute;left:0;top:0;width:100%;background:white;padding:28px}
+  #salarySlip .noPrint{display:none!important}
+}
+.slipbox{max-width:820px;margin:auto;background:#fff;border:1px solid #e1e7ef;border-radius:16px;padding:26px}
+.sliphead{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #111827;padding-bottom:18px;margin-bottom:18px}
+.sliptitle{font-size:25px;font-weight:900}.sliprow{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid #edf0f4}
+.sliptotal{font-size:20px;font-weight:900;padding-top:16px}
 </style>
 </head>
 <body>
@@ -125,6 +136,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     <section id="payroll" class="page hidden">
       <div class="top">
         <div><h1>Penggajian</h1><div class="muted">Hitung gaji bulanan berdasarkan gaji pokok dan potongan keterlambatan.</div></div>
+        <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
       </div>
 
       <div class="card" style="margin-bottom:15px">
@@ -276,6 +288,26 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <label class="field">Gaji Pokok<input id="salaryAmount" type="number" min="0" step="1000"></label>
     </div>
     <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveSalary">Simpan Gaji</button></div>
+  </div>
+</div>
+
+<div class="modal" id="slipModal">
+  <div class="box" style="max-width:900px">
+    <div id="salarySlip" class="slipbox">
+      <div class="sliphead">
+        <div><div class="sliptitle" id="slipOffice">HOME OFFICE YANSTORE</div><div class="muted">SLIP GAJI KARYAWAN</div></div>
+        <div style="text-align:right"><b id="slipPeriod">-</b><div class="muted">Periode</div></div>
+      </div>
+      <div class="sliprow"><span>Nama Karyawan</span><b id="slipName">-</b></div>
+      <div class="sliprow"><span>Gaji Pokok</span><b id="slipBase">Rp0</b></div>
+      <div class="sliprow"><span>Keterlambatan</span><b id="slipLate">0 kejadian</b></div>
+      <div class="sliprow"><span>Potongan Terlambat</span><b id="slipPenalty">Rp0</b></div>
+      <div class="sliprow"><span>Izin</span><b id="slipIzin">0 hari</b></div>
+      <div class="sliprow"><span>Sakit</span><b id="slipSakit">0 hari</b></div>
+      <div class="sliprow sliptotal"><span>GAJI BERSIH</span><b id="slipNet">Rp0</b></div>
+      <div class="muted" style="margin-top:20px">Izin, cuti, dan sakit tidak dikenakan potongan. Potongan keterlambatan mengikuti pengaturan payroll.</div>
+      <div class="actions noPrint" style="margin-top:22px"><button class="btn modalCancel">Tutup</button><button class="btn primary" id="printSlip">🖨 Cetak / Simpan PDF</button></div>
+    </div>
   </div>
 </div>
 
@@ -506,6 +538,31 @@ $('#saveSettings').onclick=async()=>{
 };
 
 
+
+
+function buildSalarySlip(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return;
+  let selected=$('#payrollEmployee').value;
+  if(!selected){alert('Pilih satu karyawan terlebih dahulu.');return}
+  let rows=getPayrollRows();
+  let x=rows.find(r=>r.emp.id===selected);
+  if(!x){alert('Data karyawan tidak ditemukan.');return}
+  let month=$('#payrollMonth').value||ymd().slice(0,7);
+  let [yy,mm]=month.split('-');
+  let period=new Date(Number(yy),Number(mm)-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  $('#slipOffice').textContent=(officeSettings&&officeSettings.office_name)||'HomeOffice';
+  $('#slipPeriod').textContent=period;
+  $('#slipName').textContent=x.emp.full_name;
+  $('#slipBase').textContent=rupiah(x.base);
+  $('#slipLate').textContent=x.late+' kejadian × '+rupiah(payrollSettings?.late_penalty||5000);
+  $('#slipPenalty').textContent=rupiah(x.penalty);
+  $('#slipIzin').textContent=x.izin+' hari';
+  $('#slipSakit').textContent=x.sakit+' hari';
+  $('#slipNet').textContent=rupiah(x.net);
+  openModal('#slipModal');
+}
+$('#openSlip').onclick=buildSalarySlip;
+$('#printSlip').onclick=()=>window.print();
 
 const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
 
