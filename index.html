@@ -224,6 +224,18 @@ aside .userbox{
 }
 /* ===== END V19.2 TRUE SIDEBAR FIX ===== */
 
+
+/* ===== V20 SALES RECAP ===== */
+.sales-drop{border:2px dashed #cbd5e1;border-radius:16px;padding:28px;text-align:center;background:#f8fafc;cursor:pointer;transition:.2s}
+.sales-drop.drag{border-color:#2563eb;background:#eef4ff}
+.sales-preview{max-height:340px;overflow:auto;margin-top:14px}
+.sales-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.sales-kpi{background:#fff;border:1px solid #e6eaf0;border-radius:15px;padding:16px}.sales-kpi b{display:block;font-size:24px;margin-top:6px}
+.sales-list{display:grid;gap:10px}.sales-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f4}
+@media(max-width:850px){.sales-kpis{grid-template-columns:1fr 1fr}.sales-row{align-items:flex-start}}
+@media(max-width:520px){.sales-kpis{grid-template-columns:1fr}.sales-row{flex-direction:column}.sales-row>div:last-child{text-align:left!important}}
+/* ===== END V20 SALES RECAP ===== */
+
 </style>
 </head>
 <body>
@@ -252,6 +264,7 @@ aside .userbox{
       <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
       <button data-page="stock" id="stockNav">▣ Stok Produk</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
+      <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -277,7 +290,18 @@ aside .userbox{
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
         <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
       </div>
-      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div><div id="bossDashboardExtra" class="adminOnly" style="margin-top:18px">
+      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div><div id="salesDashboardBlock" class="salesOnly hidden" style="margin-top:18px">
+        <div class="card">
+          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Penjualan Hari Ini</h3><div class="muted">Rekap dari Excel Aping yang sudah diimport.</div></div><button class="btn" onclick="go('salesrecap')">Buka Rekap</button></div>
+          <div class="sales-kpis" style="margin-bottom:12px">
+            <div class="sales-kpi"><span class="muted">Transaksi</span><b id="dashSalesCount">0</b></div>
+            <div class="sales-kpi"><span class="muted">Omzet</span><b id="dashSalesRevenue">Rp0</b></div>
+            <div class="sales-kpi"><span class="muted">Produk Terjual</span><b id="dashSalesProducts">0</b></div>
+            <div class="sales-kpi"><span class="muted">Buyer</span><b id="dashSalesBuyers">0</b></div>
+          </div>
+          <div class="sales-list" id="dashSalesRecent"></div>
+        </div>
+      </div><div id="bossDashboardExtra" class="adminOnly" style="margin-top:18px">
         <div class="bossdash">
           <div class="bosscard"><span class="muted">Belum Absen</span><b id="bNotIn">0</b></div>
           <div class="bosscard"><span class="muted">Belum Pulang</span><b id="bNotOut">0</b></div>
@@ -451,6 +475,51 @@ aside .userbox{
       <div class="card">
         <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="salesrecap" class="page hidden">
+      <div class="top">
+        <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Import Excel rekap penjualan harian.</div></div>
+      </div>
+
+      <div class="sales-kpis">
+        <div class="sales-kpi"><span class="muted">Transaksi Hari Ini</span><b id="salesTodayCount">0</b></div>
+        <div class="sales-kpi"><span class="muted">Omzet Hari Ini</span><b id="salesTodayRevenue">Rp0</b></div>
+        <div class="sales-kpi"><span class="muted">Transaksi Periode</span><b id="salesPeriodCount">0</b></div>
+        <div class="sales-kpi"><span class="muted">Omzet Periode</span><b id="salesPeriodRevenue">Rp0</b></div>
+      </div>
+
+      <div class="card salesUploaderOnly" style="margin-bottom:16px">
+        <h3 style="margin-top:0">Import Excel Aping</h3>
+        <div class="muted" style="margin-bottom:12px">Format otomatis: sheet <b>Pendapatan</b> → Tanggal, aplikasi, customer, Jumlah (Rp).</div>
+        <div id="salesDropZone" class="sales-drop">
+          <b>Tarik & lepas file Excel di sini</b>
+          <div class="muted" style="margin-top:6px">atau klik untuk pilih file .xlsx / .xls</div>
+          <input id="salesFileInput" type="file" accept=".xlsx,.xls" class="hidden">
+        </div>
+        <div id="salesFileInfo" class="notice hidden" style="margin-top:12px"></div>
+        <div id="salesPreviewWrap" class="hidden">
+          <div class="sales-kpis" style="margin-top:14px">
+            <div class="sales-kpi"><span class="muted">Baris Valid</span><b id="salesPreviewCount">0</b></div>
+            <div class="sales-kpi"><span class="muted">Omzet Preview</span><b id="salesPreviewRevenue">Rp0</b></div>
+          </div>
+          <div class="sales-preview table"><table><thead><tr><th>Tanggal</th><th>Aplikasi</th><th>Customer</th><th>Jumlah</th></tr></thead><tbody id="salesPreviewRows"></tbody></table></div>
+          <div class="actions"><button class="btn" id="cancelSalesImport">Batal</button><button class="btn primary" id="confirmSalesImport">Import Data</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="toolbar"><div>
+          <input class="input" id="salesDateFilter" type="date">
+          <input class="input" id="salesMonthFilter" type="month">
+          <input class="input" id="salesSearch" placeholder="Cari buyer / produk">
+        </div></div>
+      </div>
+
+      <div class="card">
+        <div class="top" style="margin-bottom:8px"><div><h3 style="margin:0">Detail Penjualan</h3><div class="muted">Data yang sudah masuk ke Supabase.</div></div></div>
+        <div class="table"><table><thead><tr><th>Tanggal</th><th>Aplikasi</th><th>Customer</th><th>Jumlah</th><th>Diinput Oleh</th></tr></thead><tbody id="salesRows"></tbody></table></div>
       </div>
     </section>
 
@@ -667,6 +736,7 @@ let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],le
 let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 let attendanceArchive=[];
 let routineJobs=[],routineChecks=[],digitalItems=[];
+let salesTransactions=[],salesPreviewData=[],salesPreviewFileName="";
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -696,6 +766,13 @@ async function boot(user){
   $('#taskPageTitle').textContent=emp.role==='admin'?'Tugas Karyawan':'Tugas Saya';
   $('#taskSubtitle').textContent=emp.role==='admin'?'Buat dan pantau pekerjaan seluruh karyawan.':'Lihat pekerjaan yang diberikan Bos dan update progresnya.';
   $('#welcome').textContent=emp.role==='admin'?'Selamat datang, Bos.':'Selamat bekerja, '+emp.full_name+'.';
+  const canSales = emp.role==='admin' || emp.can_manage_sales===true || emp.username==='aping';
+  $$('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
+  $$('.salesUploaderOnly').forEach(x=>x.classList.toggle('hidden',!(emp.role==='admin'||emp.can_manage_sales===true||emp.username==='aping')));
+  if(canSales){
+    $('#salesRecapSubtitle').textContent=emp.role==='admin'?'Pantau seluruh rekap penjualan YANSTORE.':'Upload Excel rekap harian dan pantau hasilnya.';
+  }
+
   $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $('#attendanceSubtitle').textContent=emp.role==='admin'?'Lihat absensi semua karyawan.':'Riwayat absensi milik kamu sendiri.';
   $('#stockNav').textContent=emp.role==='admin'?'▣ Stok Produk':'▣ Stok Hari Ini';
@@ -714,6 +791,8 @@ async function boot(user){
   await loadStockSafe();
   await loadRoutineSafe();
   await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
   setupStockRealtimeSafe();
   setupOpsRealtime();
 }
@@ -1317,6 +1396,8 @@ $('#saveStockProduct').onclick=async()=>{
   await loadStockSafe();
   await loadRoutineSafe();
   await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 window.openStockChange=(id,mode)=>{
@@ -1359,6 +1440,8 @@ $('#saveStockChange').onclick=async()=>{
   await loadStockSafe();
   await loadRoutineSafe();
   await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 window.removeStockProduct=async id=>{
@@ -1371,6 +1454,8 @@ window.removeStockProduct=async id=>{
   await loadStockSafe();
   await loadRoutineSafe();
   await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 /* ===== END STOCK MODULE ===== */
 
@@ -1612,6 +1697,8 @@ $('#saveDigitalItem').onclick=async()=>{
   const {error}=await sb.from('digital_inventory').insert({product_name,secret_value,note:$('#digitalNote').value.trim()||null,status:'available'});
   if(error){alert(error.message);return}
   $('#digitalModal').classList.remove('open');await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 window.openClaimDigital=id=>{
@@ -1625,19 +1712,27 @@ $('#confirmClaimItem').onclick=async()=>{
   const {data,error}=await sb.from('digital_inventory').update({
     status:'claimed',claimed_by:currentEmployee.id,claimed_at:new Date().toISOString(),buyer_ref:buyer
   }).eq('id',id).eq('status','available').select().single();
-  if(error||!data){alert('Item sudah diambil orang lain. Coba item lain.');await loadDigitalSafe();return}
+  if(error||!data){alert('Item sudah diambil orang lain. Coba item lain.');await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();return}
   $('#claimBuyerModal').classList.remove('open');await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 window.markDelivered=async id=>{
   const {error}=await sb.from('digital_inventory').update({status:'delivered',delivered_at:new Date().toISOString()}).eq('id',id).eq('claimed_by',currentEmployee.id);
   if(error)alert(error.message);else await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 window.deleteDigital=async id=>{
   if(!confirm('Hapus item stok digital ini?'))return;
   const {error}=await sb.from('digital_inventory').delete().eq('id',id);
   if(error)alert(error.message);else await loadDigitalSafe();
+  await loadSalesSafe();
+  setupSalesRealtime();
 };
 
 function setupOpsRealtime(){
@@ -1648,6 +1743,132 @@ function setupOpsRealtime(){
       .subscribe();
   }catch(e){console.error(e)}
 }
+
+
+/* ===== V20 SALES RECAP MODULE ===== */
+function normalizeMoney(v){
+  if(v===null||v===undefined||v==='')return 0;
+  if(typeof v==='number')return Math.round(v);
+  let s=String(v).trim().replace(/\s+/g,'').replace(/^rp/i,'');
+  // Template uses commas as thousands separator. Remove all non-digits/minus.
+  s=s.replace(/[^0-9-]/g,'');
+  return Number(s)||0;
+}
+function excelDateToYMD(v){
+  if(!v)return '';
+  if(v instanceof Date&&!isNaN(v))return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+  if(typeof v==='number'){
+    const d=XLSX.SSF.parse_date_code(v); if(!d)return '';
+    return d.y+'-'+String(d.m).padStart(2,'0')+'-'+String(d.d).padStart(2,'0');
+  }
+  const s=String(v).trim();
+  const iso=s.match(/^(\d{4})[-\/]([01]?\d)[-\/]([0-3]?\d)$/); if(iso)return iso[1]+'-'+iso[2].padStart(2,'0')+'-'+iso[3].padStart(2,'0');
+  const id=s.match(/^([0-3]?\d)[-\/]([01]?\d)[-\/](\d{4})$/); if(id)return id[3]+'-'+id[2].padStart(2,'0')+'-'+id[1].padStart(2,'0');
+  const d=new Date(s); if(!isNaN(d))return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return '';
+}
+function cleanText(v){return String(v??'').trim().replace(/\s+/g,' ')}
+function simpleImportKey(file,rowIndex,date,product,customer,amount){
+  const raw=[file,rowIndex,date,product.toLowerCase(),customer.toLowerCase(),amount].join('|');
+  let h=2166136261; for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}
+  return 'v20_'+(h>>>0).toString(16)+'_'+rowIndex;
+}
+async function loadSalesSafe(){
+  try{
+    if(!currentEmployee)return;
+    const canSales=currentEmployee.role==='admin'||currentEmployee.can_manage_sales===true||currentEmployee.username==='aping';
+    if(!canSales){salesTransactions=[];return}
+    let q=sb.from('sales_transactions').select('*, employees(full_name)').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(2000);
+    if(currentEmployee.role!=='admin')q=q.eq('uploaded_by',currentEmployee.id);
+    const {data,error}=await q; if(error)throw error;
+    salesTransactions=(data||[]).map(x=>({...x,uploader_name:x.employees?.full_name||'-'}));
+    renderSales();renderSalesDashboard();
+  }catch(e){console.error('sales',e)}
+}
+function salesFilteredRows(){
+  let rows=[...salesTransactions];
+  const d=$('#salesDateFilter')?.value||''; const m=$('#salesMonthFilter')?.value||''; const q=($('#salesSearch')?.value||'').toLowerCase().trim();
+  if(d)rows=rows.filter(x=>x.transaction_date===d); else if(m)rows=rows.filter(x=>x.transaction_date?.startsWith(m));
+  if(q)rows=rows.filter(x=>(x.product_name||'').toLowerCase().includes(q)||(x.customer_name||'').toLowerCase().includes(q));
+  return rows;
+}
+function renderSales(){
+  if(!currentEmployee||!$('#salesRows'))return;
+  const today=ymd(); if(!$('#salesMonthFilter').value)$('#salesMonthFilter').value=today.slice(0,7);
+  const todayRows=salesTransactions.filter(x=>x.transaction_date===today);
+  const rows=salesFilteredRows();
+  $('#salesTodayCount').textContent=todayRows.length;
+  $('#salesTodayRevenue').textContent=rupiah(todayRows.reduce((s,x)=>s+Number(x.amount||0),0));
+  $('#salesPeriodCount').textContent=rows.length;
+  $('#salesPeriodRevenue').textContent=rupiah(rows.reduce((s,x)=>s+Number(x.amount||0),0));
+  $('#salesRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${esc(x.transaction_date)}</td><td><b>${esc(x.product_name)}</b></td><td>${esc(x.customer_name)}</td><td>${rupiah(x.amount)}</td><td>${esc(x.uploader_name||'-')}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#8793a5;padding:28px">Belum ada data penjualan.</td></tr>';
+}
+function renderSalesDashboard(){
+  const block=$('#salesDashboardBlock'); if(!block||!currentEmployee)return;
+  const canSales=currentEmployee.role==='admin'||currentEmployee.can_manage_sales===true||currentEmployee.username==='aping';
+  block.classList.toggle('hidden',!canSales); if(!canSales)return;
+  const rows=salesTransactions.filter(x=>x.transaction_date===ymd());
+  $('#dashSalesCount').textContent=rows.length;
+  $('#dashSalesRevenue').textContent=rupiah(rows.reduce((s,x)=>s+Number(x.amount||0),0));
+  $('#dashSalesProducts').textContent=new Set(rows.map(x=>(x.product_name||'').toLowerCase())).size;
+  $('#dashSalesBuyers').textContent=new Set(rows.map(x=>(x.customer_name||'').toLowerCase())).size;
+  $('#dashSalesRecent').innerHTML=rows.slice(0,5).map(x=>`<div class="sales-row"><div><b>${esc(x.product_name)}</b><div class="muted">${esc(x.customer_name)}</div></div><div style="text-align:right"><b>${rupiah(x.amount)}</b><div class="muted">${esc(x.transaction_date)}</div></div></div>`).join('')||'<div class="muted">Belum ada penjualan hari ini.</div>';
+}
+$('#salesDateFilter').onchange=()=>{if($('#salesDateFilter').value)$('#salesMonthFilter').value='';renderSales()};
+$('#salesMonthFilter').onchange=()=>{if($('#salesMonthFilter').value)$('#salesDateFilter').value='';renderSales()};
+$('#salesSearch').oninput=renderSales;
+
+function resetSalesPreview(){salesPreviewData=[];salesPreviewFileName='';$('#salesPreviewWrap').classList.add('hidden');$('#salesFileInfo').classList.add('hidden');$('#salesFileInput').value=''}
+async function parseSalesExcel(file){
+  try{
+    const buf=await file.arrayBuffer(); const wb=XLSX.read(buf,{type:'array',cellDates:true});
+    const ws=wb.Sheets['Pendapatan']; if(!ws){alert('Sheet "Pendapatan" tidak ditemukan.');return}
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+    if(!raw.length){alert('Sheet Pendapatan kosong.');return}
+    const head=raw[0].map(x=>cleanText(x).toLowerCase());
+    const idxDate=head.findIndex(x=>x==='tanggal');
+    const idxProd=head.findIndex(x=>x==='aplikasi');
+    const idxCust=head.findIndex(x=>x==='customer');
+    const idxAmt=head.findIndex(x=>x.includes('jumlah'));
+    if([idxDate,idxProd,idxCust,idxAmt].some(x=>x<0)){alert('Kolom Pendapatan tidak sesuai template.');return}
+    const parsed=[];
+    for(let i=1;i<raw.length;i++){
+      const r=raw[i]; const date=excelDateToYMD(r[idxDate]); const product=cleanText(r[idxProd]); const customer=cleanText(r[idxCust]); const amount=normalizeMoney(r[idxAmt]);
+      if(!date||!product||!customer||amount<=0)continue;
+      parsed.push({transaction_date:date,product_name:product,customer_name:customer,amount,source_row:i+1,import_key:simpleImportKey(file.name,i+1,date,product,customer,amount)});
+    }
+    salesPreviewData=parsed;salesPreviewFileName=file.name;
+    $('#salesFileInfo').textContent=`${file.name} • ${parsed.length} baris valid ditemukan`;$('#salesFileInfo').classList.remove('hidden');
+    $('#salesPreviewCount').textContent=parsed.length;$('#salesPreviewRevenue').textContent=rupiah(parsed.reduce((s,x)=>s+x.amount,0));
+    $('#salesPreviewRows').innerHTML=parsed.slice(0,100).map(x=>`<tr><td>${esc(x.transaction_date)}</td><td>${esc(x.product_name)}</td><td>${esc(x.customer_name)}</td><td>${rupiah(x.amount)}</td></tr>`).join('');
+    $('#salesPreviewWrap').classList.remove('hidden');
+  }catch(e){console.error(e);alert('File Excel gagal dibaca: '+e.message)}
+}
+const salesDrop=$('#salesDropZone');
+salesDrop.onclick=()=>$('#salesFileInput').click();
+$('#salesFileInput').onchange=e=>{const f=e.target.files?.[0];if(f)parseSalesExcel(f)};
+['dragenter','dragover'].forEach(ev=>salesDrop.addEventListener(ev,e=>{e.preventDefault();salesDrop.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>salesDrop.addEventListener(ev,e=>{e.preventDefault();salesDrop.classList.remove('drag')}));
+salesDrop.addEventListener('drop',e=>{const f=e.dataTransfer.files?.[0];if(f)parseSalesExcel(f)});
+$('#cancelSalesImport').onclick=resetSalesPreview;
+$('#confirmSalesImport').onclick=async()=>{
+  if(!salesPreviewData.length){alert('Tidak ada data untuk diimport.');return}
+  if(!confirm(`Import ${salesPreviewData.length} transaksi dengan omzet ${rupiah(salesPreviewData.reduce((s,x)=>s+x.amount,0))}?`))return;
+  const rows=salesPreviewData.map(x=>({...x,uploaded_by:currentEmployee.id,source_file:salesPreviewFileName}));
+  const batchSize=200; let inserted=0,duplicates=0;
+  for(let i=0;i<rows.length;i+=batchSize){
+    const part=rows.slice(i,i+batchSize);
+    const {data,error}=await sb.from('sales_transactions').upsert(part,{onConflict:'import_key',ignoreDuplicates:true}).select('id');
+    if(error){alert('Import gagal: '+error.message);return}
+    inserted+=(data||[]).length; duplicates+=part.length-(data||[]).length;
+  }
+  await sb.from('sales_import_batches').insert({file_name:salesPreviewFileName,uploaded_by:currentEmployee.id,row_count:salesPreviewData.length,revenue_total:salesPreviewData.reduce((s,x)=>s+x.amount,0)});
+  resetSalesPreview(); await loadSalesSafe(); alert(`Import selesai. Data baru: ${inserted}. Duplikat dilewati: ${duplicates}.`);
+};
+function setupSalesRealtime(){
+  try{sb.channel('yanstore-sales-live').on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>loadSalesSafe()).subscribe()}catch(e){console.error(e)}
+}
+/* ===== END V20 SALES RECAP ===== */
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>
