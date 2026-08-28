@@ -240,6 +240,12 @@ aside .userbox{
 .rt-ok{color:#15803d!important;font-weight:700}
 .rt-warn{color:#b45309!important;font-weight:700}
 .rt-off{color:#b91c1c!important;font-weight:700}
+
+.digital-tools{display:flex;gap:8px;flex-wrap:wrap}
+.batchpreview{max-height:320px;overflow:auto;border:1px solid #e6eaf0;border-radius:12px;margin-top:12px}
+.batchpreview table{min-width:720px}
+.cred-hidden{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px;margin-top:10px;color:#64748b}
+.categorypill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -370,7 +376,7 @@ aside .userbox{
     <section id="digitalstock" class="page hidden">
       <div class="top">
         <div><h1 id="digitalStockTitle">Gudang Digital</h1><div class="muted" id="digitalStockSubtitle"></div></div>
-        <button class="btn primary adminOnly" id="addDigitalItem">+ Tambah Stok Digital</button>
+        <div class="digital-tools adminOnly"><button class="btn" id="batchDigitalBtn">⇪ Batch Paste</button><button class="btn primary" id="addDigitalItem">+ Tambah Stok Digital</button></div>
       </div>
       <div class="stats">
         <div class="card stat"><span class="muted">Tersedia</span><b id="dsAvailable">0</b></div>
@@ -713,6 +719,7 @@ aside .userbox{
     <h3 id="digitalModalTitle">Tambah Stok Digital</h3>
     <input type="hidden" id="digitalEditId">
     <div class="grid">
+      <label class="field">Kategori<select id="digitalCategory"><option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option><option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option><option>Drama Box</option><option>CapCut</option><option>Lainnya</option></select></label>
       <label class="field">Produk<input id="digitalProductName" placeholder="Contoh: Netflix Premium"></label>
       <label class="field">Akun / Link / Kode<input id="digitalSecret" placeholder="Email akun, link invite, kode redeem, dll"></label>
       <label class="field" style="grid-column:1/-1">Catatan<textarea id="digitalNote" placeholder="Opsional"></textarea></label>
@@ -732,6 +739,27 @@ aside .userbox{
   </div>
 </div>
 
+<div class="modal" id="digitalBatchModal">
+  <div class="box" style="max-width:1000px">
+    <h3>Batch Paste Gudang Digital</h3>
+    <div class="muted">Copy blok data dari Google Sheets/Excel lalu paste di bawah.</div>
+    <div class="grid" style="margin-top:12px">
+      <label class="field">Kategori<select id="batchCategory"><option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option><option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option><option>Drama Box</option><option>CapCut</option><option>Lainnya</option></select></label>
+      <label class="field">Nama Produk Default<input id="batchProduct" placeholder="Contoh: Netflix Premium"></label>
+      <label class="field" style="grid-column:1/-1">Paste Data<textarea id="batchText" rows="12" placeholder="email : contoh@gmail.com&#10;pass : abc123&#10;profile Jose ..."></textarea></label>
+    </div>
+    <div class="actions">
+      <button class="btn modalCancel">Batal</button>
+      <button class="btn" id="previewBatch">Preview</button>
+      <button class="btn primary" id="importBatch" disabled>Import Batch</button>
+    </div>
+    <div id="batchPreviewWrap" class="hidden">
+      <div class="batchpreview"><table><thead><tr><th>#</th><th>Kategori</th><th>Produk</th><th>Email/Akun</th><th>Password/Kode</th><th>Keterangan</th></tr></thead><tbody id="batchPreviewRows"></tbody></table></div>
+      <div class="muted" id="batchPreviewInfo" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -740,7 +768,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
 let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 let attendanceArchive=[];
-let routineJobs=[],routineChecks=[],digitalItems=[];
+let routineJobs=[],routineChecks=[],digitalItems=[],digitalSecrets={},digitalBatchPreview=[];
 let salesTransactions=[],salesPreviewData=[],salesPreviewFileName="";
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 
@@ -1663,6 +1691,14 @@ async function loadDigitalSafe(){
     const {data,error}=await q;
     if(error)throw error;
     digitalItems=data||[];
+
+    digitalSecrets={};
+    const canSeeSecrets=currentEmployee.role==='admin'||currentEmployee.username==='paqih';
+    if(canSeeSecrets){
+      const {data:sec,error:secErr}=await sb.from('digital_inventory_secrets').select('*');
+      if(secErr)throw secErr;
+      (sec||[]).forEach(s=>digitalSecrets[s.item_id]=s.secret_value);
+    }
     renderDigital();
   }catch(e){console.error('digital',e)}
 }
@@ -1674,25 +1710,32 @@ function renderDigital(){
   $('#dsDelivered').textContent=digitalItems.filter(x=>x.status==='delivered').length;
   $('#dsTotal').textContent=digitalItems.length;
 
+  const canSeeSecrets=currentEmployee.role==='admin'||currentEmployee.username==='paqih';
+
   $('#digitalRows').innerHTML=digitalItems.length?digitalItems.map(x=>{
     let buttons='';
-    let secret='';
+    const secretValue=digitalSecrets[x.id]||'';
+
     if(currentEmployee.role==='admin'){
       buttons=`<div class="stockactions"><button class="btn" onclick="editDigital('${x.id}')">Edit</button><button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button></div>`;
-      secret=`<div class="claimbox"><b>Data Akun / Link / Kode</b><div class="secretbox">${esc(x.secret_value)}</div></div>`;
     }else if(x.status==='available'){
       buttons=`<button class="btn primary" onclick="openClaimDigital('${x.id}')">Ambil untuk Buyer</button>`;
     }else if(x.claimed_by===currentEmployee.id){
-      secret=`<div class="claimbox"><b>Data untuk Buyer</b><div class="secretbox">${esc(x.secret_value)}</div><div class="muted">Buyer: ${esc(x.buyer_ref||'-')}</div></div>`;
       buttons=x.status==='claimed'?`<button class="btn primary" onclick="markDelivered('${x.id}')">✓ Sudah Dikirim ke Buyer</button>`:'<span class="badge hadir">Sudah Dikirim</span>';
     }
-    return `<div class="digitalcard"><div class="digitalhead"><div><b>${esc(x.product_name)}</b><div class="muted">${esc(x.note||'')}</div></div><span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span></div>${secret}<div class="stockactions">${buttons}</div></div>`;
+
+    const secret=canSeeSecrets
+      ? `<div class="claimbox"><b>Credential</b><div class="secretbox">${esc(secretValue||'Belum ada credential')}</div>${x.buyer_ref?`<div class="muted">Buyer: ${esc(x.buyer_ref)}</div>`:''}</div>`
+      : `<div class="cred-hidden">🔒 Credential hanya dapat dilihat Bos dan Faqih.</div>`;
+
+    return `<div class="digitalcard"><div class="digitalhead"><div><b>${esc(x.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(x.category||'Lainnya')}</span></div><div class="muted" style="margin-top:6px">${esc(x.note||'')}</div></div><span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span></div>${secret}<div class="stockactions">${buttons}</div></div>`;
   }).join(''):'<div class="card">Belum ada stok digital.</div>';
 }
 
 $('#addDigitalItem').onclick=()=>{
   $('#digitalEditId').value='';
   $('#digitalModalTitle').textContent='Tambah Stok Digital';
+  $('#digitalCategory').value='Netflix';
   $('#digitalProductName').value='';
   $('#digitalSecret').value='';
   $('#digitalNote').value='';
@@ -1704,14 +1747,16 @@ window.editDigital=id=>{
   if(!item)return;
   $('#digitalEditId').value=item.id;
   $('#digitalModalTitle').textContent='Edit Stok Digital';
+  $('#digitalCategory').value=item.category||'Lainnya';
   $('#digitalProductName').value=item.product_name||'';
-  $('#digitalSecret').value=item.secret_value||'';
+  $('#digitalSecret').value=digitalSecrets[item.id]||'';
   $('#digitalNote').value=item.note||'';
   openModal('#digitalModal');
 };
 
 $('#saveDigitalItem').onclick=async()=>{
   const id=$('#digitalEditId').value;
+  const category=$('#digitalCategory').value;
   const product_name=$('#digitalProductName').value.trim();
   const secret_value=$('#digitalSecret').value.trim();
   const note=$('#digitalNote').value.trim()||null;
@@ -1721,16 +1766,18 @@ $('#saveDigitalItem').onclick=async()=>{
     return;
   }
 
+  let itemId=id;
   if(id){
-    const {error}=await sb.from('digital_inventory')
-      .update({product_name,secret_value,note})
-      .eq('id',id);
+    const {error}=await sb.from('digital_inventory').update({category,product_name,note}).eq('id',id);
     if(error){alert(error.message);return}
   }else{
-    const {error}=await sb.from('digital_inventory')
-      .insert({product_name,secret_value,note,status:'available'});
+    const {data,error}=await sb.from('digital_inventory').insert({category,product_name,note,status:'available',secret_value:null}).select().single();
     if(error){alert(error.message);return}
+    itemId=data.id;
   }
+
+  const {error:secErr}=await sb.from('digital_inventory_secrets').upsert({item_id:itemId,secret_value},{onConflict:'item_id'});
+  if(secErr){alert('Credential gagal disimpan: '+secErr.message);return}
 
   $('#digitalModal').classList.remove('open');
   await loadDigitalSafe();
@@ -1975,6 +2022,88 @@ function setupFullRealtime(){
 }
 /* ===== END V20.1 FULL REALTIME ===== */
 
+
+
+function parseBatchDigital(text,category,productDefault){
+  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const items=[];
+  let current={category,product_name:productDefault||category,email:'',password:'',notes:[]};
+
+  const flush=()=>{
+    if(current.email||current.password||current.notes.length){
+      const sec=[];
+      if(current.email)sec.push('email: '+current.email);
+      if(current.password)sec.push('pass: '+current.password);
+      items.push({
+        category:current.category,
+        product_name:current.product_name||category,
+        secret_value:sec.join('\n')||current.notes.join('\n'),
+        note:current.notes.join(' | ')||null
+      });
+    }
+    current={category,product_name:productDefault||category,email:'',password:'',notes:[]};
+  };
+
+  for(const line of lines){
+    const email=line.match(/(?:email|mail)\s*[:=]\s*(.+)/i);
+    const pass=line.match(/(?:pass|password|pw)\s*[:=]\s*(.+)/i);
+    if(email){
+      if(current.email)flush();
+      current.email=email[1].trim();
+      continue;
+    }
+    if(pass){
+      current.password=pass[1].trim();
+      continue;
+    }
+    if(/^\(.*\)$/.test(line)){
+      if(current.email||current.password||current.notes.length)flush();
+      current.notes.push(line.replace(/^\(|\)$/g,''));
+      continue;
+    }
+    current.notes.push(line);
+  }
+  flush();
+  return items.filter(x=>x.secret_value);
+}
+
+$('#batchDigitalBtn').onclick=()=>{
+  $('#batchCategory').value='Netflix';
+  $('#batchProduct').value='Netflix Premium';
+  $('#batchText').value='';
+  $('#batchPreviewWrap').classList.add('hidden');
+  $('#importBatch').disabled=true;
+  digitalBatchPreview=[];
+  openModal('#digitalBatchModal');
+};
+
+$('#previewBatch').onclick=()=>{
+  digitalBatchPreview=parseBatchDigital($('#batchText').value,$('#batchCategory').value,$('#batchProduct').value.trim());
+  $('#batchPreviewRows').innerHTML=digitalBatchPreview.map((x,i)=>{
+    const em=(x.secret_value.match(/email:\s*(.*)/i)||[])[1]||'-';
+    const pw=(x.secret_value.match(/pass:\s*(.*)/i)||[])[1]||'-';
+    return `<tr><td>${i+1}</td><td>${esc(x.category)}</td><td>${esc(x.product_name)}</td><td>${esc(em)}</td><td>${esc(pw)}</td><td>${esc(x.note||'-')}</td></tr>`;
+  }).join('');
+  $('#batchPreviewInfo').textContent=digitalBatchPreview.length+' item siap diimport.';
+  $('#batchPreviewWrap').classList.remove('hidden');
+  $('#importBatch').disabled=digitalBatchPreview.length===0;
+};
+
+$('#importBatch').onclick=async()=>{
+  if(!digitalBatchPreview.length)return;
+  if(!confirm('Import '+digitalBatchPreview.length+' item?'))return;
+  let success=0;
+  for(const item of digitalBatchPreview){
+    const {data,error}=await sb.from('digital_inventory').insert({category:item.category,product_name:item.product_name,note:item.note,status:'available',secret_value:null}).select().single();
+    if(error){console.error(error);continue}
+    const {error:secErr}=await sb.from('digital_inventory_secrets').insert({item_id:data.id,secret_value:item.secret_value});
+    if(secErr){console.error(secErr);continue}
+    success++;
+  }
+  alert(success+' item berhasil diimport.');
+  $('#digitalBatchModal').classList.remove('open');
+  await loadDigitalSafe();
+};
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>
