@@ -53,6 +53,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
       <button data-page="settings" class="adminOnly">⚙ Pengaturan Kantor</button>
       <button data-page="reports" class="adminOnly">▤ Laporan</button>
+      <button data-page="payroll" class="adminOnly">💰 Penggajian</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -119,6 +120,33 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
       </div>
       <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
+    </section>
+
+    <section id="payroll" class="page hidden">
+      <div class="top">
+        <div><h1>Penggajian</h1><div class="muted">Hitung gaji bulanan berdasarkan gaji pokok dan potongan keterlambatan.</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:15px">
+        <div class="toolbar"><div>
+          <input class="input" id="payrollMonth" type="month">
+          <select class="input" id="payrollEmployee"><option value="">Semua karyawan</option></select>
+        </div></div>
+      </div>
+
+      <div class="stats">
+        <div class="card stat"><span class="muted">Total Gaji Pokok</span><b id="pBase">Rp0</b></div>
+        <div class="card stat"><span class="muted">Total Terlambat</span><b id="pLate">0</b></div>
+        <div class="card stat"><span class="muted">Total Potongan</span><b id="pPenalty">Rp0</b></div>
+        <div class="card stat"><span class="muted">Total Gaji Bersih</span><b id="pNet">Rp0</b></div>
+      </div>
+
+      <div class="card">
+        <div class="table"><table>
+          <thead><tr><th>Nama</th><th>Gaji Pokok</th><th>Terlambat</th><th>Potongan</th><th>Izin</th><th>Sakit</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
+          <tbody id="payrollRows"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <section id="reports" class="page hidden">
@@ -239,6 +267,18 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
   </div>
 </div>
 
+<div class="modal" id="salaryModal">
+  <div class="box">
+    <h3>Edit Gaji Karyawan</h3>
+    <input type="hidden" id="salaryEmployeeId">
+    <div class="grid">
+      <label class="field">Nama Karyawan<input id="salaryEmployeeName" disabled></label>
+      <label class="field">Gaji Pokok<input id="salaryAmount" type="number" min="0" step="1000"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveSalary">Simpan Gaji</button></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -281,7 +321,7 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap'||id==='settings'||id==='reports')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
@@ -295,6 +335,8 @@ async function refreshData(){
   if(currentEmployee.role==='admin'){
     const {data:e}=await sb.from('employees').select('*').order('full_name');
     employees=e||[];
+    const {data:ps}=await sb.from('payroll_settings').select('*').eq('id',1).single();
+    if(ps) payrollSettings=ps;
     const {data:a}=await sb.from('attendance').select('*, employees(full_name)').order('attendance_date',{ascending:false});
     attendance=(a||[]).map(x=>({...x,name:x.employees?.full_name||'-'}));
     const {data:t}=await sb.from('tasks').select('*, assignee:employees!tasks_assigned_to_fkey(full_name)').order('created_at',{ascending:false});
@@ -320,7 +362,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderSettings();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderSettings();
 }
 
 function renderAttendance(){
@@ -463,6 +505,76 @@ $('#saveSettings').onclick=async()=>{
  if(error){alert(error.message);return} await refreshData(); alert('Pengaturan kantor berhasil disimpan.');
 };
 
+
+
+const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
+
+function getPayrollRows(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return [];
+  if(!$('#payrollMonth').value) $('#payrollMonth').value=ymd().slice(0,7);
+  let month=$('#payrollMonth').value;
+  let selected=$('#payrollEmployee').value;
+  const old=selected;
+
+  $('#payrollEmployee').innerHTML='<option value="">Semua karyawan</option>'+
+    employees.filter(x=>x.role==='employee').map(x=>`<option value="${x.id}" ${x.id===old?'selected':''}>${esc(x.full_name)}</option>`).join('');
+
+  let staff=employees.filter(x=>x.role==='employee');
+  if(selected) staff=staff.filter(x=>x.id===selected);
+
+  return staff.map(emp=>{
+    let a=attendance.filter(x=>x.employee_id===emp.id && x.attendance_date && x.attendance_date.startsWith(month));
+    let late=a.filter(x=>x.status==='Terlambat').length;
+    let izin=a.filter(x=>x.status==='Izin').length;
+    let sakit=a.filter(x=>x.status==='Sakit').length;
+    let base=Number(emp.base_salary||0);
+    let penalty=late*Number(payrollSettings?.late_penalty||5000);
+    let net=Math.max(0,base-penalty);
+    return {emp,late,izin,sakit,base,penalty,net};
+  });
+}
+
+function renderPayroll(){
+  if(!currentEmployee || currentEmployee.role!=='admin') return;
+  let rows=getPayrollRows();
+
+  $('#pBase').textContent=rupiah(rows.reduce((s,x)=>s+x.base,0));
+  $('#pLate').textContent=rows.reduce((s,x)=>s+x.late,0);
+  $('#pPenalty').textContent=rupiah(rows.reduce((s,x)=>s+x.penalty,0));
+  $('#pNet').textContent=rupiah(rows.reduce((s,x)=>s+x.net,0));
+
+  $('#payrollRows').innerHTML=rows.length?rows.map(x=>`<tr>
+    <td><b>${esc(x.emp.full_name)}</b></td>
+    <td>${rupiah(x.base)}</td>
+    <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||5000)}</td>
+    <td>${rupiah(x.penalty)}</td>
+    <td>${x.izin}</td>
+    <td>${x.sakit}</td>
+    <td><b>${rupiah(x.net)}</b></td>
+    <td><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
+}
+
+$('#payrollMonth').onchange=renderPayroll;
+$('#payrollEmployee').onchange=renderPayroll;
+
+window.editSalary=id=>{
+  let emp=employees.find(x=>x.id===id);if(!emp)return;
+  $('#salaryEmployeeId').value=emp.id;
+  $('#salaryEmployeeName').value=emp.full_name;
+  $('#salaryAmount').value=Number(emp.base_salary||0);
+  openModal('#salaryModal');
+};
+
+$('#saveSalary').onclick=async()=>{
+  let id=$('#salaryEmployeeId').value;
+  let amount=Number($('#salaryAmount').value||0);
+  if(amount<0){alert('Gaji tidak boleh negatif.');return}
+  let {error}=await sb.from('employees').update({base_salary:amount}).eq('id',id);
+  if(error){alert(error.message);return}
+  $('#salaryModal').classList.remove('open');
+  await refreshData();
+};
 
 function getReportRows(){
   if(!currentEmployee || currentEmployee.role!=='admin') return [];
