@@ -236,6 +236,10 @@ aside .userbox{
 @media(max-width:520px){.sales-kpis{grid-template-columns:1fr}.sales-row{flex-direction:column}.sales-row>div:last-child{text-align:left!important}}
 /* ===== END V20 SALES RECAP ===== */
 
+
+.rt-ok{color:#15803d!important;font-weight:700}
+.rt-warn{color:#b45309!important;font-weight:700}
+.rt-off{color:#b91c1c!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -279,7 +283,7 @@ aside .userbox{
 
   <main class="main">
     <section id="dashboard" class="page">
-      <div class="top"><div><h1>Dashboard</h1><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
+      <div class="top"><div><h1>Dashboard</h1><div id="realtimeStatus" class="muted">● Menghubungkan realtime...</div><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
       <div class="stats">
         <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
         <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
@@ -793,8 +797,7 @@ async function boot(user){
   await loadDigitalSafe();
   await loadSalesSafe();
   setupSalesRealtime();
-  setupStockRealtimeSafe();
-  setupOpsRealtime();
+  setupFullRealtime();
 }
 
 function go(id){
@@ -1869,6 +1872,76 @@ function setupSalesRealtime(){
   try{sb.channel('yanstore-sales-live').on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>loadSalesSafe()).subscribe()}catch(e){console.error(e)}
 }
 /* ===== END V20 SALES RECAP ===== */
+
+
+/* ===== V20.1 FULL REALTIME ===== */
+let fullRealtimeChannel=null;
+let realtimeRefreshTimer=null;
+
+function setRealtimeStatus(text,mode){
+  const el=$('#realtimeStatus');
+  if(!el)return;
+  el.textContent='● '+text;
+  el.classList.remove('rt-ok','rt-warn','rt-off');
+  el.classList.add(mode==='ok'?'rt-ok':mode==='warn'?'rt-warn':'rt-off');
+}
+
+function scheduleRealtimeRefresh(source){
+  clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer=setTimeout(async()=>{
+    try{
+      // Core HomeOffice data
+      await refreshData();
+
+      // Isolated modules
+      if(typeof loadAttendanceArchiveSafe==='function') await loadAttendanceArchiveSafe();
+      if(typeof loadStockSafe==='function') await loadStockSafe();
+      if(typeof loadRoutineSafe==='function') await loadRoutineSafe();
+      if(typeof loadDigitalSafe==='function') await loadDigitalSafe();
+      if(typeof loadSalesSafe==='function') await loadSalesSafe();
+
+      // Re-render dashboard after all module data is fresh
+      if(typeof renderBossDashboard==='function') renderBossDashboard();
+      if(typeof renderSalesDashboard==='function') renderSalesDashboard();
+
+      setRealtimeStatus('Realtime aktif','ok');
+      console.log('Realtime update:',source);
+    }catch(err){
+      console.error('Realtime refresh gagal:',err);
+      setRealtimeStatus('Realtime terhubung, refresh data gagal','warn');
+    }
+  },350);
+}
+
+function setupFullRealtime(){
+  try{
+    if(fullRealtimeChannel){
+      sb.removeChannel(fullRealtimeChannel);
+      fullRealtimeChannel=null;
+    }
+
+    fullRealtimeChannel=sb.channel('homeoffice-full-realtime')
+      .on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>scheduleRealtimeRefresh('attendance'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'employees'},()=>scheduleRealtimeRefresh('employees'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'leave_requests'},()=>scheduleRealtimeRefresh('leave_requests'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>scheduleRealtimeRefresh('tasks'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'routine_jobs'},()=>scheduleRealtimeRefresh('routine_jobs'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'routine_job_checks'},()=>scheduleRealtimeRefresh('routine_job_checks'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'product_stock'},()=>scheduleRealtimeRefresh('product_stock'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>scheduleRealtimeRefresh('digital_inventory'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>scheduleRealtimeRefresh('sales_transactions'))
+      .subscribe((status)=>{
+        if(status==='SUBSCRIBED')setRealtimeStatus('Realtime aktif','ok');
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setRealtimeStatus('Realtime bermasalah','off');
+        else setRealtimeStatus('Menghubungkan realtime...','warn');
+      });
+  }catch(err){
+    console.error('Setup realtime gagal:',err);
+    setRealtimeStatus('Realtime gagal aktif','off');
+  }
+}
+/* ===== END V20.1 FULL REALTIME ===== */
+
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>
