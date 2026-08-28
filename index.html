@@ -50,6 +50,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="attendance">◷ Absensi</button>
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
       <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
+      <button data-page="settings" class="adminOnly">⚙ Pengaturan Kantor</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -104,7 +105,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     </section>
 
     <section id="recap" class="page hidden">
-      <div class="top"><div><h1>Rekap Absensi</h1><div class="muted">Senin–Sabtu • Masuk 09:00 • Toleransi 09:15 • Pulang 21:00</div></div></div>
+      <div class="top"><div><h1>Rekap Absensi</h1><div class="muted" id="recapRule"></div></div></div>
       <div class="card" style="margin-bottom:15px"><div class="toolbar"><div>
         <input class="input" id="recapMonth" type="month">
         <select class="input" id="recapEmployee"><option value="">Semua karyawan</option></select>
@@ -116,6 +117,26 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
       </div>
       <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
+    </section>
+
+    <section id="settings" class="page hidden">
+      <div class="top"><div><h1>Pengaturan Kantor</h1><div class="muted">Atur jam kerja dan hari kerja tanpa mengubah kode website.</div></div></div>
+      <div class="card">
+        <div class="grid">
+          <label class="field">Nama Kantor<input id="sOffice" type="text"></label>
+          <label class="field">Jam Masuk<input id="sStart" type="time"></label>
+          <label class="field">Batas Toleransi<input id="sLate" type="time"></label>
+          <label class="field">Jam Pulang<input id="sEnd" type="time"></label>
+        </div>
+        <h3 style="margin-top:22px">Hari Kerja</h3>
+        <div class="grid" id="workDays">
+          <label><input type="checkbox" id="sMon"> Senin</label><label><input type="checkbox" id="sTue"> Selasa</label>
+          <label><input type="checkbox" id="sWed"> Rabu</label><label><input type="checkbox" id="sThu"> Kamis</label>
+          <label><input type="checkbox" id="sFri"> Jumat</label><label><input type="checkbox" id="sSat"> Sabtu</label>
+          <label><input type="checkbox" id="sSun"> Minggu</label>
+        </div>
+        <div class="actions" style="margin-top:22px"><button class="btn primary" id="saveSettings">Simpan Pengaturan</button></div>
+      </div>
     </section>
 
     <section id="employees" class="page hidden">
@@ -196,7 +217,7 @@ const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[];
+let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -233,7 +254,7 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
@@ -242,6 +263,8 @@ function go(id){
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
 async function refreshData(){
+  const {data:os}=await sb.from('office_settings').select('*').eq('id',1).single();
+  officeSettings=os||{office_name:'HomeOffice',work_start:'09:00:00',late_after:'09:15:00',work_end:'21:00:00',work_monday:true,work_tuesday:true,work_wednesday:true,work_thursday:true,work_friday:true,work_saturday:true,work_sunday:false};
   if(currentEmployee.role==='admin'){
     const {data:e}=await sb.from('employees').select('*').order('full_name');
     employees=e||[];
@@ -270,7 +293,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderSettings();
 }
 
 function renderAttendance(){
@@ -295,7 +318,7 @@ function renderNotice(){
  if(!currentEmployee||currentEmployee.role==='admin')return;
  let x=attendance.find(a=>a.attendance_date===ymd());
  let n=$('#dashNotice');n.classList.remove('hidden');
- n.textContent=!x?'Kamu belum melakukan absensi hari ini. Jam masuk 09:00, toleransi sampai 09:15, pulang 21:00.':`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
+ n.textContent=!x?`Kamu belum melakukan absensi hari ini. Jam masuk ${time5(officeSettings.work_start)}, toleransi sampai ${time5(officeSettings.late_after)}, pulang ${time5(officeSettings.work_end)}.`:`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
 }
 
 function renderProfile(){
@@ -388,6 +411,31 @@ window.rejectLeave=async id=>{
   await refreshData();
 };
 
+
+function time5(v){return (v||'').slice(0,5)}
+function isWorkDay(d){
+ const keys=['work_sunday','work_monday','work_tuesday','work_wednesday','work_thursday','work_friday','work_saturday'];
+ return !!officeSettings[keys[d.getDay()]];
+}
+function workDayLabel(){
+ const names=[['Sen',officeSettings.work_monday],['Sel',officeSettings.work_tuesday],['Rab',officeSettings.work_wednesday],['Kam',officeSettings.work_thursday],['Jum',officeSettings.work_friday],['Sab',officeSettings.work_saturday],['Min',officeSettings.work_sunday]];
+ return names.filter(x=>x[1]).map(x=>x[0]).join(', ');
+}
+function renderSettings(){
+ if(!officeSettings)return;
+ $('#recapRule').textContent=`Hari kerja ${workDayLabel()} • Masuk ${time5(officeSettings.work_start)} • Toleransi ${time5(officeSettings.late_after)} • Pulang ${time5(officeSettings.work_end)}`;
+ if(currentEmployee.role!=='admin')return;
+ $('#sOffice').value=officeSettings.office_name||'HomeOffice'; $('#sStart').value=time5(officeSettings.work_start); $('#sLate').value=time5(officeSettings.late_after); $('#sEnd').value=time5(officeSettings.work_end);
+ [['sMon','work_monday'],['sTue','work_tuesday'],['sWed','work_wednesday'],['sThu','work_thursday'],['sFri','work_friday'],['sSat','work_saturday'],['sSun','work_sunday']].forEach(([a,b])=>$('#'+a).checked=!!officeSettings[b]);
+}
+$('#saveSettings').onclick=async()=>{
+ if($('#sLate').value<$('#sStart').value){alert('Batas toleransi tidak boleh sebelum jam masuk.');return}
+ let payload={office_name:$('#sOffice').value.trim()||'HomeOffice',work_start:$('#sStart').value,late_after:$('#sLate').value,work_end:$('#sEnd').value,work_monday:$('#sMon').checked,work_tuesday:$('#sTue').checked,work_wednesday:$('#sWed').checked,work_thursday:$('#sThu').checked,work_friday:$('#sFri').checked,work_saturday:$('#sSat').checked,work_sunday:$('#sSun').checked,updated_at:new Date().toISOString()};
+ if(!payload.work_start||!payload.late_after||!payload.work_end){alert('Jam masuk, toleransi, dan pulang wajib diisi.');return}
+ let {error}=await sb.from('office_settings').update(payload).eq('id',1);
+ if(error){alert(error.message);return} await refreshData(); alert('Pengaturan kantor berhasil disimpan.');
+};
+
 function renderRecap(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   if(!$('#recapMonth').value)$('#recapMonth').value=ymd().slice(0,7);
@@ -395,7 +443,7 @@ function renderRecap(){
   $('#recapEmployee').innerHTML='<option value="">Semua karyawan</option>'+employees.filter(x=>x.role==='employee').map(x=>`<option value="${x.id}" ${x.id===chosen?'selected':''}>${esc(x.full_name)}</option>`).join('');
   let rows=attendance.filter(x=>x.attendance_date&&x.attendance_date.startsWith($('#recapMonth').value));
   if(chosen)rows=rows.filter(x=>x.employee_id===chosen);
-  let early=x=>x.check_out&&x.check_out<'21:00';
+  let early=x=>x.check_out&&x.check_out<time5(officeSettings.work_end);
   $('#rHadir').textContent=rows.filter(x=>x.status==='Hadir').length;
   $('#rLate').textContent=rows.filter(x=>x.status==='Terlambat').length;
   $('#rLeave').textContent=rows.filter(x=>x.status==='Izin'||x.status==='Sakit').length;
@@ -412,7 +460,8 @@ $('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterS
 $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
  if(x&&x.check_in){alert('Kamu sudah absen masuk hari ini.');return}
- let t=hm(),status=t>'09:15'?'Terlambat':'Hadir';
+ if(!isWorkDay(new Date())){alert('Hari ini bukan hari kerja. Absensi tidak dibuka.');return}
+ let t=hm(),status=t>time5(officeSettings.late_after)?'Terlambat':'Hadir';
  let res=x?await sb.from('attendance').update({check_in:t,status}).eq('id',x.id):await sb.from('attendance').insert({employee_id:currentEmployee.id,attendance_date:ymd(),check_in:t,status});
  if(res.error){alert(res.error.message);return}await refreshData();alert('Absensi masuk berhasil: '+t);
 }

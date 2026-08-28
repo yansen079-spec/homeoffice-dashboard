@@ -1,19 +1,11 @@
-HOME OFFICE V8 - IZIN / SAKIT / CUTI
+HOME OFFICE V9 - PENGATURAN KANTOR
 
-Mempertahankan:
-- Role Bos/Karyawan
-- Data Karyawan
-- Absensi
-- Rekap Bulanan
-- Tugas Karyawan / Tugas Saya
+Tambahan V9:
+- Menu Pengaturan Kantor khusus Bos/Admin
+- Ubah nama kantor, jam masuk, batas toleransi, jam pulang
+- Pilih hari kerja Senin-Minggu
+- Aturan absensi dibaca langsung dari Supabase
+- Hari non-kerja tidak dapat melakukan absen masuk
+- Rekap Pulang Cepat mengikuti jam pulang dari pengaturan
 
-Tambahan:
-- Karyawan ajukan Izin / Sakit / Cuti
-- Tanggal mulai dan selesai
-- Alasan
-- Status Menunggu / Disetujui / Ditolak
-- Bos dapat Setujui / Tolak
-- Pengajuan disetujui otomatis masuk ke rekap absensi
-- Hari Minggu dilewati saat membuat rekap otomatis
-
-Data tetap tersimpan di Supabase.
+Semua fitur V8 tetap dipertahankan.
