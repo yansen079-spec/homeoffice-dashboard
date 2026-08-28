@@ -57,6 +57,72 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .bossrow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f4}
 @media(max-width:900px){.bossdash{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.bossdash{grid-template-columns:1fr}}
+
+/* ===== V18 MOBILE POLISH ===== */
+html,body{max-width:100%;overflow-x:hidden}
+button,input,select,textarea{font:inherit}
+table{max-width:100%}
+
+@media(max-width:768px){
+  body{font-size:14px}
+  .app{display:block!important}
+  aside{
+    position:relative!important;width:100%!important;height:auto!important;min-height:0!important;
+    padding:14px!important;border-right:0!important;border-bottom:1px solid #e7ebf0!important
+  }
+  aside .brand{margin-bottom:10px!important}
+  aside nav{
+    display:flex!important;overflow-x:auto!important;gap:7px!important;padding:3px 0 8px!important;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch
+  }
+  aside nav::-webkit-scrollbar{display:none}
+  aside nav button{
+    flex:0 0 auto!important;width:auto!important;min-height:42px!important;margin:0!important;
+    white-space:nowrap!important;scroll-snap-align:start;padding:9px 13px!important
+  }
+  aside .userbox{margin-top:8px!important}
+  main{margin-left:0!important;width:100%!important;padding:14px!important}
+  .page>.top{align-items:flex-start!important;gap:10px!important;flex-direction:column!important}
+  .page>.top>div,.page>.top>button,.page>.top>.adminOnly{max-width:100%}
+  h1{font-size:23px!important;line-height:1.2}
+  h2{font-size:20px!important}
+  h3{font-size:17px!important}
+  .stats,.bossdash,.grid,.stockgrid{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  .card,.bosscard,.stockcard{padding:14px!important;border-radius:14px!important}
+  .stat b,.bosscard b{font-size:22px!important}
+  .stockqty{font-size:28px!important}
+  .actions,.stockactions{gap:7px!important;flex-wrap:wrap!important}
+  .btn{min-height:42px;padding:9px 12px!important}
+  input,select,textarea{width:100%!important;min-height:44px!important;font-size:16px!important}
+  .field{min-width:0!important}
+  .tablewrap,.table-wrap,.tableWrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch;width:100%!important}
+  table{min-width:720px!important}
+  th,td{padding:10px 9px!important;white-space:nowrap}
+  .modal{padding:12px!important;align-items:flex-start!important;overflow-y:auto!important}
+  .modal .box{width:100%!important;max-width:100%!important;margin:18px 0!important;padding:16px!important;max-height:none!important}
+  .modal .grid{grid-template-columns:1fr!important}
+  .bossrow{align-items:flex-start!important}
+  #bossEmployeeSummary .bossrow>div:first-child{min-width:0}
+  #bossEmployeeSummary .bossrow b{overflow-wrap:anywhere}
+}
+
+@media(max-width:480px){
+  main{padding:10px!important}
+  aside{padding:10px!important}
+  .stats,.bossdash,.grid,.stockgrid{grid-template-columns:1fr!important}
+  .card,.bosscard,.stockcard{padding:13px!important}
+  .page>.top{margin-bottom:12px!important}
+  .page>.top .btn{width:100%!important}
+  .page>.top .adminOnly{width:100%!important}
+  .page>.top .adminOnly .btn{flex:1 1 100%!important}
+  .actions .btn,.stockactions .btn{flex:1 1 auto}
+  .bossrow{flex-direction:column!important}
+  .bossrow>div:last-child{text-align:left!important}
+  .modal .actions{display:grid!important;grid-template-columns:1fr!important}
+  .modal .actions .btn{width:100%!important}
+}
+/* ===== END V18 MOBILE POLISH ===== */
+
 </style>
 </head>
 <body>

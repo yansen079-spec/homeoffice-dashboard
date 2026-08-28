@@ -1,15 +1,14 @@
-HOME OFFICE V17 - DASHBOARD BOS
+HOME OFFICE V18 - MOBILE POLISH
 
-Tambahan khusus Bos:
-- Belum Absen hari ini
-- Belum Pulang
-- Pengajuan Menunggu
-- Tugas Belum Selesai
-- Stok Menipis
-- Stok Habis
-- Total Hari Kerja Dibayar periode berjalan
-- Estimasi Gaji Berjalan
-- Ringkasan status absensi semua karyawan hari ini
+Basis: V17 stabil.
 
-Tidak ada perubahan database.
-Semua fitur V16 tetap dipertahankan.
+Perubahan hanya tampilan/responsive:
+- Navigasi mobile lebih ringkas dan bisa digeser horizontal
+- Dashboard card menyesuaikan 2 kolom / 1 kolom
+- Form dan tombol lebih nyaman disentuh
+- Modal rapi di layar HP
+- Tabel dapat digeser horizontal tanpa merusak layout
+- Stok, payroll, absensi, dashboard Bos dan halaman lain responsive
+- Input memakai ukuran 16px untuk mencegah auto-zoom di browser HP
+- Desktop tetap dipertahankan
+- Tidak ada perubahan database atau logika fitur V17
