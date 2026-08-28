@@ -40,6 +40,14 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 .sliphead{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #111827;padding-bottom:18px;margin-bottom:18px}
 .sliptitle{font-size:25px;font-weight:900}.sliprow{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid #edf0f4}
 .sliptotal{font-size:20px;font-weight:900;padding-top:16px}
+
+.stockgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.stockcard{background:#fff;border:1px solid #e1e7ef;border-radius:16px;padding:18px}
+.stockname{font-size:18px;font-weight:900;margin-bottom:8px}
+.stocknum{font-size:30px;font-weight:900;margin:8px 0}
+.stockactions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.stock-ok{background:#e8f7ed;color:#15803d}.stock-low{background:#fff3dc;color:#b45309}.stock-out{background:#feecec;color:#b91c1c}
+.historyitem{padding:12px 0;border-bottom:1px solid #edf0f4}
 </style>
 </head>
 <body>
@@ -131,6 +139,25 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
       </div>
       <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
+    </section>
+
+    <section id="stock" class="page hidden">
+      <div class="top">
+        <div><h1 id="stockTitle">Stok Produk</h1><div class="muted" id="stockSubtitle">Stok produk premium YANSTORE.</div></div>
+        <button class="btn primary adminOnly" id="addStockProduct">+ Tambah Produk</button>
+      </div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Produk Aktif</span><b id="stockProducts">0</b></div>
+        <div class="card stat"><span class="muted">Stok Aman</span><b id="stockSafe">0</b></div>
+        <div class="card stat"><span class="muted">Menipis</span><b id="stockLow">0</b></div>
+        <div class="card stat"><span class="muted">Habis</span><b id="stockOut">0</b></div>
+      </div>
+      <div class="stockgrid" id="stockCards"></div>
+
+      <div class="card adminOnly" style="margin-top:18px">
+        <h3 style="margin-top:0">Riwayat Perubahan Stok</h3>
+        <div id="stockHistory"><div class="muted">Belum ada riwayat.</div></div>
+      </div>
     </section>
 
     <section id="payroll" class="page hidden">
@@ -311,6 +338,32 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
   </div>
 </div>
 
+<div class="modal" id="stockProductModal">
+  <div class="box">
+    <h3 id="stockProductModalTitle">Tambah Produk</h3>
+    <input type="hidden" id="stockProductId">
+    <div class="grid">
+      <label class="field">Nama Produk<input id="stockProductName" placeholder="Contoh: Netflix Premium"></label>
+      <label class="field">Stok Awal<input id="stockProductQty" type="number" min="0" step="1"></label>
+      <label class="field">Batas Stok Menipis<input id="stockMinimum" type="number" min="0" step="1" value="5"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveStockProduct">Simpan Produk</button></div>
+  </div>
+</div>
+
+<div class="modal" id="stockChangeModal">
+  <div class="box">
+    <h3 id="stockChangeTitle">Ubah Stok</h3>
+    <input type="hidden" id="stockChangeId">
+    <input type="hidden" id="stockChangeMode">
+    <div class="grid">
+      <label class="field">Jumlah<input id="stockChangeQty" type="number" min="1" step="1" value="1"></label>
+      <label class="field" style="grid-column:1/-1">Catatan<input id="stockChangeNote" placeholder="Contoh: stok akun baru / terjual"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveStockChange">Simpan</button></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -394,7 +447,13 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderSettings();
+ const {data:psx}=await sb.from('product_stock').select('*').eq('active',true).order('product_name');
+    productStocks=psx||[];
+    if(currentEmployee.role==='admin'){
+      const {data:sh}=await sb.from('stock_history').select('*, product_stock(product_name)').order('created_at',{ascending:false}).limit(30);
+      stockHistory=sh||[];
+    }else stockHistory=[];
+    renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderStock();renderSettings();
 }
 
 function renderAttendance(){
@@ -563,6 +622,132 @@ function buildSalarySlip(){
 }
 $('#openSlip').onclick=buildSalarySlip;
 $('#printSlip').onclick=()=>window.print();
+
+
+function stockState(p){
+  if(Number(p.stock)<=0)return {text:'Habis',cls:'stock-out'};
+  if(Number(p.stock)<=Number(p.minimum_stock))return {text:'Menipis',cls:'stock-low'};
+  return {text:'Aman',cls:'stock-ok'};
+}
+function renderStock(){
+  if(!currentEmployee)return;
+  $('#stockProducts').textContent=productStocks.length;
+  $('#stockSafe').textContent=productStocks.filter(x=>Number(x.stock)>Number(x.minimum_stock)).length;
+  $('#stockLow').textContent=productStocks.filter(x=>Number(x.stock)>0&&Number(x.stock)<=Number(x.minimum_stock)).length;
+  $('#stockOut').textContent=productStocks.filter(x=>Number(x.stock)<=0).length;
+
+  $('#stockCards').innerHTML=productStocks.length?productStocks.map(p=>{
+    let st=stockState(p);
+    let actions=currentEmployee.role==='admin'?`<div class="stockactions">
+      <button class="btn primary" onclick="changeStock('${p.id}','add')">+ Stok</button>
+      <button class="btn" onclick="changeStock('${p.id}','subtract')">− Stok</button>
+      <button class="btn" onclick="editStockProduct('${p.id}')">Edit</button>
+      <button class="btn danger" onclick="deleteStockProduct('${p.id}')">Hapus</button>
+    </div>`:'';
+    return `<div class="stockcard"><div class="stockname">${esc(p.product_name)}</div>
+      <span class="badge ${st.cls}">${st.text}</span>
+      <div class="stocknum">${Number(p.stock)}</div>
+      <div class="muted">Stok tersedia hari ini</div>${actions}</div>`;
+  }).join(''):'<div class="card" style="text-align:center;color:#8793a5">Belum ada produk.</div>';
+
+  if(currentEmployee.role==='admin'){
+    $('#stockHistory').innerHTML=stockHistory.length?stockHistory.map(h=>{
+      let pn=h.product_stock?.product_name||'Produk';
+      let sign=Number(h.change_amount)>0?'+':'';
+      return `<div class="historyitem"><b>${esc(pn)}</b> &nbsp; ${h.old_stock} → ${h.new_stock}
+        <span class="badge ${Number(h.change_amount)>=0?'stock-ok':'stock-low'}">${sign}${h.change_amount}</span>
+        <div class="muted">${esc(h.note||'-')} • ${new Date(h.created_at).toLocaleString('id-ID')}</div></div>`;
+    }).join(''):'<div class="muted">Belum ada riwayat.</div>';
+  }
+}
+
+$('#addStockProduct').onclick=()=>{
+  $('#stockProductModalTitle').textContent='Tambah Produk';
+  $('#stockProductId').value='';
+  $('#stockProductName').value='';
+  $('#stockProductQty').value=0;
+  $('#stockMinimum').value=5;
+  $('#stockProductQty').disabled=false;
+  openModal('#stockProductModal');
+};
+
+window.editStockProduct=id=>{
+  let p=productStocks.find(x=>x.id===id);if(!p)return;
+  $('#stockProductModalTitle').textContent='Edit Produk';
+  $('#stockProductId').value=p.id;
+  $('#stockProductName').value=p.product_name;
+  $('#stockProductQty').value=p.stock;
+  $('#stockProductQty').disabled=true;
+  $('#stockMinimum').value=p.minimum_stock;
+  openModal('#stockProductModal');
+};
+
+$('#saveStockProduct').onclick=async()=>{
+  let id=$('#stockProductId').value;
+  let name=$('#stockProductName').value.trim();
+  let minimum=Number($('#stockMinimum').value||0);
+  if(!name){alert('Nama produk wajib diisi.');return}
+  if(id){
+    let {error}=await sb.from('product_stock').update({product_name:name,minimum_stock:minimum,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error){alert(error.message);return}
+  }else{
+    let qty=Number($('#stockProductQty').value||0);
+    let {data,error}=await sb.from('product_stock').insert({product_name:name,stock:qty,minimum_stock:minimum}).select().single();
+    if(error){alert(error.message);return}
+    if(qty!==0){
+      await sb.from('stock_history').insert({product_id:data.id,old_stock:0,new_stock:qty,change_amount:qty,note:'Stok awal',changed_by:currentEmployee.id});
+    }
+  }
+  $('#stockProductModal').classList.remove('open');await refreshData();
+};
+
+window.changeStock=(id,mode)=>{
+  let p=productStocks.find(x=>x.id===id);if(!p)return;
+  $('#stockChangeId').value=id;$('#stockChangeMode').value=mode;
+  $('#stockChangeQty').value=1;$('#stockChangeNote').value='';
+  $('#stockChangeTitle').textContent=(mode==='add'?'Tambah Stok - ':'Kurangi Stok - ')+p.product_name;
+  openModal('#stockChangeModal');
+};
+
+$('#saveStockChange').onclick=async()=>{
+  let id=$('#stockChangeId').value,mode=$('#stockChangeMode').value;
+  let qty=Math.floor(Number($('#stockChangeQty').value||0));
+  let note=$('#stockChangeNote').value.trim()||(mode==='add'?'Stok masuk':'Stok keluar');
+  if(qty<=0){alert('Jumlah minimal 1.');return}
+  let p=productStocks.find(x=>x.id===id);if(!p)return;
+  let old=Number(p.stock),next=mode==='add'?old+qty:old-qty;
+  if(next<0){alert('Stok tidak cukup. Stok saat ini '+old+'.');return}
+
+  let {data,error}=await sb.from('product_stock').update({stock:next,updated_at:new Date().toISOString()}).eq('id',id).eq('stock',old).select().single();
+  if(error||!data){alert('Stok berubah di perangkat lain. Data akan dimuat ulang.');$('#stockChangeModal').classList.remove('open');await refreshData();return}
+  let diff=next-old;
+  let hr=await sb.from('stock_history').insert({product_id:id,old_stock:old,new_stock:next,change_amount:diff,note,changed_by:currentEmployee.id});
+  if(hr.error)console.warn('Riwayat stok gagal:',hr.error.message);
+  $('#stockChangeModal').classList.remove('open');await refreshData();
+};
+
+window.deleteStockProduct=async id=>{
+  let p=productStocks.find(x=>x.id===id);if(!p)return;
+  if(!confirm('Hapus produk '+p.product_name+'?'))return;
+  let {error}=await sb.from('product_stock').delete().eq('id',id);
+  if(error){alert(error.message);return}
+  await refreshData();
+};
+
+function setupStockRealtime(){
+  if(stockRealtimeChannel) sb.removeChannel(stockRealtimeChannel);
+  stockRealtimeChannel=sb.channel('homeoffice-stock-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'product_stock'},async payload=>{
+      // Fetch canonical list so INSERT/UPDATE/DELETE all stay consistent.
+      const {data}=await sb.from('product_stock').select('*').eq('active',true).order('product_name');
+      productStocks=data||[];
+      renderStock();
+      if(currentEmployee?.role==='admin'){
+        const {data:sh}=await sb.from('stock_history').select('*, product_stock(product_name)').order('created_at',{ascending:false}).limit(30);
+        stockHistory=sh||[];renderStock();
+      }
+    }).subscribe();
+}
 
 const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
 
