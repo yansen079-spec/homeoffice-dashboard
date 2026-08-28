@@ -48,6 +48,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <button data-page="dashboard" class="active">⌂ Dashboard</button>
       <button data-page="attendance">◷ Absensi</button>
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
+      <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
     </nav>
@@ -84,6 +85,21 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
         <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
         <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
       </div>
+    </section>
+
+    <section id="recap" class="page hidden">
+      <div class="top"><div><h1>Rekap Absensi</h1><div class="muted">Senin–Sabtu • Masuk 09:00 • Toleransi 09:15 • Pulang 21:00</div></div></div>
+      <div class="card" style="margin-bottom:15px"><div class="toolbar"><div>
+        <input class="input" id="recapMonth" type="month">
+        <select class="input" id="recapEmployee"><option value="">Semua karyawan</option></select>
+      </div></div></div>
+      <div class="stats">
+        <div class="card stat"><span class="muted">Hadir</span><b id="rHadir">0</b></div>
+        <div class="card stat"><span class="muted">Terlambat</span><b id="rLate">0</b></div>
+        <div class="card stat"><span class="muted">Izin / Sakit</span><b id="rLeave">0</b></div>
+        <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
+      </div>
+      <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
     </section>
 
     <section id="employees" class="page hidden">
@@ -188,7 +204,7 @@ async function boot(user){
 }
 
 function go(id){
-  if(id==='employees'&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
@@ -221,7 +237,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();
 }
 
 function renderAttendance(){
@@ -246,7 +262,7 @@ function renderNotice(){
  if(!currentEmployee||currentEmployee.role==='admin')return;
  let x=attendance.find(a=>a.attendance_date===ymd());
  let n=$('#dashNotice');n.classList.remove('hidden');
- n.textContent=!x?'Kamu belum melakukan absensi hari ini.':`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
+ n.textContent=!x?'Kamu belum melakukan absensi hari ini. Jam masuk 09:00, toleransi sampai 09:15, pulang 21:00.':`Absensi hari ini: ${x.status} • Masuk ${x.check_in||'-'} • Pulang ${x.check_out||'-'}`;
 }
 
 function renderProfile(){
@@ -271,12 +287,32 @@ window.editTask=id=>{let x=tasks.find(t=>t.id===id);if(!x)return;resetTaskForm()
 $('#saveTask').onclick=async()=>{let id=$('#tId').value,title=$('#tTitle').value.trim(),assigned=$('#tEmployee').value;if(!title||!assigned){alert('Judul tugas dan karyawan wajib diisi.');return}let payload={title,description:$('#tDescription').value.trim()||null,assigned_to:assigned,due_date:$('#tDue').value||null,priority:$('#tPriority').value};if(!id)payload.created_by=currentEmployee.id;let res=id?await sb.from('tasks').update(payload).eq('id',id):await sb.from('tasks').insert(payload);if(res.error){alert(res.error.message);return}$('#taskModal').classList.remove('open');await refreshData()};
 window.deleteTask=async id=>{if(!confirm('Hapus tugas ini?'))return;let {error}=await sb.from('tasks').delete().eq('id',id);if(error)alert(error.message);else await refreshData()};
 window.setTaskStatus=async(id,status)=>{let {error}=await sb.from('tasks').update({status,completed_at:status==='Selesai'?new Date().toISOString():null}).eq('id',id);if(error){alert(error.message);return}await refreshData()};
+
+function renderRecap(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  if(!$('#recapMonth').value)$('#recapMonth').value=ymd().slice(0,7);
+  let chosen=$('#recapEmployee').value;
+  $('#recapEmployee').innerHTML='<option value="">Semua karyawan</option>'+employees.filter(x=>x.role==='employee').map(x=>`<option value="${x.id}" ${x.id===chosen?'selected':''}>${esc(x.full_name)}</option>`).join('');
+  let rows=attendance.filter(x=>x.attendance_date&&x.attendance_date.startsWith($('#recapMonth').value));
+  if(chosen)rows=rows.filter(x=>x.employee_id===chosen);
+  let early=x=>x.check_out&&x.check_out<'21:00';
+  $('#rHadir').textContent=rows.filter(x=>x.status==='Hadir').length;
+  $('#rLate').textContent=rows.filter(x=>x.status==='Terlambat').length;
+  $('#rLeave').textContent=rows.filter(x=>x.status==='Izin'||x.status==='Sakit').length;
+  $('#rEarly').textContent=rows.filter(early).length;
+  $('#recapRows').innerHTML=rows.length?rows.map(x=>{
+    let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
+    return `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.attendance_date)}</td><td>${esc(day)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td>${early(x)?'<span class="badge telat">Pulang Cepat</span>':esc(x.note||'-')}</td></tr>`;
+  }).join(''):'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada data bulan ini.</td></tr>';
+}
+$('#recapMonth').onchange=renderRecap;$('#recapEmployee').onchange=renderRecap;
+
 $('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
 
 $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
  if(x&&x.check_in){alert('Kamu sudah absen masuk hari ini.');return}
- let t=hm(),status=t>'08:15'?'Terlambat':'Hadir';
+ let t=hm(),status=t>'09:15'?'Terlambat':'Hadir';
  let res=x?await sb.from('attendance').update({check_in:t,status}).eq('id',x.id):await sb.from('attendance').insert({employee_id:currentEmployee.id,attendance_date:ymd(),check_in:t,status});
  if(res.error){alert(res.error.message);return}await refreshData();alert('Absensi masuk berhasil: '+t);
 }
