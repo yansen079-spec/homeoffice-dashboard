@@ -168,7 +168,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 
     <section id="payroll" class="page hidden">
       <div class="top">
-        <div><h1>Penggajian</h1><div class="muted">Hitung gaji bulanan berdasarkan gaji pokok dan potongan keterlambatan.</div></div>
+        <div><h1>Penggajian</h1><div class="muted">Hitung gaji bulanan dengan potongan yang bisa diatur Bos.</div></div>
+        <button class="btn primary" id="payrollSettingsBtn">⚙ Atur Potongan</button>
         <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
       </div>
 
@@ -188,7 +189,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
 
       <div class="card">
         <div class="table"><table>
-          <thead><tr><th>Nama</th><th>Gaji Pokok</th><th>Terlambat</th><th>Potongan</th><th>Izin</th><th>Sakit</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Nama</th><th>Gaji Pokok</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
           <tbody id="payrollRows"></tbody>
         </table></div>
       </div>
@@ -337,6 +338,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
       <div class="sliprow"><span>Potongan Terlambat</span><b id="slipPenalty">Rp0</b></div>
       <div class="sliprow"><span>Izin</span><b id="slipIzin">0 hari</b></div>
       <div class="sliprow"><span>Sakit</span><b id="slipSakit">0 hari</b></div>
+      <div class="sliprow"><span>Cuti</span><b id="slipCuti">0 hari</b></div>
       <div class="sliprow sliptotal"><span>GAJI BERSIH</span><b id="slipNet">Rp0</b></div>
       <div class="muted" style="margin-top:20px">Izin, cuti, dan sakit tidak dikenakan potongan. Potongan keterlambatan mengikuti pengaturan payroll.</div>
       <div class="actions noPrint" style="margin-top:22px"><button class="btn modalCancel">Tutup</button><button class="btn primary" id="printSlip">🖨 Cetak / Simpan PDF</button></div>
@@ -383,6 +385,22 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
   </div>
 </div>
 
+<div class="modal" id="payrollSettingsModal">
+  <div class="box">
+    <h3>Pengaturan Potongan Payroll</h3>
+    <div class="grid">
+      <label class="field">Terlambat / kejadian<input id="psLate" type="number" min="0" step="1000"></label>
+      <label class="field">Izin / hari<input id="psIzin" type="number" min="0" step="1000"></label>
+      <label class="field">Sakit / hari<input id="psSakit" type="number" min="0" step="1000"></label>
+      <label class="field">Cuti / hari<input id="psCuti" type="number" min="0" step="1000"></label>
+    </div>
+    <div class="actions">
+      <button class="btn modalCancel">Batal</button>
+      <button class="btn primary" id="savePayrollSettings">Simpan Pengaturan</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -391,6 +409,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
 let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 let attendanceArchive=[];
+let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -638,11 +657,38 @@ function buildSalarySlip(){
   $('#slipPenalty').textContent=rupiah(x.penalty);
   $('#slipIzin').textContent=x.izin+' hari';
   $('#slipSakit').textContent=x.sakit+' hari';
+  $('#slipCuti').textContent=(x.cuti||0)+' hari';
   $('#slipNet').textContent=rupiah(x.net);
   openModal('#slipModal');
 }
 $('#openSlip').onclick=buildSalarySlip;
 $('#printSlip').onclick=()=>window.print();
+
+
+function openPayrollSettings(){
+  $('#psLate').value=Number(payrollSettings?.late_penalty||0);
+  $('#psIzin').value=Number(payrollSettings?.izin_penalty||0);
+  $('#psSakit').value=Number(payrollSettings?.sakit_penalty||0);
+  $('#psCuti').value=Number(payrollSettings?.cuti_penalty||0);
+  openModal('#payrollSettingsModal');
+}
+$('#payrollSettingsBtn').onclick=openPayrollSettings;
+
+$('#savePayrollSettings').onclick=async()=>{
+  const payload={
+    late_penalty:Math.max(0,Number($('#psLate').value||0)),
+    izin_penalty:Math.max(0,Number($('#psIzin').value||0)),
+    sakit_penalty:Math.max(0,Number($('#psSakit').value||0)),
+    cuti_penalty:Math.max(0,Number($('#psCuti').value||0)),
+    updated_at:new Date().toISOString()
+  };
+  const {data,error}=await sb.from('payroll_settings').update(payload).eq('id',1).select().single();
+  if(error){alert(error.message);return}
+  payrollSettings=data||payload;
+  $('#payrollSettingsModal').classList.remove('open');
+  renderPayroll();
+  alert('Pengaturan potongan berhasil disimpan.');
+};
 
 const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
 
@@ -664,10 +710,15 @@ function getPayrollRows(){
     let late=a.filter(x=>x.status==='Terlambat').length;
     let izin=a.filter(x=>x.status==='Izin').length;
     let sakit=a.filter(x=>x.status==='Sakit').length;
+    let cuti=leaveRequests.filter(x=>x.employee_id===emp.id&&x.status==='Disetujui'&&x.leave_type==='Cuti'&&x.start_date&&x.start_date.startsWith(month)).length;
     let base=Number(emp.base_salary||0);
-    let penalty=late*Number(payrollSettings?.late_penalty||5000);
+    let latePenalty=late*Number(payrollSettings?.late_penalty||0);
+    let izinPenalty=izin*Number(payrollSettings?.izin_penalty||0);
+    let sakitPenalty=sakit*Number(payrollSettings?.sakit_penalty||0);
+    let cutiPenalty=cuti*Number(payrollSettings?.cuti_penalty||0);
+    let penalty=latePenalty+izinPenalty+sakitPenalty+cutiPenalty;
     let net=Math.max(0,base-penalty);
-    return {emp,late,izin,sakit,base,penalty,net};
+    return {emp,late,izin,sakit,cuti,base,latePenalty,izinPenalty,sakitPenalty,cutiPenalty,penalty,net};
   });
 }
 
@@ -683,13 +734,14 @@ function renderPayroll(){
   $('#payrollRows').innerHTML=rows.length?rows.map(x=>`<tr>
     <td><b>${esc(x.emp.full_name)}</b></td>
     <td>${rupiah(x.base)}</td>
-    <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||5000)}</td>
+    <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||0)}</td>
+    <td>${x.izin} × ${rupiah(payrollSettings?.izin_penalty||0)}</td>
+    <td>${x.sakit} × ${rupiah(payrollSettings?.sakit_penalty||0)}</td>
+    <td>${x.cuti} × ${rupiah(payrollSettings?.cuti_penalty||0)}</td>
     <td>${rupiah(x.penalty)}</td>
-    <td>${x.izin}</td>
-    <td>${x.sakit}</td>
     <td><b>${rupiah(x.net)}</b></td>
     <td><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji</button></td>
-  </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
 }
 
 $('#payrollMonth').onchange=renderPayroll;
