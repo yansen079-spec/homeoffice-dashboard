@@ -1,15 +1,13 @@
-HOME OFFICE V13 - STOK PRODUK YANSTORE (VERSI AMAN)
+HOME OFFICE V14 - RESET ABSENSI KHUSUS BOS
 
-Basis: V12 yang stabil.
+Fitur:
+- Reset absensi per karyawan
+- Reset semua absensi hari ini
+- Tombol hanya terlihat untuk Bos/Admin
+- Data lama disimpan ke attendance_archive sebelum dihapus
+- Karyawan dapat absen ulang
+- Arsip reset tetap terlihat di Rekap Absensi
+- Arsip tidak ikut hitung payroll agar tidak double count
+- Semua fitur V13 Stok Aman tetap dipertahankan
 
-Prinsip V13:
-- Modul stok dipisahkan dari refreshData utama.
-- Error stok tidak membuat Data Karyawan / Absensi / Payroll blank.
-- Bos dapat tambah/edit/tambah stok/kurangi stok/hapus produk.
-- Karyawan hanya melihat Stok Hari Ini.
-- Status Aman / Menipis / Habis.
-- Riwayat perubahan stok untuk Bos.
-- Supabase Realtime untuk product_stock.
-- Semua fitur V12 tetap dipertahankan.
-
-Jika realtime gagal tersambung, fitur utama HomeOffice tetap bekerja dan stok masih bisa dimuat normal.
+WAJIB jalankan SQL attendance_archive di Supabase terlebih dahulu.

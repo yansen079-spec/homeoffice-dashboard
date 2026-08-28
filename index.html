@@ -106,7 +106,11 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
     <section id="attendance" class="page hidden">
       <div class="top">
         <div><h1>Absensi</h1><div class="muted" id="attendanceSubtitle">Riwayat absensi.</div></div>
-        <button class="btn primary adminOnly" id="manualAttendance">+ Tambah Absensi</button>
+        <div class="adminOnly" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" id="manualAttendance">+ Tambah Absensi</button>
+      <button class="btn" id="resetAttendanceEmployee">↻ Reset Absensi Karyawan</button>
+      <button class="btn danger" id="resetAttendanceAll">↻ Reset Semua Hari Ini</button>
+    </div>
       </div>
       <div class="card">
         <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
@@ -366,6 +370,19 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10p
   </div>
 </div>
 
+<div class="modal" id="resetAttendanceModal">
+  <div class="box">
+    <h3>Reset Absensi Karyawan</h3>
+    <div class="muted">Data lama akan diarsipkan dan tetap tampil di Rekap Absensi.</div>
+    <div class="grid">
+      <label class="field">Karyawan<select id="resetEmployee"></select></label>
+      <label class="field">Tanggal<input id="resetDate" type="date"></label>
+      <label class="field" style="grid-column:1/-1">Alasan Reset<input id="resetReason" placeholder="Contoh: salah jam masuk"></label>
+    </div>
+    <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn danger" id="confirmResetEmployee">Reset Absensi</button></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ltffbxrggflevlilqmze.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
@@ -373,6 +390,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
 let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
+let attendanceArchive=[];
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -409,6 +427,7 @@ async function boot(user){
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
   go('dashboard'); await refreshData();
+  await loadAttendanceArchiveSafe();
   await loadStockSafe();
   setupStockRealtimeSafe();
 }
@@ -773,10 +792,17 @@ function renderRecap(){
   $('#rLate').textContent=rows.filter(x=>x.status==='Terlambat').length;
   $('#rLeave').textContent=rows.filter(x=>x.status==='Izin'||x.status==='Sakit').length;
   $('#rEarly').textContent=rows.filter(early).length;
-  $('#recapRows').innerHTML=rows.length?rows.map(x=>{
+  let archived=attendanceArchive.filter(x=>x.attendance_date&&x.attendance_date.startsWith($('#recapMonth').value));
+  if(chosen)archived=archived.filter(x=>x.employee_id===chosen);
+  const liveHtml=rows.map(x=>{
     let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
     return `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.attendance_date)}</td><td>${esc(day)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td>${early(x)?'<span class="badge telat">Pulang Cepat</span>':esc(x.note||'-')}</td></tr>`;
-  }).join(''):'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada data bulan ini.</td></tr>';
+  }).join('');
+  const archiveHtml=archived.map(x=>{
+    let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
+    return `<tr style="background:#fff8e6"><td><b>${esc(x.name)}</b><div class="muted">ARSIP RESET</div></td><td>${esc(x.attendance_date)}</td><td>${esc(day)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td><span class="badge telat">ARSIP RESET</span> ${esc(x.reset_reason||'')}</td></tr>`;
+  }).join('');
+  $('#recapRows').innerHTML=(liveHtml+archiveHtml)||'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada data bulan ini.</td></tr>';
 }
 $('#recapMonth').onchange=renderRecap;$('#recapEmployee').onchange=renderRecap;
 
@@ -1014,6 +1040,79 @@ window.removeStockProduct=async id=>{
   await loadStockSafe();
 };
 /* ===== END STOCK MODULE ===== */
+
+
+
+async function loadAttendanceArchiveSafe(){
+  try{
+    if(!currentEmployee||currentEmployee.role!=='admin'){attendanceArchive=[];return}
+    const {data,error}=await sb.from('attendance_archive')
+      .select('*, employees(full_name)')
+      .order('archived_at',{ascending:false});
+    if(error)throw error;
+    attendanceArchive=(data||[]).map(x=>({...x,name:x.employees?.full_name||x.employee_name||'-'}));
+  }catch(err){
+    console.error('Attendance archive:',err);
+    attendanceArchive=[];
+  }
+}
+
+async function archiveAndDeleteAttendance(row,reason){
+  const ar=await sb.from('attendance_archive').insert({
+    original_attendance_id:row.id,
+    employee_id:row.employee_id,
+    employee_name:row.name||null,
+    attendance_date:row.attendance_date,
+    check_in:row.check_in||null,
+    check_out:row.check_out||null,
+    status:row.status,
+    note:row.note||null,
+    reset_reason:reason||'Reset oleh Bos',
+    reset_by:currentEmployee.id
+  });
+  if(ar.error)throw ar.error;
+  const del=await sb.from('attendance').delete().eq('id',row.id);
+  if(del.error)throw del.error;
+}
+
+$('#resetAttendanceEmployee').onclick=()=>{
+  $('#resetEmployee').innerHTML=employees.filter(x=>x.role==='employee'&&x.active)
+    .map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');
+  $('#resetDate').value=ymd();
+  $('#resetReason').value='';
+  openModal('#resetAttendanceModal');
+};
+
+$('#confirmResetEmployee').onclick=async()=>{
+  const employeeId=$('#resetEmployee').value;
+  const date=$('#resetDate').value;
+  const reason=$('#resetReason').value.trim()||'Reset oleh Bos';
+  const row=attendance.find(x=>x.employee_id===employeeId&&x.attendance_date===date);
+  if(!row){alert('Tidak ada absensi karyawan tersebut pada tanggal ini.');return}
+  if(!confirm('Reset absensi '+row.name+' tanggal '+date+'? Data lama tetap masuk arsip rekap.'))return;
+  try{
+    await archiveAndDeleteAttendance(row,reason);
+    $('#resetAttendanceModal').classList.remove('open');
+    await refreshData();
+    await loadAttendanceArchiveSafe();
+    renderRecap();
+    alert('Absensi berhasil di-reset. Karyawan dapat absen ulang.');
+  }catch(err){alert('Reset gagal: '+err.message)}
+};
+
+$('#resetAttendanceAll').onclick=async()=>{
+  const date=ymd();
+  const rows=attendance.filter(x=>x.attendance_date===date);
+  if(!rows.length){alert('Belum ada absensi hari ini.');return}
+  if(!confirm('Reset SEMUA absensi hari ini ('+rows.length+' data)? Data lama tetap di arsip.'))return;
+  try{
+    for(const row of rows)await archiveAndDeleteAttendance(row,'Reset semua absensi hari ini oleh Bos');
+    await refreshData();
+    await loadAttendanceArchiveSafe();
+    renderRecap();
+    alert('Semua absensi hari ini berhasil di-reset.');
+  }catch(err){alert('Reset gagal: '+err.message)}
+}
 
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
