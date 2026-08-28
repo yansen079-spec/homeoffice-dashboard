@@ -370,6 +370,7 @@ const SUPABASE_KEY = 'sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let currentAuth=null,currentEmployee=null,employees=[],attendance=[],tasks=[],leaveRequests=[],officeSettings=null;
+let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -394,6 +395,9 @@ async function boot(user){
   $('#sideName').textContent=emp.full_name;
   $('#sideRole').textContent=emp.role==='admin'?'Bos / Administrator':emp.job_title||'Karyawan';
   $('#roleBadge').textContent=emp.role==='admin'?'AKSES BOS':'AKSES KARYAWAN';
+  $('#stockNav').textContent=emp.role==='admin'?'▣ Stok Produk':'▣ Stok Hari Ini';
+  $('#stockTitle').textContent=emp.role==='admin'?'Stok Produk YANSTORE':'Stok Hari Ini';
+  $('#stockSubtitle').textContent=emp.role==='admin'?'Kelola stok produk premium dan pantau perubahannya.':'Stok produk premium terbaru. Data berubah otomatis secara realtime.';
   $('#taskNav').textContent=emp.role==='admin'?'Tugas Karyawan':'Tugas Saya';
   $('#taskPageTitle').textContent=emp.role==='admin'?'Tugas Karyawan':'Tugas Saya';
   $('#taskSubtitle').textContent=emp.role==='admin'?'Buat dan pantau pekerjaan seluruh karyawan.':'Lihat pekerjaan yang diberikan Bos dan update progresnya.';
@@ -402,7 +406,7 @@ async function boot(user){
   $('#attendanceSubtitle').textContent=emp.role==='admin'?'Lihat absensi semua karyawan.':'Riwayat absensi milik kamu sendiri.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
-  go('dashboard'); await refreshData();
+  go('dashboard'); await refreshData(); setupStockRealtime();
 }
 
 function go(id){
@@ -437,6 +441,12 @@ async function refreshData(){
     const {data:l}=await sb.from('leave_requests').select('*').eq('employee_id',currentEmployee.id).order('created_at',{ascending:false});
     leaveRequests=(l||[]).map(x=>({...x,employee_name:currentEmployee.full_name}));
   }
+  const {data:psx}=await sb.from('product_stock').select('*').eq('active',true).order('product_name');
+  productStocks=psx||[];
+  if(currentEmployee.role==='admin'){
+    const {data:sh}=await sb.from('stock_history').select('*, product_stock(product_name)').order('created_at',{ascending:false}).limit(30);
+    stockHistory=sh||[];
+  }else stockHistory=[];
   renderAll();
 }
 
@@ -447,13 +457,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- const {data:psx}=await sb.from('product_stock').select('*').eq('active',true).order('product_name');
-    productStocks=psx||[];
-    if(currentEmployee.role==='admin'){
-      const {data:sh}=await sb.from('stock_history').select('*, product_stock(product_name)').order('created_at',{ascending:false}).limit(30);
-      stockHistory=sh||[];
-    }else stockHistory=[];
-    renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderStock();renderSettings();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderStock();renderSettings();
 }
 
 function renderAttendance(){
