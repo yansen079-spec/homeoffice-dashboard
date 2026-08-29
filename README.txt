@@ -13,3 +13,5 @@ Fitur:
 - Tidak membuat tabel database baru.
 - Tidak perlu SQL baru.
 - Fitur V20.7 Gudang Digital 100% Fit tetap dipertahankan.
+
+V24: seller listings + public marketplace preview. Lihat README_V24.txt
