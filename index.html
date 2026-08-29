@@ -246,6 +246,46 @@ aside .userbox{
 .batchpreview table{min-width:720px}
 .cred-hidden{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px;margin-top:10px;color:#64748b}
 .categorypill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
+
+/* ===== V20.4 GUDANG DIGITAL SPREADSHEET ===== */
+.sheet-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sheet-toolbar .input{min-width:180px}
+.sheet-wrap{
+  background:#fff;border:1px solid #e6eaf0;border-radius:16px;
+  overflow:auto;max-height:68vh;position:relative
+}
+.sheet-table{
+  border-collapse:separate;border-spacing:0;min-width:1250px;width:100%;
+  font-size:14px
+}
+.sheet-table th{
+  position:sticky;top:0;z-index:3;background:#f8fafc;
+  border-bottom:1px solid #dfe5ec;padding:11px 12px;text-align:left;
+  white-space:nowrap;font-weight:800
+}
+.sheet-table td{
+  border-bottom:1px solid #edf0f4;padding:10px 12px;vertical-align:top;
+  min-width:120px
+}
+.sheet-table tr:hover td{background:#fbfdff}
+.sheet-cred{
+  font-family:monospace;white-space:pre-wrap;word-break:break-word;
+  max-width:360px;min-width:300px
+}
+.sheet-note{white-space:pre-wrap;max-width:320px;min-width:240px}
+.sheet-actions{display:flex;gap:6px;flex-wrap:wrap;min-width:170px}
+.sheet-buyer{min-width:180px}
+.sheet-index{width:52px;min-width:52px;text-align:center;color:#64748b}
+.sheet-category{min-width:120px}
+.sheet-product{min-width:180px;font-weight:700}
+.sheet-status{min-width:110px}
+.sheet-locked{color:#64748b;font-style:italic}
+@media(max-width:768px){
+  .sheet-wrap{max-height:62vh}
+  .sheet-toolbar{display:grid;grid-template-columns:1fr}
+  .sheet-toolbar .input,.sheet-toolbar .btn{width:100%!important}
+}
+
 </style>
 </head>
 <body>
@@ -376,15 +416,54 @@ aside .userbox{
     <section id="digitalstock" class="page hidden">
       <div class="top">
         <div><h1 id="digitalStockTitle">Gudang Digital</h1><div class="muted" id="digitalStockSubtitle"></div></div>
-        <div class="digital-tools adminOnly"><button class="btn" id="batchDigitalBtn">⇪ Batch Paste</button><button class="btn primary" id="addDigitalItem">+ Tambah Stok Digital</button></div>
+        <div class="digital-tools adminOnly">
+          <button class="btn" id="batchDigitalBtn">⇪ Batch Paste</button>
+          <button class="btn primary" id="addDigitalItem">+ Tambah Stok Digital</button>
+        </div>
       </div>
+
       <div class="stats">
         <div class="card stat"><span class="muted">Tersedia</span><b id="dsAvailable">0</b></div>
         <div class="card stat"><span class="muted">Sudah Diambil</span><b id="dsClaimed">0</b></div>
         <div class="card stat"><span class="muted">Sudah Dikirim</span><b id="dsDelivered">0</b></div>
         <div class="card stat"><span class="muted">Total Item</span><b id="dsTotal">0</b></div>
       </div>
-      <div class="digitalgrid" id="digitalRows"></div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="sheet-toolbar">
+          <input class="input" id="digitalSearch" placeholder="Cari produk / buyer / keterangan...">
+          <select class="input" id="digitalCategoryFilter">
+            <option value="">Semua kategori</option>
+            <option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option>
+            <option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option>
+            <option>Drama Box</option><option>CapCut</option><option>Lainnya</option>
+          </select>
+          <select class="input" id="digitalStatusFilter">
+            <option value="">Semua status</option>
+            <option value="available">Tersedia</option>
+            <option value="claimed">Diambil</option>
+            <option value="delivered">Terkirim</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sheet-wrap">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th class="sheet-index">#</th>
+              <th>Kategori</th>
+              <th>Produk</th>
+              <th>Credential / Akun</th>
+              <th>Keterangan</th>
+              <th>Status</th>
+              <th>Buyer</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="digitalRows"></tbody>
+        </table>
+      </div>
     </section>
 
     <section id="stock" class="page hidden">
@@ -1705,33 +1784,63 @@ async function loadDigitalSafe(){
 
 function renderDigital(){
   if(!currentEmployee)return;
+
+  const canSeeSecrets=currentEmployee.role==='admin'||currentEmployee.username==='paqih';
+  const q=($('#digitalSearch')?.value||'').trim().toLowerCase();
+  const cat=$('#digitalCategoryFilter')?.value||'';
+  const stf=$('#digitalStatusFilter')?.value||'';
+
+  let rows=digitalItems.filter(x=>{
+    if(cat && (x.category||'Lainnya')!==cat)return false;
+    if(stf && x.status!==stf)return false;
+    if(q){
+      const hay=[x.product_name,x.category,x.note,x.buyer_ref].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+
   $('#dsAvailable').textContent=digitalItems.filter(x=>x.status==='available').length;
   $('#dsClaimed').textContent=digitalItems.filter(x=>x.status==='claimed').length;
   $('#dsDelivered').textContent=digitalItems.filter(x=>x.status==='delivered').length;
   $('#dsTotal').textContent=digitalItems.length;
 
-  const canSeeSecrets=currentEmployee.role==='admin'||currentEmployee.username==='paqih';
-
-  $('#digitalRows').innerHTML=digitalItems.length?digitalItems.map(x=>{
-    let buttons='';
+  $('#digitalRows').innerHTML=rows.length?rows.map((x,i)=>{
     const secretValue=digitalSecrets[x.id]||'';
+    let actions='';
 
     if(currentEmployee.role==='admin'){
-      buttons=`<div class="stockactions"><button class="btn" onclick="editDigital('${x.id}')">Edit</button><button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button></div>`;
+      actions=`<div class="sheet-actions">
+        <button class="btn" onclick="editDigital('${x.id}')">Edit</button>
+        <button class="btn danger" onclick="deleteDigital('${x.id}')">Hapus</button>
+      </div>`;
     }else if(x.status==='available'){
-      buttons=`<button class="btn primary" onclick="openClaimDigital('${x.id}')">Ambil untuk Buyer</button>`;
+      actions=`<div class="sheet-actions"><button class="btn primary" onclick="openClaimDigital('${x.id}')">Ambil untuk Buyer</button></div>`;
     }else if(x.claimed_by===currentEmployee.id){
-      buttons=x.status==='claimed'?`<button class="btn primary" onclick="markDelivered('${x.id}')">✓ Sudah Dikirim ke Buyer</button>`:'<span class="badge hadir">Sudah Dikirim</span>';
+      actions=x.status==='claimed'
+        ? `<div class="sheet-actions"><button class="btn primary" onclick="markDelivered('${x.id}')">✓ Sudah Dikirim</button></div>`
+        : `<span class="badge hadir">Sudah Dikirim</span>`;
     }
 
-    const secret=canSeeSecrets
-      ? `<div class="claimbox"><b>Credential</b><div class="secretbox">${esc(secretValue||'Belum ada credential')}</div>${x.buyer_ref?`<div class="muted">Buyer: ${esc(x.buyer_ref)}</div>`:''}</div>`
-      : `<div class="cred-hidden">🔒 Credential hanya dapat dilihat Bos dan Faqih.</div>`;
+    const cred=canSeeSecrets
+      ? `<div class="sheet-cred">${esc(secretValue||'Belum ada credential')}</div>`
+      : `<span class="sheet-locked">🔒 Hanya Bos & Faqih</span>`;
 
-    return `<div class="digitalcard"><div class="digitalhead"><div><b>${esc(x.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(x.category||'Lainnya')}</span></div><div class="muted" style="margin-top:6px">${esc(x.note||'')}</div></div><span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span></div>${secret}<div class="stockactions">${buttons}</div></div>`;
-  }).join(''):'<div class="card">Belum ada stok digital.</div>';
+    const statusLabel=x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim';
+    const statusClass=x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin';
+
+    return `<tr>
+      <td class="sheet-index">${i+1}</td>
+      <td class="sheet-category"><span class="categorypill">${esc(x.category||'Lainnya')}</span></td>
+      <td class="sheet-product">${esc(x.product_name||'-')}</td>
+      <td>${cred}</td>
+      <td class="sheet-note">${esc(x.note||'-')}</td>
+      <td class="sheet-status"><span class="badge ${statusClass}">${statusLabel}</span></td>
+      <td class="sheet-buyer">${esc(x.buyer_ref||'-')}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="8" style="text-align:center;padding:28px;color:#8793a5">Belum ada data yang cocok.</td></tr>`;
 }
-
 $('#addDigitalItem').onclick=()=>{
   $('#digitalEditId').value='';
   $('#digitalModalTitle').textContent='Tambah Stok Digital';
@@ -2104,6 +2213,14 @@ $('#importBatch').onclick=async()=>{
   $('#digitalBatchModal').classList.remove('open');
   await loadDigitalSafe();
 };
+
+
+['#digitalSearch','#digitalCategoryFilter','#digitalStatusFilter'].forEach(sel=>{
+  const el=$(sel);
+  if(el){
+    el.addEventListener(sel==='#digitalSearch'?'input':'change',()=>renderDigital());
+  }
+});
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>

@@ -1,12 +1,16 @@
-HOME OFFICE V20.3 - GUDANG DIGITAL PRO
+HOME OFFICE V20.4 - GUDANG DIGITAL SPREADSHEET VIEW
 
-- Hanya Bos/Admin + Faqih (username paqih) dapat melihat credential.
-- Hanya Bos/Admin dapat tambah/edit/hapus credential.
-- Karyawan lain hanya melihat produk dan status.
-- Batch Paste dari Google Sheets/Excel.
-- Preview sebelum import.
-- Kategori produk.
-- Edit kategori, nama produk, credential, dan keterangan.
-- Full realtime tetap dipertahankan.
+Basis: V20.3 Gudang Digital Pro.
 
-WAJIB jalankan SQL_SETUP_V20_3_DIGITAL_PRO.sql terlebih dahulu.
+Perubahan tampilan:
+- Gudang Digital berubah dari card menjadi tabel spreadsheet.
+- Kolom: #, Kategori, Produk, Credential, Keterangan, Status, Buyer, Aksi.
+- Header tabel sticky.
+- Scroll horizontal & vertical.
+- Search cepat.
+- Filter kategori.
+- Filter status.
+- Edit/Hapus tetap tersedia untuk Bos.
+- Claim/Delivered tetap tersedia untuk karyawan sesuai hak akses.
+- Credential tetap hanya terlihat untuk Bos + Faqih.
+- Tidak perlu SQL baru.
