@@ -15,3 +15,6 @@ Fitur:
 - Fitur V20.7 Gudang Digital 100% Fit tetap dipertahankan.
 
 V24: seller listings + public marketplace preview. Lihat README_V24.txt
+
+V26 NOTE:
+Marketplace frontend telah diubah ke branding YANSTORE dark-neon tanpa mengubah database V25. Lihat README_V26.txt.
