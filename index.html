@@ -367,6 +367,24 @@ aside .userbox{
 }
 /* ===== END V20.7 TRUE 100% FIT ===== */
 
+
+/* ===== V20.8 PUSAT NOTIFIKASI BOS ===== */
+.boss-bell{position:fixed;top:18px;right:22px;z-index:40;width:46px;height:46px;border:1px solid #dfe5ec;border-radius:14px;background:#fff;cursor:pointer;font-size:20px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.boss-bell:hover{background:#f8fafc}
+.boss-badge{position:absolute;top:-6px;right:-6px;min-width:21px;height:21px;padding:0 5px;border-radius:999px;background:#dc2626;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.boss-badge.hidden{display:none!important}
+.notify-panel{position:fixed;top:72px;right:22px;z-index:50;width:min(390px,calc(100vw - 28px));max-height:72vh;background:#fff;border:1px solid #dfe5ec;border-radius:18px;box-shadow:0 18px 50px rgba(15,23,42,.18);overflow:hidden}
+.notify-head{padding:16px 17px;border-bottom:1px solid #edf0f4;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.notify-list{max-height:calc(72vh - 66px);overflow:auto;padding:8px}
+.notify-item{width:100%;border:0;background:#fff;text-align:left;padding:12px;border-radius:12px;display:flex;gap:10px;cursor:pointer}
+.notify-item:hover{background:#f5f8ff}
+.notify-icon{width:34px;height:34px;border-radius:10px;background:#eef4ff;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.notify-title{font-weight:800;font-size:13px;color:#17233b}
+.notify-desc{font-size:12px;color:#68758b;margin-top:3px;line-height:1.35}
+.notify-empty{text-align:center;padding:30px 16px;color:#68758b}
+@media(max-width:850px){.boss-bell{top:12px;right:12px}.notify-panel{top:66px;right:12px}}
+/* ===== END V20.8 ===== */
+
 </style>
 </head>
 <body>
@@ -382,6 +400,11 @@ aside .userbox{
 </section>
 
 <div id="app" class="app hidden">
+  <button id="bossBell" class="boss-bell adminOnly hidden" title="Pusat Notifikasi Bos">🔔<span id="bossBellBadge" class="boss-badge hidden">0</span></button>
+  <div id="bossNotifyPanel" class="notify-panel hidden adminOnly">
+    <div class="notify-head"><div><b>🔔 Pusat Notifikasi Bos</b><div class="muted" style="font-size:12px">Hal yang perlu perhatian hari ini</div></div><button class="btn" id="closeBossNotify">Tutup</button></div>
+    <div id="bossNotifyList" class="notify-list"></div>
+  </div>
   <aside class="side">
     <div class="brand">🏠 HomeOffice</div>
     <nav class="nav">
@@ -928,6 +951,7 @@ let productStocks=[],stockHistory=[],stockRealtimeChannel=null;
 let attendanceArchive=[];
 let routineJobs=[],routineChecks=[],digitalItems=[],digitalSecrets={},digitalBatchPreview=[];
 let salesTransactions=[],salesPreviewData=[],salesPreviewFileName="";
+let bossNotifications=[];
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -983,6 +1007,7 @@ async function boot(user){
   await loadRoutineSafe();
   await loadDigitalSafe();
   await loadSalesSafe();
+  renderBossNotifications();
   setupSalesRealtime();
   setupFullRealtime();
 }
@@ -1023,13 +1048,82 @@ async function refreshData(){
 }
 
 function badge(s){return '<span class="badge '+(s==='Hadir'?'hadir':s==='Terlambat'?'telat':s==='Izin'?'izin':'sakit')+'">'+esc(s)+'</span>'}
+
+function isTodayWorkday(){
+  const d=new Date().getDay();
+  const map={0:'work_sunday',1:'work_monday',2:'work_tuesday',3:'work_wednesday',4:'work_thursday',5:'work_friday',6:'work_saturday'};
+  return officeSettings ? officeSettings[map[d]]!==false : d!==0;
+}
+function openBossNotification(page){
+  $('#bossNotifyPanel')?.classList.add('hidden');
+  go(page);
+}
+function renderBossNotifications(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const today=ymd(), active=employees.filter(e=>e.role==='employee'&&e.active);
+  const todayAtt=attendance.filter(a=>a.attendance_date===today);
+  const notes=[];
+  const add=(icon,title,desc,page)=>notes.push({icon,title,desc,page});
+
+  if(isTodayWorkday()){
+    const absent=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id));
+    if(absent.length)add('👤',absent.length+' karyawan belum absen',absent.map(x=>x.full_name).join(', '),'attendance');
+
+    const late=todayAtt.filter(a=>a.status==='Terlambat');
+    if(late.length)add('⏰',late.length+' karyawan terlambat',late.map(x=>x.name||'-').join(', '),'attendance');
+
+    const now=new Date(), hh=now.getHours(), mm=now.getMinutes();
+    if(hh>20||(hh===20&&mm>=30)){
+      const noOut=todayAtt.filter(a=>a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status));
+      if(noOut.length)add('🚪',noOut.length+' karyawan belum checkout',noOut.map(x=>x.name||'-').join(', '),'attendance');
+    }
+  }
+
+  const pending=leaveRequests.filter(x=>String(x.status||'').toLowerCase().includes('menunggu')||String(x.status||'').toLowerCase()==='pending');
+  if(pending.length)add('📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave');
+
+  const unfinished=tasks.filter(x=>x.status!=='Selesai');
+  const overdue=unfinished.filter(x=>x.due_date&&x.due_date<today);
+  if(overdue.length)add('⚠️',overdue.length+' tugas lewat deadline','Ada tugas tambahan yang belum selesai.','tasks');
+  else if(unfinished.length)add('📋',unfinished.length+' tugas belum selesai','Pantau progres tugas tambahan karyawan.','tasks');
+
+  const openRoutine=routineJobs.filter(j=>!routineChecks.some(c=>c.job_id===j.id&&c.completed));
+  if(openRoutine.length)add('☑️',openRoutine.length+' job harian belum selesai','Checklist hari ini masih ada yang terbuka.','routine');
+
+  const out=productStocks.filter(p=>Number(p.stock)<=0);
+  const low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));
+  if(out.length)add('📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock');
+  if(low.length)add('📉',low.length+' stok produk menipis',low.map(x=>x.product_name).join(', '),'stock');
+
+  const digitalAvailable=digitalItems.filter(x=>x.status==='available').length;
+  if(digitalItems.length && digitalAvailable===0)add('💻','Gudang Digital kehabisan stok','Tidak ada item digital berstatus Tersedia.','digitalstock');
+
+  const aping=employees.find(e=>e.username==='aping'&&e.active);
+  if(isTodayWorkday()&&aping){
+    const salesToday=salesTransactions.filter(x=>x.transaction_date===today);
+    const now=new Date();
+    if(now.getHours()>=18 && salesToday.length===0)add('📊','Rekap penjualan hari ini belum masuk','Belum ada transaksi rekap Aping untuk hari ini.','salesrecap');
+  }
+
+  bossNotifications=notes;
+  const badge=$('#bossBellBadge'), list=$('#bossNotifyList');
+  if(badge){
+    badge.textContent=notes.length>99?'99+':notes.length;
+    badge.classList.toggle('hidden',notes.length===0);
+  }
+  if(list){
+    list.innerHTML=notes.length?notes.map((n,i)=>`<button class="notify-item" onclick="openBossNotification('${n.page}')"><span class="notify-icon">${n.icon}</span><span><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div></span></button>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua aman</b><div style="margin-top:5px">Belum ada hal yang perlu perhatian Bos.</div></div>`;
+  }
+}
+window.openBossNotification=openBossNotification;
+
 function renderAll(){
  let td=attendance.filter(x=>x.attendance_date===ymd());
  $('#dH').textContent=td.filter(x=>x.status==='Hadir').length;
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();renderBossNotifications();
 }
 
 function renderAttendance(){
@@ -2175,6 +2269,7 @@ function scheduleRealtimeRefresh(source){
       // Re-render dashboard after all module data is fresh
       if(typeof renderBossDashboard==='function') renderBossDashboard();
       if(typeof renderSalesDashboard==='function') renderSalesDashboard();
+      if(typeof renderBossNotifications==='function') renderBossNotifications();
 
       setRealtimeStatus('Realtime aktif','ok');
       console.log('Realtime update:',source);
@@ -2303,6 +2398,18 @@ $('#importBatch').onclick=async()=>{
   if(el){
     el.addEventListener(sel==='#digitalSearch'?'input':'change',()=>renderDigital());
   }
+});
+
+
+$('#bossBell').onclick=(e)=>{
+  e.stopPropagation();
+  renderBossNotifications();
+  $('#bossNotifyPanel').classList.toggle('hidden');
+};
+$('#closeBossNotify').onclick=()=>$('#bossNotifyPanel').classList.add('hidden');
+document.addEventListener('click',(e)=>{
+  const p=$('#bossNotifyPanel'), b=$('#bossBell');
+  if(p&&!p.classList.contains('hidden')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.add('hidden');
 });
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
