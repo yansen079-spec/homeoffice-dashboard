@@ -10,7 +10,7 @@
 .login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eef4ff,#f8fafc)}
 .loginbox{width:min(440px,100%);background:#fff;padding:30px;border:1px solid #e5eaf1;border-radius:20px;box-shadow:0 20px 60px #1e293b12}.logo{font-size:26px;font-weight:900}.muted{color:#7a8799;font-size:13px;line-height:1.5}.field{display:grid;gap:6px;margin-top:15px;font-size:13px}.field input,.field select{padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff}.btn{border:1px solid #dfe5ed;background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.primary{background:#2563eb;color:#fff;border-color:#2563eb}.wide{width:100%;margin-top:18px}.linkbtn{width:100%;margin-top:8px}.notice{padding:12px 14px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:12px;margin:15px 0;line-height:1.45;font-size:13px}.err{color:#b91c1c;margin-top:12px;font-size:13px;line-height:1.45}
 .app{min-height:100vh}.topbar{height:68px;background:#fff;border-bottom:1px solid #e6eaf0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:5}.brand{font-size:20px;font-weight:900}.userbox{display:flex;align-items:center;gap:12px}.avatar{width:36px;height:36px;border-radius:50%;background:#e8efff;color:#3157a6;display:grid;place-items:center;font-weight:800}.main{padding:28px;max-width:1250px;margin:auto}.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:20px}.hero h1{margin:0 0 6px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e8f7ed;color:#15803d;font-size:12px;font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:20px;box-shadow:0 10px 30px #1e2d5008}.stat b{display:block;font-size:25px;margin-top:7px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs .active{background:#2563eb;color:#fff;border-color:#2563eb}.panel{display:none}.panel.active{display:block}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{font-size:12px;color:#78859a}.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.ok{background:#e8f7ed;color:#15803d}.wait{background:#fff3dc;color:#b45309}.bad{background:#feecec;color:#b91c1c}.money{font-weight:900}.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.box{width:min(680px,100%);background:#fff;padding:22px;border-radius:16px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:20px;box-shadow:0 10px 30px #1e2d5008}.stat b{display:block;font-size:25px;margin-top:7px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs .active{background:#2563eb;color:#fff;border-color:#2563eb}.panel{display:none}.panel.active{display:block}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;white-space:nowrap}th{font-size:12px;color:#78859a}.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.ok{background:#e8f7ed;color:#15803d}.wait{background:#fff3dc;color:#b45309}.bad{background:#feecec;color:#b91c1c}.money{font-weight:900}.cataloggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.productcard{border:1px solid #e6eaf0;border-radius:14px;padding:17px;background:#fff}.productname{font-size:17px;font-weight:900;margin-bottom:8px}.stocknum{font-size:26px;font-weight:900;margin:7px 0}.search{padding:10px 12px;border:1px solid #dfe5ed;border-radius:10px;min-width:240px}.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.box{width:min(680px,100%);background:#fff;padding:22px;border-radius:16px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 @media(max-width:850px){.stats{grid-template-columns:1fr 1fr}.main{padding:18px}.topbar{padding:0 16px}}@media(max-width:520px){.stats,.grid{grid-template-columns:1fr}.hero{flex-direction:column}.topbar{height:auto;padding:12px 14px}.userbox .muted{display:none}}
 </style>
 </head>
@@ -24,6 +24,7 @@
     <label class="field">Password<input id="password" type="password" autocomplete="current-password" placeholder="minimal 6 karakter"></label>
     <button class="btn primary wide" id="loginBtn">Masuk Seller</button>
     <button class="btn linkbtn" id="signupBtn">Aktifkan Akun Pertama Kali</button>
+    <button class="btn linkbtn" id="forgotBtn">Lupa Password</button>
     <div class="muted" style="margin-top:10px">Aktivasi hanya berhasil bila email sama dengan email seller yang sudah berstatus Aktif.</div>
     <div class="err" id="loginMsg"></div>
   </div>
@@ -35,16 +36,17 @@
     <div class="userbox"><div class="avatar" id="avatar">S</div><div><b id="topName">Seller</b><div class="muted" id="topStore"></div></div><button class="btn" id="logoutBtn">Keluar</button></div>
   </div>
   <main class="main">
-    <div class="hero"><div><h1 id="welcome">Dashboard Seller</h1><div class="muted">Pantau order, profit, saldo, dan withdrawal milikmu sendiri.</div></div><span class="status">✓ Seller Aktif</span></div>
+    <div class="hero"><div><h1 id="welcome">Dashboard Seller</h1><div class="muted">Pantau katalog, order, profit, saldo, dan withdrawal milikmu sendiri.</div></div><span class="status">✓ Seller Aktif</span></div>
     <div class="stats">
       <div class="card stat"><div class="muted">Saldo Ledger</div><b id="kpiBalance">Rp 0</b></div>
       <div class="card stat"><div class="muted">Saldo Tersedia</div><b id="kpiAvailable">Rp 0</b></div>
       <div class="card stat"><div class="muted">Order Selesai</div><b id="kpiOrders">0</b></div>
       <div class="card stat"><div class="muted">Withdrawal Menunggu</div><b id="kpiPending">0</b></div>
     </div>
-    <div class="tabs"><button class="btn active" data-tab="orders">Order Saya</button><button class="btn" data-tab="ledger">Ledger Profit</button><button class="btn" data-tab="withdrawals">Withdrawal</button></div>
+    <div class="tabs"><button class="btn active" data-tab="catalog">Katalog Produk</button><button class="btn" data-tab="orders">Order Saya</button><button class="btn" data-tab="ledger">Ledger Profit</button><button class="btn" data-tab="withdrawals">Withdrawal</button></div>
 
-    <section class="panel active" id="p-orders"><div class="card"><div class="toolbar"><b>Order Saya</b><button class="btn" onclick="loadData()">↻ Refresh</button></div><div class="table"><table><thead><tr><th>Tanggal</th><th>Buyer</th><th>Produk</th><th>Harga Jual</th><th>Profit</th><th>Status</th></tr></thead><tbody id="orderRows"></tbody></table></div></div></section>
+    <section class="panel active" id="p-catalog"><div class="card"><div class="toolbar"><div><b>Katalog Produk</b><div class="muted">Stok dari Gudang Produk HomeOffice. Seller hanya dapat melihat, tidak dapat mengubah stok.</div></div><input class="search" id="catalogSearch" placeholder="Cari produk..."></div><div class="cataloggrid" id="catalogGrid"></div></div></section>
+    <section class="panel" id="p-orders"><div class="card"><div class="toolbar"><b>Order Saya</b><button class="btn" onclick="loadData()">↻ Refresh</button></div><div class="table"><table><thead><tr><th>Tanggal</th><th>Buyer</th><th>Produk</th><th>Harga Jual</th><th>Profit</th><th>Status</th></tr></thead><tbody id="orderRows"></tbody></table></div></div></section>
     <section class="panel" id="p-ledger"><div class="card"><div class="toolbar"><b>Ledger Profit</b><div class="muted">Semua perubahan saldo tercatat di sini.</div></div><div class="table"><table><thead><tr><th>Waktu</th><th>Jenis</th><th>Nominal</th><th>Catatan</th></tr></thead><tbody id="ledgerRows"></tbody></table></div></div></section>
     <section class="panel" id="p-withdrawals"><div class="card"><div class="toolbar"><div><b>Withdrawal</b><div class="muted">Bos akan memeriksa dan mentransfer secara manual.</div></div><button class="btn primary" id="requestBtn">+ Ajukan Withdrawal</button></div><div class="table"><table><thead><tr><th>Tanggal</th><th>Nominal</th><th>Tujuan</th><th>Status</th></tr></thead><tbody id="withdrawRows"></tbody></table></div></div></section>
   </main>
@@ -59,7 +61,29 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const rupiah=n=>'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n||0));
-let seller=null,orders=[],ledger=[],withdrawals=[];
+let seller=null,orders=[],ledger=[],withdrawals=[],catalog=[];
+
+
+async function forgotPassword(){
+  const email=$('#email').value.trim();
+  if(!email){$('#loginMsg').textContent='Isi email seller terlebih dahulu.';return}
+  $('#loginMsg').textContent='Mengirim link reset password...';
+  const redirectTo=new URL('seller.html',location.href).href;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  $('#loginMsg').textContent=error?error.message:'Link reset password sudah dikirim. Buka email seller lalu klik link tersebut.';
+}
+async function handleRecovery(){
+  const hash=new URLSearchParams(location.hash.replace(/^#/,''));
+  const query=new URLSearchParams(location.search);
+  const isRecovery=hash.get('type')==='recovery'||query.get('type')==='recovery';
+  if(!isRecovery)return false;
+  const pw=prompt('Buat password baru seller (minimal 6 karakter):');
+  if(!pw)return true;
+  if(pw.length<6){alert('Password minimal 6 karakter.');return true}
+  const {error}=await sb.auth.updateUser({password:pw});
+  if(error)alert(error.message);else{alert('Password seller berhasil diperbarui. Silakan login kembali.');await sb.auth.signOut();history.replaceState({},document.title,location.pathname);location.reload()}
+  return true;
+}
 
 async function signIn(){
   $('#loginMsg').textContent='Memproses...';
@@ -92,7 +116,9 @@ async function loadData(){
     sb.from('withdrawal_requests').select('id,amount,destination_type,destination_account,destination_name,status,created_at,processed_at').order('created_at',{ascending:false})
   ]);
   if(a.error||b.error||c.error){alert((a.error||b.error||c.error).message);return}
-  orders=a.data||[];ledger=b.data||[];withdrawals=c.data||[];render();
+  orders=a.data||[];ledger=b.data||[];withdrawals=c.data||[];
+  const cat=await sb.from('seller_product_catalog').select('id,product_name,stock,minimum_stock').order('product_name');
+  catalog=cat.error?[]:(cat.data||[]);render();
 }
 function render(){
   const balance=ledger.reduce((n,x)=>n+Number(x.amount||0),0);
@@ -101,10 +127,28 @@ function render(){
   $('#kpiBalance').textContent=rupiah(balance);$('#kpiAvailable').textContent=rupiah(available);$('#kpiOrders').textContent=orders.filter(x=>x.status==='Selesai').length;$('#kpiPending').textContent=withdrawals.filter(x=>x.status==='pending').length;
   $('#orderRows').innerHTML=orders.length?orders.map(x=>`<tr><td>${esc(new Date(x.created_at).toLocaleDateString('id-ID'))}</td><td>${esc(x.buyer_name||'-')}</td><td>${esc(x.product_name)}</td><td>${rupiah(x.sell_price)}</td><td class="money">${rupiah(x.seller_profit)}</td><td><span class="badge ${x.status==='Selesai'?'ok':x.status==='Dibatalkan'?'bad':'wait'}">${esc(x.status)}</span></td></tr>`).join(''):'<tr><td colspan="6" class="muted" style="text-align:center;padding:28px">Belum ada order.</td></tr>';
   $('#ledgerRows').innerHTML=ledger.length?ledger.map(x=>`<tr><td>${esc(new Date(x.created_at).toLocaleString('id-ID'))}</td><td>${esc(x.entry_type)}</td><td class="money">${Number(x.amount)>=0?'+':''}${rupiah(x.amount)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="4" class="muted" style="text-align:center;padding:28px">Belum ada ledger.</td></tr>';
+
+  renderCatalog();
   $('#withdrawRows').innerHTML=withdrawals.length?withdrawals.map(x=>`<tr><td>${esc(new Date(x.created_at).toLocaleDateString('id-ID'))}</td><td class="money">${rupiah(x.amount)}</td><td>${esc(x.destination_type+' • '+x.destination_account+' • '+x.destination_name)}</td><td><span class="badge ${x.status==='paid'?'ok':x.status==='rejected'?'bad':'wait'}">${x.status==='paid'?'Dibayar':x.status==='rejected'?'Ditolak':'Menunggu'}</span></td></tr>`).join(''):'<tr><td colspan="4" class="muted" style="text-align:center;padding:28px">Belum ada withdrawal.</td></tr>';
 }
-$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));$$('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+b.dataset.tab))});
-$('#loginBtn').onclick=signIn;$('#signupBtn').onclick=signUp;$('#password').onkeydown=e=>{if(e.key==='Enter')signIn()};
+
+function renderCatalog(){
+  const q=($('#catalogSearch')?.value||'').trim().toLowerCase();
+  const rows=catalog.filter(x=>!q||String(x.product_name||'').toLowerCase().includes(q));
+  const el=$('#catalogGrid'); if(!el)return;
+  el.innerHTML=rows.length?rows.map(x=>{const qty=Number(x.stock||0),min=Number(x.minimum_stock||0);const label=qty<=0?'Habis':qty<=min?'Menipis':'Tersedia';const cls=qty<=0?'bad':qty<=min?'wait':'ok';return `<div class="productcard"><div class="productname">${esc(x.product_name)}</div><span class="badge ${cls}">${label}</span><div class="stocknum">${qty}</div><div class="muted">stok tersedia • read-only</div></div>`}).join(''):'<div class="muted">Produk tidak ditemukan atau belum ada stok yang dibagikan.</div>';
+}
+
+$$('[data-tab]').forEach(b=>b.onclick=()=>{
+function renderCatalog(){
+  const q=($('#catalogSearch')?.value||'').trim().toLowerCase();
+  const rows=catalog.filter(x=>!q||String(x.product_name||'').toLowerCase().includes(q));
+  const el=$('#catalogGrid'); if(!el)return;
+  el.innerHTML=rows.length?rows.map(x=>{const qty=Number(x.stock||0),min=Number(x.minimum_stock||0);const label=qty<=0?'Habis':qty<=min?'Menipis':'Tersedia';const cls=qty<=0?'bad':qty<=min?'wait':'ok';return `<div class="productcard"><div class="productname">${esc(x.product_name)}</div><span class="badge ${cls}">${label}</span><div class="stocknum">${qty}</div><div class="muted">stok tersedia • read-only</div></div>`}).join(''):'<div class="muted">Produk tidak ditemukan atau belum ada stok yang dibagikan.</div>';
+}
+
+$$('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));$$('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+b.dataset.tab))});
+$('#loginBtn').onclick=signIn;$('#signupBtn').onclick=signUp;$('#forgotBtn').onclick=forgotPassword;$('#catalogSearch').oninput=renderCatalog;$('#password').onkeydown=e=>{if(e.key==='Enter')signIn()};
 $('#logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
 $('#requestBtn').onclick=()=>{$('#wdAmount').value='';$('#wdType').value='';$('#wdAccount').value='';$('#wdName').value='';$('#withdrawModal').classList.add('open')};
 $('#cancelWd').onclick=()=>$('#withdrawModal').classList.remove('open');
@@ -117,7 +161,7 @@ $('#saveWd').onclick=async()=>{
   if(error){alert(error.message);return}
   $('#withdrawModal').classList.remove('open');await loadData();alert('Permintaan withdrawal berhasil dikirim ke Bos.');
 };
-(async()=>{const {data}=await sb.auth.getSession();if(data.session)await boot(data.session.user)})();
+(async()=>{if(await handleRecovery())return;const {data}=await sb.auth.getSession();if(data.session)await boot(data.session.user)})();
 </script>
 </body>
 </html>
