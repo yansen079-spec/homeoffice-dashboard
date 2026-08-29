@@ -1,0 +1,9 @@
+YANSTORE V28.2 Transparent Logo Fix
+- Menggunakan logo mentahan asli pengguna.
+- Background putih luar dihapus menjadi transparan.
+- Background CSS putih pada logo dihapus.
+- Proporsi dijaga dengan object-fit: contain.
+- Logo PNG juga disimpan di assets/yanstore-logo-transparent.png.
+- Logo di-embed langsung ke marketplace.html untuk menghindari broken path.
+- Animasi tulisan YANSTORE tetap dipertahankan.
+- Fitur order, seller, admin, Supabase, SQL dan logic lain tidak diubah.
