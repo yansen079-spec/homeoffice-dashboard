@@ -18,3 +18,5 @@ V24: seller listings + public marketplace preview. Lihat README_V24.txt
 
 V26 NOTE:
 Marketplace frontend telah diubah ke branding YANSTORE dark-neon tanpa mengubah database V25. Lihat README_V26.txt.
+
+V27: UI Polish marketplace YANSTORE. Tidak ada SQL baru; semua logic/order/database V26 tetap sama.
