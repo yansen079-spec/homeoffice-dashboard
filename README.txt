@@ -1,11 +1,10 @@
-HOME OFFICE V20.6 - GUDANG DIGITAL COMPACT FIT
+HOME OFFICE V20.7 - GUDANG DIGITAL TRUE 100% FIT
 
-Perbaikan utama:
-- Spreadsheet tidak lagi dipaksa melebar keluar layar.
-- Semua 8 kolom dipadatkan agar muat pada area konten.
-- Credential dan keterangan otomatis wrap.
-- Kolom Aksi/Edit/Hapus selalu masuk layar.
-- Font tabel sedikit diperkecil agar lebih lega.
-- Di HP otomatis berubah menjadi kartu supaya tidak kepotong.
+- Nyaman dipakai pada browser zoom 100%.
+- Tidak perlu zoom-out.
+- Spreadsheet dikompres menjadi 6 kolom.
+- Kategori digabung dengan Produk.
+- Status digabung dengan Buyer.
+- Credential/Keterangan wrap otomatis.
+- Edit/Hapus tetap terlihat.
 - Tidak perlu SQL baru.
-- Semua fungsi V20.5 tetap dipertahankan.
