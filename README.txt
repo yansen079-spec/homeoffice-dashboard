@@ -1,7 +1,11 @@
-HOME OFFICE V20.5 - GUDANG DIGITAL SPREADSHEET FIX
+HOME OFFICE V20.6 - GUDANG DIGITAL COMPACT FIT
 
-- Scroll horizontal lebih jelas.
-- Kolom Aksi sticky di kanan.
-- Tombol Edit/Hapus tetap terlihat.
-- Tabel lebih lebar agar credential/keterangan lebih lega.
+Perbaikan utama:
+- Spreadsheet tidak lagi dipaksa melebar keluar layar.
+- Semua 8 kolom dipadatkan agar muat pada area konten.
+- Credential dan keterangan otomatis wrap.
+- Kolom Aksi/Edit/Hapus selalu masuk layar.
+- Font tabel sedikit diperkecil agar lebih lega.
+- Di HP otomatis berubah menjadi kartu supaya tidak kepotong.
 - Tidak perlu SQL baru.
+- Semua fungsi V20.5 tetap dipertahankan.
