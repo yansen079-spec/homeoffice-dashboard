@@ -286,6 +286,44 @@ aside .userbox{
   .sheet-toolbar .input,.sheet-toolbar .btn{width:100%!important}
 }
 
+
+/* ===== V20.5 SPREADSHEET USABILITY FIX ===== */
+.sheet-scroll-hint{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin:8px 0 10px;color:#64748b;font-size:13px
+}
+.sheet-wrap{
+  overflow-x:scroll!important;
+  overflow-y:auto!important;
+  scrollbar-gutter:stable both-edges!important;
+  padding-bottom:4px;
+}
+.sheet-wrap::-webkit-scrollbar{height:14px;width:12px}
+.sheet-wrap::-webkit-scrollbar-track{background:#eef2f7;border-radius:999px}
+.sheet-wrap::-webkit-scrollbar-thumb{background:#9aa7b8;border-radius:999px;border:3px solid #eef2f7}
+.sheet-wrap::-webkit-scrollbar-thumb:hover{background:#6b7788}
+.sheet-table{min-width:1450px!important}
+.sheet-table th:last-child,
+.sheet-table td:last-child{
+  position:sticky!important;
+  right:0!important;
+  z-index:4!important;
+  background:#fff!important;
+  box-shadow:-8px 0 12px -12px rgba(15,23,42,.45);
+}
+.sheet-table th:last-child{
+  z-index:6!important;
+  background:#f8fafc!important;
+}
+.sheet-table tr:hover td:last-child{background:#fbfdff!important}
+.sheet-actions{min-width:190px!important;justify-content:flex-start!important}
+.sheet-actions .btn{min-width:76px!important}
+@media(max-width:768px){
+  .sheet-table{min-width:1300px!important}
+  .sheet-table th:last-child,.sheet-table td:last-child{min-width:170px!important}
+}
+/* ===== END V20.5 SPREADSHEET USABILITY FIX ===== */
+
 </style>
 </head>
 <body>
@@ -447,6 +485,10 @@ aside .userbox{
         </div>
       </div>
 
+      <div class="sheet-scroll-hint">
+        <span>↔ Geser tabel ke kiri/kanan untuk melihat semua kolom.</span>
+        <span>Kolom Aksi tetap menempel di kanan.</span>
+      </div>
       <div class="sheet-wrap">
         <table class="sheet-table">
           <thead>
