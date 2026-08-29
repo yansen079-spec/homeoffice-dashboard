@@ -1,0 +1,6 @@
+YANSTORE V28.1 Logo Fix
+- Menggunakan logo mentahan asli yang diberikan pengguna.
+- Logo di-embed langsung ke marketplace.html agar tidak broken karena path.
+- Rasio logo dijaga dengan object-fit: contain.
+- Animasi tulisan YANSTORE tetap dipertahankan.
+- Fitur V28 lainnya tidak diubah.
