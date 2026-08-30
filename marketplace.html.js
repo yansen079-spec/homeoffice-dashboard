@@ -1,4 +1,5 @@
 
+
 const SUPABASE_URL='https://ltffbxrggflevlilqmze.supabase.co',SUPABASE_KEY='sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ',sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));const rupiah=n=>'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n||0));let rows=[],activeCat='all';
 function categoryOf(x){const s=[x.title,x.product_name,x.description].join(' ').toLowerCase();if(/joki|boost|rank|jasa|service|followers|channel/.test(s))return'jasa';if(/mobile legend|mlbb|pubg|valorant|roblox|steam|game|diamond|voucher game|top up/.test(s))return'game';if(/spotify|netflix|disney|wetv|drive|canva|youtube|premium|akun|digital|voucher/.test(s))return'digital';return'other'}
