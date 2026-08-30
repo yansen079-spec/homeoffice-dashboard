@@ -75,9 +75,9 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 </section>
 <section class="searchBox"><div class="searchIcon">⌕</div><input id="search" class="search" placeholder="Cari produk atau toko..."><button class="searchBtn" id="searchButton">Cari</button></section>
 <section class="section" id="categories"><div class="sectionHead"><div><div class="sectionTitle">Jelajahi <span>Kategori</span></div><div class="sectionSub">Filter cepat berdasarkan jenis produk.</div></div></div><div class="cats" id="cats"><button class="cat active" data-cat="all">✦ Semua</button><button class="cat" data-cat="digital">◇ Produk Digital</button><button class="cat" data-cat="game">🎮 Produk Game</button><button class="cat" data-cat="jasa">⚡ Jasa</button><button class="cat" data-cat="other">••• Lainnya</button></div></section>
-<div class="notice" id="how"><b>Safe Order V27:</b> buyer membuat permintaan order terlebih dahulu. Pembayaran otomatis dan pemotongan stok tetap belum diaktifkan; status pembayaran diverifikasi melalui HomeOffice seperti pada V25.</div>
+<div class="notice" id="how"><b>Midtrans Sandbox Aktif:</b> order dibuat dan stok langsung direservasi oleh database. Setelah itu buyer diarahkan ke halaman pembayaran Midtrans. Status pembayaran diperbarui otomatis melalui webhook.</div>
 <section class="section" id="products"><div class="sectionHead"><div><div class="sectionTitle">✦ Produk <span>Terbaru</span></div><div class="sectionSub">Listing aktif dari seller YANSTORE.</div></div><div class="count" id="countChip">0 listing</div></div><div id="grid" class="products"></div></section>
-<section class="section"><div class="features"><div class="feature"><div class="featureIcon">◇</div><div><b>Transaksi Tercatat</b><span>Order masuk ke sistem HomeOffice</span></div></div><div class="feature"><div class="featureIcon">⚡</div><div><b>Proses Cepat</b><span>Seller menerima order yang masuk</span></div></div><div class="feature"><div class="featureIcon">⌁</div><div><b>Harga Transparan</b><span>Harga divalidasi dari database</span></div></div><div class="feature"><div class="featureIcon">◉</div><div><b>Seller Terverifikasi</b><span>Hanya seller approved yang tampil</span></div></div></div><div class="stats"><div class="stat"><b id="statListings">0</b><span>Listing Aktif</span></div><div class="stat"><b id="statStores">0</b><span>Toko Aktif</span></div><div class="stat"><b>Realtime</b><span>Stok Marketplace</span></div><div class="stat"><b>V31.1</b><span>Atomic Stock Checkout</span></div></div></section>
+<section class="section"><div class="features"><div class="feature"><div class="featureIcon">◇</div><div><b>Transaksi Tercatat</b><span>Order masuk ke sistem HomeOffice</span></div></div><div class="feature"><div class="featureIcon">⚡</div><div><b>Proses Cepat</b><span>Seller menerima order yang masuk</span></div></div><div class="feature"><div class="featureIcon">⌁</div><div><b>Harga Transparan</b><span>Harga divalidasi dari database</span></div></div><div class="feature"><div class="featureIcon">◉</div><div><b>Seller Terverifikasi</b><span>Hanya seller approved yang tampil</span></div></div></div><div class="stats"><div class="stat"><b id="statListings">0</b><span>Listing Aktif</span></div><div class="stat"><b id="statStores">0</b><span>Toko Aktif</span></div><div class="stat"><b>Realtime</b><span>Stok Marketplace</span></div><div class="stat"><b>Midtrans</b><span>Sandbox Payment</span></div></div></section>
 </main>
 <footer class="footer">YANSTORE Marketplace • Terhubung dengan Seller Portal & HomeOffice</footer>
 <div class="modal" id="orderModal"><div class="box">
@@ -91,10 +91,10 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 <label class="field">Email (opsional)<input id="buyerEmail" maxlength="160" type="email" autocomplete="email" placeholder="email@contoh.com"></label>
 <label class="field">Catatan (opsional)<textarea id="buyerNote" maxlength="500" placeholder="Detail kebutuhan atau catatan order"></textarea></label>
 <div class="checkoutSummary"><span>Harga satuan</span><b id="summaryUnit">-</b><span>Jumlah</span><b id="summaryQty">1</b><span>Total estimasi</span><b class="checkoutTotal" id="summaryTotal">-</b></div>
-<div class="payNotice"><b>Belum melakukan pembayaran.</b> V30 belum mengaktifkan payment gateway. Saat order berhasil dibuat, stok sesuai jumlah pesanan langsung direservasi secara atomik oleh database; pembayaran tetap diverifikasi melalui HomeOffice.</div>
-<div class="success" id="orderSuccess"><b>Order berhasil dibuat.</b><div>Kode order:</div><div class="code" id="orderCode"></div><div class="muted">Simpan kode ini untuk pengecekan order.</div></div>
-<div class="orderNext" id="orderNext"><b>Langkah selanjutnya</b><span>Hubungi admin/seller menggunakan kode order di atas. Jangan menganggap order sudah dibayar sebelum status pembayaran diverifikasi di HomeOffice.</span></div>
-<div class="actions"><button class="btn secondary" id="cancelOrder">Tutup</button><button class="btn" id="submitOrder">Buat Pesanan</button></div>
+<div class="payNotice"><b>Pembayaran otomatis via Midtrans.</b> Setelah order dibuat, kamu akan diarahkan ke halaman pembayaran Sandbox. Order baru dianggap dibayar setelah Midtrans mengirim konfirmasi otomatis ke sistem.</div>
+<div class="success" id="orderSuccess"><b>Order berhasil dibuat.</b><div>Kode order:</div><div class="code" id="orderCode"></div><div class="muted" id="paymentMessage">Menyiapkan halaman pembayaran Midtrans...</div></div>
+<div class="orderNext" id="orderNext"><b>Langkah selanjutnya</b><span id="orderNextText">Selesaikan pembayaran di Midtrans. Status order akan diperbarui otomatis setelah pembayaran terkonfirmasi.</span></div>
+<div class="actions"><button class="btn secondary" id="cancelOrder">Tutup</button><button class="btn" id="submitOrder">Buat & Bayar</button></div>
 </div></div>
 <script>
 const SUPABASE_URL='https://ltffbxrggflevlilqmze.supabase.co',SUPABASE_KEY='sb_publishable_svtQE6pna4HvyU07igxRnA_eUdi0rNJ',sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -104,10 +104,46 @@ function iconOf(x){const c=categoryOf(x),s=[x.title,x.product_name].join(' ').to
 async function load(){const {data,error}=await sb.rpc('get_marketplace_listings_v32_1');if(error){$('#grid').innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}rows=data||[];$('#statListings').textContent=rows.length;$('#statStores').textContent=new Set(rows.map(x=>x.store_name).filter(Boolean)).size;render()}
 function render(){const q=$('#search').value.trim().toLowerCase(),f=rows.filter(x=>(activeCat==='all'||categoryOf(x)===activeCat)&&(!q||[x.title,x.product_name,x.store_name,x.seller_name,x.description].some(v=>String(v||'').toLowerCase().includes(q))));$('#countChip').textContent=f.length+' listing';$('#grid').innerHTML=f.length?f.map(x=>`<article class="card"><div class="visual ${categoryOf(x)} ${x.image_url?'hasPhoto':''}"><span class="new">Aktif</span>${x.image_url?`<img class="productPhoto" src="${esc(x.image_url)}" alt="${esc(x.product_name||x.title)}">`:`<div class="visualGlow"></div><div class="productIcon">${esc(iconOf(x))}</div><div class="visualCopy"><b>${esc(x.product_name||x.title)}</b><span>${esc(categoryOf(x)==='game'?'Game & Top Up':categoryOf(x)==='jasa'?'Digital Service':categoryOf(x)==='digital'?'Digital Premium':'YANSTORE')}</span></div>`}</div><div class="cardbody"><div class="storeRow"><span class="storeAvatar">${esc((x.store_name||'Y').slice(0,1).toUpperCase())}</span><span>${esc(x.store_name||x.seller_name||'YANSTORE Seller')}</span></div><div class="cardTitle">${esc(x.title)}</div><div class="desc">${esc(x.description||x.product_name||'Produk digital YANSTORE')}</div><div class="price">${rupiah(x.sell_price)}</div><div class="cardMeta"><span>Seller: ${esc(x.seller_name||'-')}</span><span class="stock">Stok ${Number(x.stock||0)}</span></div><button class="buyBtn" data-id="${esc(x.listing_id)}">Checkout</button></div></article>`).join(''):'<div class="empty">Belum ada listing yang cocok dengan pencarian atau kategori ini.</div>';document.querySelectorAll('.buyBtn').forEach(btn=>btn.addEventListener('click',()=>openOrder(btn.dataset.id)))}
 function updateCheckoutSummary(){const unit=Number($('#orderUnitPrice').value||0),qty=Number($('#orderQty').value||1);$('#summaryUnit').textContent=rupiah(unit);$('#summaryQty').textContent=qty;$('#summaryTotal').textContent=rupiah(unit*qty)}
-function openOrder(id){const x=rows.find(r=>String(r.listing_id)===String(id));if(!x)return;$('#orderListingId').value=x.listing_id;$('#orderTitle').textContent=x.title;$('#orderStore').textContent='Toko: '+x.store_name;$('#orderPrice').textContent=rupiah(x.sell_price);$('#orderUnitPrice').value=Number(x.sell_price||0);$('#orderStock').value=Math.max(1,Number(x.stock||1));$('#orderQty').value=1;$('#buyerName').value='';$('#buyerContact').value='';$('#buyerEmail').value='';$('#buyerNote').value='';$('#orderSuccess').classList.remove('show');$('#orderNext').classList.remove('show');$('#submitOrder').disabled=false;$('#submitOrder').textContent='Buat Pesanan';updateCheckoutSummary();$('#orderModal').classList.add('open')}
+function openOrder(id){const x=rows.find(r=>String(r.listing_id)===String(id));if(!x)return;$('#orderListingId').value=x.listing_id;$('#orderTitle').textContent=x.title;$('#orderStore').textContent='Toko: '+x.store_name;$('#orderPrice').textContent=rupiah(x.sell_price);$('#orderUnitPrice').value=Number(x.sell_price||0);$('#orderStock').value=Math.max(1,Number(x.stock||1));$('#orderQty').value=1;$('#buyerName').value='';$('#buyerContact').value='';$('#buyerEmail').value='';$('#buyerNote').value='';$('#orderSuccess').classList.remove('show');$('#orderNext').classList.remove('show');$('#submitOrder').disabled=false;$('#submitOrder').textContent='Buat & Bayar';$('#paymentMessage').textContent='Menyiapkan halaman pembayaran Midtrans...';$('#orderNextText').textContent='Selesaikan pembayaran di Midtrans. Status order akan diperbarui otomatis setelah pembayaran terkonfirmasi.';updateCheckoutSummary();$('#orderModal').classList.add('open')}
 $('#qtyMinus').onclick=()=>{const q=Math.max(1,Number($('#orderQty').value||1)-1);$('#orderQty').value=q;updateCheckoutSummary()};
 $('#qtyPlus').onclick=()=>{const stock=Math.max(1,Number($('#orderStock').value||1)),q=Math.min(stock,Number($('#orderQty').value||1)+1);$('#orderQty').value=q;updateCheckoutSummary()};
-$('#submitOrder').onclick=async()=>{const id=$('#orderListingId').value,name=$('#buyerName').value.trim(),contact=$('#buyerContact').value.trim(),email=$('#buyerEmail').value.trim(),qty=Math.max(1,Number($('#orderQty').value||1));let note=$('#buyerNote').value.trim();if(!id||name.length<2||contact.length<5){alert('Lengkapi nama buyer dan WhatsApp / kontak.');return}$('#submitOrder').disabled=true;$('#submitOrder').textContent='Membuat pesanan...';const {data,error}=await sb.rpc('create_marketplace_order_v30',{p_listing_id:id,p_quantity:qty,p_buyer_name:name,p_buyer_contact:contact,p_buyer_email:email||null,p_buyer_note:note||null});if(error){$('#submitOrder').disabled=false;$('#submitOrder').textContent='Buat Pesanan';alert(error.message);return}const result=Array.isArray(data)?data[0]:data;$('#orderCode').textContent=result?.order_code||'-';$('#orderSuccess').classList.add('show');$('#orderNext').classList.add('show');document.querySelectorAll('.checkoutStep').forEach(x=>x.classList.add('active'));$('#submitOrder').textContent='Pesanan Dibuat';await load()};
+async function createMidtransPayment(orderCode){
+  const r=await fetch(SUPABASE_URL+'/functions/v1/midtrans-create-snap',{
+    method:'POST',
+    headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({order_code:orderCode})
+  });
+  const raw=await r.text();
+  let data={};try{data=JSON.parse(raw)}catch(_){data={error:raw||('HTTP '+r.status)}}
+  if(!r.ok)throw new Error(data?.error||data?.message||('HTTP '+r.status));
+  if(!data?.redirect_url)throw new Error('Midtrans tidak mengembalikan URL pembayaran.');
+  return data;
+}
+$('#submitOrder').onclick=async()=>{
+  const id=$('#orderListingId').value,name=$('#buyerName').value.trim(),contact=$('#buyerContact').value.trim(),email=$('#buyerEmail').value.trim(),qty=Math.max(1,Number($('#orderQty').value||1));
+  let note=$('#buyerNote').value.trim();
+  if(!id||name.length<2||contact.length<5){alert('Lengkapi nama buyer dan WhatsApp / kontak.');return}
+  $('#submitOrder').disabled=true;$('#submitOrder').textContent='Membuat order...';
+  const {data,error}=await sb.rpc('create_marketplace_order_v30',{p_listing_id:id,p_quantity:qty,p_buyer_name:name,p_buyer_contact:contact,p_buyer_email:email||null,p_buyer_note:note||null});
+  if(error){$('#submitOrder').disabled=false;$('#submitOrder').textContent='Buat & Bayar';alert(error.message);return}
+  const result=Array.isArray(data)?data[0]:data,orderCode=result?.order_code||'';
+  $('#orderCode').textContent=orderCode||'-';$('#orderSuccess').classList.add('show');$('#orderNext').classList.add('show');
+  document.querySelectorAll('.checkoutStep').forEach(x=>x.classList.add('active'));
+  $('#paymentMessage').textContent='Menghubungkan ke Midtrans Sandbox...';$('#submitOrder').textContent='Menyiapkan pembayaran...';
+  await load();
+  try{
+    const pay=await createMidtransPayment(orderCode);
+    $('#paymentMessage').textContent='Halaman pembayaran siap. Mengalihkan ke Midtrans...';
+    $('#orderNextText').textContent='Kamu akan diarahkan ke Midtrans Sandbox. Setelah pembayaran selesai, status order diperbarui otomatis.';
+    location.href=pay.redirect_url;
+  }catch(err){
+    console.error(err);
+    $('#paymentMessage').textContent='Order sudah tersimpan, tetapi halaman pembayaran belum berhasil dibuat.';
+    $('#orderNextText').textContent='Jangan buat order baru. Catat kode order ini lalu coba lagi setelah konfigurasi pembayaran diperiksa.';
+    $('#submitOrder').disabled=true;$('#submitOrder').textContent='Order Tersimpan';
+    alert('Order berhasil dibuat, tetapi Midtrans gagal dibuka: '+(err?.message||err));
+  }
+};
 $('#cancelOrder').onclick=()=>$('#orderModal').classList.remove('open');$('#orderModal').addEventListener('click',e=>{if(e.target===$('#orderModal'))$('#orderModal').classList.remove('open')});$('#search').oninput=render;$('#searchButton').onclick=()=>{render();$('#products').scrollIntoView({behavior:'smooth'})};document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{activeCat=b.dataset.cat;document.querySelectorAll('.cat').forEach(x=>x.classList.toggle('active',x===b));render();$('#products').scrollIntoView({behavior:'smooth'})});document.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.scroll)?.scrollIntoView({behavior:'smooth'}));load();
 </script>
 </body></html>
