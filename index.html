@@ -144,7 +144,7 @@ table{max-width:100%}
 .progressbar{height:9px;background:#eef1f5;border-radius:999px;overflow:hidden;margin-top:8px}
 .progressbar>span{display:block;height:100%;background:#2563eb;border-radius:999px}
 .claimbox{background:#f8fafc;border:1px dashed #ccd5e1;border-radius:12px;padding:12px;margin-top:10px}
-.secretbox{font-family:monospace;background:#111827;color:#fff;border-radius:10px;padding:12px;word-break:break-word;margin-top:8px}
+.secretbox{font-family:monospace;background:#111827;color:#fff;border-radius:10px;padding:12px;word-break:break-word;white-space:pre-wrap;margin-top:8px}
 
 
 /* ===== V19.1 SIDEBAR SCROLL FIX ===== */
@@ -956,7 +956,11 @@ aside .userbox{
     <div class="grid">
       <label class="field">Kategori<select id="digitalCategory"><option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option><option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option><option>Drama Box</option><option>CapCut</option><option>Lainnya</option></select></label>
       <label class="field">Produk<input id="digitalProductName" placeholder="Contoh: Netflix Premium"></label>
-      <label class="field">Akun / Link / Kode<input id="digitalSecret" placeholder="Email akun, link invite, kode redeem, dll"></label>
+      <label class="field">Akun / Link / Kode<textarea id="digitalSecret" rows="6" placeholder="Contoh:
+Email: netflix01@gmail.com
+Password: netflix123
+Profile: Profile 2
+PIN: 7788" style="min-height:150px;white-space:pre-wrap"></textarea></label>
       <label class="field" style="grid-column:1/-1">Catatan<textarea id="digitalNote" placeholder="Opsional"></textarea></label>
     </div>
     <div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveDigitalItem">Simpan Item</button></div>
