@@ -402,6 +402,9 @@ aside .userbox{
 </style>
 <style>
 .digital-product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.digital-product-card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:18px}.digital-product-head{display:flex;justify-content:space-between;gap:12px}.digital-stock-number{font-size:34px;font-weight:900;margin:12px 0 2px}.digital-product-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.digital-unit{border:1px solid #e6eaf0;border-radius:12px;padding:12px;background:#f8fafc;margin:8px 0}.digital-unit-cred{font-family:monospace;white-space:pre-wrap;word-break:break-word;margin-top:7px}@media(max-width:600px){.digital-product-grid{grid-template-columns:1fr}}
+
+/* V36 Smart Notification Center */
+.notify-item{position:relative}.notify-item.unread{background:#eff6ff;border:1px solid #bfdbfe}.notify-item.read{opacity:.72}.notify-item .notify-copy{flex:1}.notify-meta{font-size:10px;color:#94a3b8;margin-top:5px}.notify-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.notify-mini{border:0;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer;background:#e8efff;color:#1d4ed8}.notify-mini.gray{background:#f1f5f9;color:#475569}.notify-head-actions{display:flex;gap:6px}.notify-head-actions .btn{padding:7px 9px;font-size:11px}
 </style>
 </head>
 <body>
@@ -419,7 +422,7 @@ aside .userbox{
 <div id="app" class="app hidden">
   <button id="bossBell" class="boss-bell adminOnly hidden" title="Pusat Notifikasi Bos">🔔<span id="bossBellBadge" class="boss-badge hidden">0</span></button>
   <div id="bossNotifyPanel" class="notify-panel hidden adminOnly">
-    <div class="notify-head"><div><b>🔔 Pusat Notifikasi Bos</b><div class="muted" style="font-size:12px">Hal yang perlu perhatian hari ini</div></div><button class="btn" id="closeBossNotify">Tutup</button></div>
+    <div class="notify-head"><div><b>🔔 Pusat Notifikasi Bos</b><div class="muted" style="font-size:12px">Hal yang perlu perhatian hari ini</div></div><div class="notify-head-actions"><button class="btn" id="markAllBossNotify">Baca Semua</button><button class="btn" id="closeBossNotify">Tutup</button></div></div>
     <div id="bossNotifyList" class="notify-list"></div>
   </div>
   <aside class="side">
@@ -1122,63 +1125,33 @@ function openBossNotification(page){
   $('#bossNotifyPanel')?.classList.add('hidden');
   go(page);
 }
+function bossNotifReadSet(){try{return new Set(JSON.parse(localStorage.getItem('yanstore_boss_notif_read_v36')||'[]'))}catch(e){return new Set()}}
+function saveBossNotifReadSet(set){localStorage.setItem('yanstore_boss_notif_read_v36',JSON.stringify([...set].slice(-500)))}
+function markBossNotificationRead(key){const r=bossNotifReadSet();r.add(key);saveBossNotifReadSet(r);renderBossNotifications()}
+function markAllBossNotificationsRead(){const r=bossNotifReadSet();bossNotifications.forEach(n=>r.add(n.key));saveBossNotifReadSet(r);renderBossNotifications()}
+function bossNotifAction(key,page){markBossNotificationRead(key);$('#bossNotifyPanel')?.classList.add('hidden');go(page)}
 function renderBossNotifications(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
-  const today=ymd(), active=employees.filter(e=>e.role==='employee'&&e.active);
-  const todayAtt=attendance.filter(a=>a.attendance_date===today);
-  const notes=[];
-  const add=(icon,title,desc,page)=>notes.push({icon,title,desc,page});
-
+  const today=ymd(), active=employees.filter(e=>e.role==='employee'&&e.active), todayAtt=attendance.filter(a=>a.attendance_date===today), notes=[];
+  const add=(key,icon,title,desc,page,meta='')=>notes.push({key,icon,title,desc,page,meta});
   if(isTodayWorkday()){
-    const absent=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id));
-    if(absent.length)add('👤',absent.length+' karyawan belum absen',absent.map(x=>x.full_name).join(', '),'attendance');
-
-    const late=todayAtt.filter(a=>a.status==='Terlambat');
-    if(late.length)add('⏰',late.length+' karyawan terlambat',late.map(x=>x.name||'-').join(', '),'attendance');
-
-    const now=new Date(), hh=now.getHours(), mm=now.getMinutes();
-    if(hh>20||(hh===20&&mm>=30)){
-      const noOut=todayAtt.filter(a=>a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status));
-      if(noOut.length)add('🚪',noOut.length+' karyawan belum checkout',noOut.map(x=>x.name||'-').join(', '),'attendance');
-    }
+    const absent=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id)); if(absent.length)add('absent:'+today,'👤',absent.length+' karyawan belum absen',absent.map(x=>x.full_name).join(', '),'attendance','Absensi hari ini');
+    const late=todayAtt.filter(a=>a.status==='Terlambat'); if(late.length)add('late:'+today+':'+late.length,'⏰',late.length+' karyawan terlambat',late.map(x=>x.name||'-').join(', '),'attendance','Perlu dipantau');
+    const now=new Date();if(now.getHours()>20||(now.getHours()===20&&now.getMinutes()>=30)){const noOut=todayAtt.filter(a=>a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status));if(noOut.length)add('checkout:'+today,'🚪',noOut.length+' karyawan belum checkout',noOut.map(x=>x.name||'-').join(', '),'attendance','Menjelang jam pulang')}
   }
-
-  const pending=leaveRequests.filter(x=>String(x.status||'').toLowerCase().includes('menunggu')||String(x.status||'').toLowerCase()==='pending');
-  if(pending.length)add('📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave');
-
-  const unfinished=tasks.filter(x=>x.status!=='Selesai');
-  const overdue=unfinished.filter(x=>x.due_date&&x.due_date<today);
-  if(overdue.length)add('⚠️',overdue.length+' tugas lewat deadline','Ada tugas tambahan yang belum selesai.','tasks');
-  else if(unfinished.length)add('📋',unfinished.length+' tugas belum selesai','Pantau progres tugas tambahan karyawan.','tasks');
-
-  const openRoutine=routineJobs.filter(j=>!routineChecks.some(c=>c.job_id===j.id&&c.completed));
-  if(openRoutine.length)add('☑️',openRoutine.length+' job harian belum selesai','Checklist hari ini masih ada yang terbuka.','routine');
-
-  const out=productStocks.filter(p=>Number(p.stock)<=0);
-  const low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));
-  if(out.length)add('📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock');
-  if(low.length)add('📉',low.length+' stok produk menipis',low.map(x=>x.product_name).join(', '),'stock');
-
-  const digitalAvailable=digitalItems.filter(x=>x.status==='available').length;
-  if(digitalItems.length && digitalAvailable===0)add('💻','Gudang Digital kehabisan stok','Tidak ada item digital berstatus Tersedia.','digitalstock');
-
-  const aping=employees.find(e=>e.username==='aping'&&e.active);
-  if(isTodayWorkday()&&aping){
-    const salesToday=salesTransactions.filter(x=>x.transaction_date===today);
-    const now=new Date();
-    if(now.getHours()>=18 && salesToday.length===0)add('📊','Rekap penjualan hari ini belum masuk','Belum ada transaksi rekap Aping untuk hari ini.','salesrecap');
-  }
-
-  bossNotifications=notes;
-  const badge=$('#bossBellBadge'), list=$('#bossNotifyList');
-  if(badge){
-    badge.textContent=notes.length>99?'99+':notes.length;
-    badge.classList.toggle('hidden',notes.length===0);
-  }
-  if(list){
-    list.innerHTML=notes.length?notes.map((n,i)=>`<button class="notify-item" onclick="openBossNotification('${n.page}')"><span class="notify-icon">${n.icon}</span><span><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div></span></button>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua aman</b><div style="margin-top:5px">Belum ada hal yang perlu perhatian Bos.</div></div>`;
-  }
+  const pending=leaveRequests.filter(x=>['pending','menunggu'].some(v=>String(x.status||'').toLowerCase().includes(v)));if(pending.length)add('leave:'+pending.map(x=>x.id).join(','),'📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave','Butuh keputusan Bos');
+  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);if(overdue.length)add('overdue:'+today+':'+overdue.length,'⚠️',overdue.length+' tugas lewat deadline','Ada tugas yang belum selesai melewati deadline.','tasks','Prioritas');
+  const out=productStocks.filter(p=>Number(p.stock)<=0),low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));if(out.length)add('stockout:'+out.map(x=>x.id).join(','),'📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock','Segera restock');if(low.length)add('stocklow:'+low.map(x=>x.id+':'+x.stock).join(','),'📉',low.length+' stok produk menipis',low.map(x=>x.product_name+' ('+x.stock+')').join(', '),'stock','Stok minimum');
+  if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined')digitalProductsV34.forEach(p=>{const av=digitalItems.filter(x=>x.product_id===p.id&&x.status==='available').length;if(av===0)add('dout:'+p.id,'🚨','Stok digital HABIS',p.product_name+' tidak punya stok tersedia.','digitalstock','Segera tambah stok');else if(av<=3)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun.','digitalstock','Gudang Digital')});
+  if(typeof digitalItems!=='undefined'){const soon=Date.now()+7*86400000;digitalItems.filter(x=>x.expiry_date&&new Date(x.expiry_date+'T23:59:59').getTime()>=Date.now()&&new Date(x.expiry_date+'T23:59:59').getTime()<=soon).slice(0,8).forEach(x=>{const d=Math.max(0,Math.ceil((new Date(x.expiry_date+'T23:59:59')-Date.now())/86400000));add('exp:'+x.id+':'+x.expiry_date,'⏳','Akun akan expired',x.product_name+' • '+(d===0?'hari ini':d+' hari lagi'),'digitalstock','Expired '+x.expiry_date)})}
+  if(typeof withdrawalRequests!=='undefined'){const w=withdrawalRequests.filter(x=>x.status==='pending');if(w.length)add('wd:'+w.map(x=>x.id).join(','),'💸',w.length+' withdrawal menunggu','Total '+rupiah(w.reduce((a,x)=>a+Number(x.amount||0),0))+' perlu diperiksa.','sellercenter','Butuh verifikasi')}
+  if(typeof marketplaceOrders!=='undefined'){const paid=marketplaceOrders.filter(x=>x.payment_status==='Dibayar'&&x.status!=='Selesai'&&x.status!=='Dibatalkan');if(paid.length)add('paid:'+paid.map(x=>x.id+':'+x.status).join(','),'🛒',paid.length+' order sudah dibayar',paid.slice(0,3).map(x=>x.order_code+' • '+rupiah(x.total_amount)).join(', '),'sellercenter','Pembayaran masuk')}
+  const salesToday=salesTransactions.filter(x=>x.transaction_date===today);if(salesToday.length){const latest=[...salesToday].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];add('sales:'+today+':'+salesToday.length+':'+latest?.id,'💰','Penjualan hari ini '+rupiah(salesToday.reduce((a,x)=>a+Number(x.amount||0),0)),salesToday.length+' transaksi tercatat hari ini.','salesrecap','Omzet otomatis')}
+  bossNotifications=notes;const read=bossNotifReadSet(),unread=notes.filter(n=>!read.has(n.key));const badge=$('#bossBellBadge'),list=$('#bossNotifyList');if(badge){badge.textContent=unread.length>99?'99+':unread.length;badge.classList.toggle('hidden',unread.length===0)}
+  if(list)list.innerHTML=notes.length?notes.map(n=>`<div class="notify-item ${read.has(n.key)?'read':'unread'}"><span class="notify-icon">${n.icon}</span><span class="notify-copy"><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div><div class="notify-meta">${esc(n.meta||'')}</div><div class="notify-actions"><button class="notify-mini" onclick="bossNotifAction('${n.key}','${n.page}')">Periksa</button>${read.has(n.key)?'':`<button class="notify-mini gray" onclick="markBossNotificationRead('${n.key}')">Tandai dibaca</button>`}</div></span></div>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua aman</b><div style="margin-top:5px">Belum ada hal penting yang perlu perhatian Bos.</div></div>`;
 }
+window.markBossNotificationRead=markBossNotificationRead;window.markAllBossNotificationsRead=markAllBossNotificationsRead;window.bossNotifAction=bossNotifAction;
+
 window.openBossNotification=openBossNotification;
 
 function renderAll(){
@@ -2562,6 +2535,7 @@ $('#bossBell').onclick=(e)=>{
   $('#bossNotifyPanel').classList.toggle('hidden');
 };
 $('#closeBossNotify').onclick=()=>$('#bossNotifyPanel').classList.add('hidden');
+$('#markAllBossNotify').onclick=markAllBossNotificationsRead;
 document.addEventListener('click',(e)=>{
   const p=$('#bossNotifyPanel'), b=$('#bossBell');
   if(p&&!p.classList.contains('hidden')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.add('hidden');
