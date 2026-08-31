@@ -2596,6 +2596,73 @@ $('#addDigitalItem').onclick=()=>{delete $('#digitalModal').dataset.v34ProductId
 $('#saveDigitalItem').onclick=async()=>{const category=$('#digitalCategory').value,product_name=$('#digitalProductName').value.trim(),secret=$('#digitalSecret').value.trim(),note=$('#digitalNote').value.trim()||null;if(!product_name||!secret){alert('Produk dan credential wajib diisi.');return}let pid=$('#digitalModal').dataset.v34ProductId;if(!pid){let r=await sb.from('digital_products').select('*').eq('category',category).eq('product_name',product_name).maybeSingle();if(!r.data){r=await sb.from('digital_products').insert({category,product_name}).select().single();if(r.error){alert(r.error.message);return}}pid=r.data.id}const a=await sb.rpc('add_digital_stock_v34',{p_product_id:pid,p_secret_value:secret,p_note:note});if(a.error){alert(a.error.message);return}delete $('#digitalModal').dataset.v34ProductId;$('#digitalModal').classList.remove('open');await loadDigitalSafe()};
 $('#importBatch').onclick=async()=>{if(!digitalBatchPreview.length)return;if(!confirm('Import '+digitalBatchPreview.length+' item?'))return;let ok=0;for(const it of digitalBatchPreview){let p=await sb.from('digital_products').select('*').eq('category',it.category).eq('product_name',it.product_name).maybeSingle();if(!p.data){p=await sb.from('digital_products').insert({category:it.category,product_name:it.product_name}).select().single();if(p.error)continue}const r=await sb.rpc('add_digital_stock_v34',{p_product_id:p.data.id,p_secret_value:it.secret_value,p_note:it.note});if(!r.error)ok++}alert(ok+' item berhasil diimport.');$('#digitalBatchModal').classList.remove('open');await loadDigitalSafe()};
 $('#digitalStockSubtitle')&&(new MutationObserver(()=>{}));
+
+
+/* ===== V34.4 PAQIH PRODUCT MANAGER ===== */
+function isPaqihDigitalManagerV344(){
+  return !!currentEmployee && String(currentEmployee.username||'').toLowerCase()==='paqih';
+}
+function openDigitalProductManagerV344(productId=''){
+  if(!(currentEmployee?.role==='admin'||isPaqihDigitalManagerV344()))return;
+  const p=productId?digitalProductsV34.find(x=>x.id===productId):null;
+  const m=document.createElement('div');m.className='modal open';m.id='digitalProductManagerV344';
+  m.innerHTML=`<div class="box" style="max-width:560px">
+    <h3 style="margin-top:0">${p?'Edit Produk':'Tambah Produk'}</h3>
+    <div class="notice">Kelola data produk induk. Isi akun/password tetap dikelola Bos melalui Tambah Stok.</div>
+    <label class="field">Kategori
+      <select id="v344ProductCategory">
+        ${['Netflix','HBO MAX','Spotify','Gmail','YouTube','VIU','Canva','Disney','Drama Box','CapCut','Lainnya'].map(x=>`<option ${p?.category===x?'selected':''}>${x}</option>`).join('')}
+      </select>
+    </label>
+    <label class="field">Nama Produk<input id="v344ProductName" value="${esc(p?.product_name||'')}" placeholder="Contoh: Netflix Premium"></label>
+    <div class="actions"><button class="btn" id="v344CancelProduct">Batal</button><button class="btn primary" id="v344SaveProduct">Simpan Produk</button></div>
+  </div>`;
+  document.body.appendChild(m);
+  m.querySelector('#v344CancelProduct').onclick=()=>m.remove();
+  m.querySelector('#v344SaveProduct').onclick=async()=>{
+    const category=m.querySelector('#v344ProductCategory').value;
+    const product_name=m.querySelector('#v344ProductName').value.trim();
+    if(!product_name){alert('Nama produk wajib diisi.');return}
+    const btn=m.querySelector('#v344SaveProduct');btn.disabled=true;btn.textContent='Menyimpan...';
+    let r;
+    if(p) r=await sb.from('digital_products').update({category,product_name,updated_at:new Date().toISOString()}).eq('id',p.id).select().single();
+    else r=await sb.from('digital_products').insert({category,product_name}).select().single();
+    if(r.error){btn.disabled=false;btn.textContent='Simpan Produk';alert(r.error.message);return}
+    m.remove();await loadDigitalSafe();
+  };
+}
+window.editDigitalProductV344=id=>openDigitalProductManagerV344(id);
+
+function setupPaqihDigitalManagerV344(){
+  if(!isPaqihDigitalManagerV344())return;
+  const top=$('#digitalstock .top');if(!top)return;
+  if(!$('#paqihDigitalProductTools')){
+    const tools=document.createElement('div');tools.id='paqihDigitalProductTools';tools.className='digital-tools';
+    tools.innerHTML='<button class="btn primary" id="paqihAddDigitalProduct">+ Tambah Produk</button>';
+    top.appendChild(tools);tools.querySelector('#paqihAddDigitalProduct').onclick=()=>openDigitalProductManagerV344();
+  }
+}
+
+const renderDigitalV344Base=renderDigital;
+renderDigital=function(){
+  renderDigitalV344Base();
+  setupPaqihDigitalManagerV344();
+  if(!isPaqihDigitalManagerV344())return;
+  const grid=$('#digitalProductGrid');if(!grid)return;
+  const cards=[...grid.querySelectorAll('.digital-product-card')];
+  cards.forEach((card,i)=>{
+    const visibleProducts=digitalProductsV34.filter(p=>{
+      const q=($('#digitalSearch')?.value||'').trim().toLowerCase(),cat=$('#digitalCategoryFilter')?.value||'',stf=$('#digitalStatusFilter')?.value||'',u=digitalUnitsV34(p.id);
+      if(cat&&p.category!==cat)return false;if(stf&&!u.some(x=>x.status===stf))return false;
+      if(q&&!([p.product_name,p.category].join(' ').toLowerCase().includes(q)||u.some(x=>[x.note,x.buyer_ref].join(' ').toLowerCase().includes(q))))return false;return true;
+    });
+    const p=visibleProducts[i];if(!p)return;
+    const actions=card.querySelector('.digital-product-actions');if(!actions)return;
+    const edit=document.createElement('button');edit.className='btn';edit.textContent='Edit Produk';edit.onclick=()=>openDigitalProductManagerV344(p.id);actions.appendChild(edit);
+  });
+};
+/* ===== END V34.4 PAQIH PRODUCT MANAGER ===== */
+
 /* ===== END V34 ===== */
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
