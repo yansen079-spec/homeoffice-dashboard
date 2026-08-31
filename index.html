@@ -2659,7 +2659,8 @@ const renderDigitalV344Base=renderDigital;
 renderDigital=function(){
   renderDigitalV344Base();
   setupPaqihDigitalManagerV344();
-  if(!isPaqihDigitalManagerV344())return;
+  const isAdminDigitalV346=currentEmployee?.role==='admin';
+  if(!isPaqihDigitalManagerV344()&&!isAdminDigitalV346)return;
   const grid=$('#digitalProductGrid');if(!grid)return;
   const cards=[...grid.querySelectorAll('.digital-product-card')];
   cards.forEach((card,i)=>{
@@ -2670,7 +2671,9 @@ renderDigital=function(){
     });
     const p=visibleProducts[i];if(!p)return;
     const actions=card.querySelector('.digital-product-actions');if(!actions)return;
-    const edit=document.createElement('button');edit.className='btn';edit.textContent='Edit Produk';edit.onclick=()=>openDigitalProductManagerV344(p.id);actions.appendChild(edit);
+    if(isPaqihDigitalManagerV344()){
+      const edit=document.createElement('button');edit.className='btn';edit.textContent='Edit Produk';edit.onclick=()=>openDigitalProductManagerV344(p.id);actions.appendChild(edit);
+    }
     if(currentEmployee?.role==='admin'){
       const del=document.createElement('button');del.className='btn danger';del.textContent='Hapus Produk';del.onclick=()=>deleteDigitalProductV345(p.id);actions.appendChild(del);
     }
