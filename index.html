@@ -2697,8 +2697,12 @@ renderDigital=function(){
     });
     const p=visibleProducts[i];if(!p)return;
     const actions=card.querySelector('.digital-product-actions');if(!actions)return;
-    if(isPaqihDigitalManagerV344()){
-      const edit=document.createElement('button');edit.className='btn';edit.textContent='Edit Produk';edit.onclick=()=>openDigitalProductManagerV344(p.id);actions.appendChild(edit);
+    if(isPaqihDigitalManagerV344()||currentEmployee?.role==='admin'){
+      const edit=document.createElement('button');
+      edit.className='btn';
+      edit.textContent='Edit Produk';
+      edit.onclick=()=>openDigitalProductManagerV344(p.id);
+      actions.appendChild(edit);
     }
     if(currentEmployee?.role==='admin'){
       const del=document.createElement('button');del.className='btn danger';del.textContent='Hapus Produk';del.onclick=()=>deleteDigitalProductV345(p.id);actions.appendChild(del);
