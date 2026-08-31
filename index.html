@@ -464,7 +464,7 @@ aside .userbox{
       </div>
       <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div><div id="salesDashboardBlock" class="salesOnly hidden" style="margin-top:18px">
         <div class="card">
-          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Penjualan Hari Ini</h3><div class="muted">Rekap dari Excel Aping yang sudah diimport.</div></div><button class="btn" onclick="go('salesrecap')">Buka Rekap</button></div>
+          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Penjualan Hari Ini</h3><div class="muted">Gabungan rekap Excel + penjualan otomatis dari Gudang Digital.</div></div><button class="btn" onclick="go('salesrecap')">Buka Rekap</button></div>
           <div class="sales-kpis" style="margin-bottom:12px">
             <div class="sales-kpi"><span class="muted">Transaksi</span><b id="dashSalesCount">0</b></div>
             <div class="sales-kpi"><span class="muted">Omzet</span><b id="dashSalesRevenue">Rp0</b></div>
@@ -725,7 +725,7 @@ aside .userbox{
 
     <section id="salesrecap" class="page hidden">
       <div class="top">
-        <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Import Excel rekap penjualan harian.</div></div>
+        <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Rekap penjualan harian, termasuk transaksi otomatis dari Gudang Digital.</div></div>
       </div>
 
       <div class="sales-kpis">
@@ -2586,7 +2586,7 @@ function renderDigital(){
   const q=($('#digitalSearch')?.value||'').trim().toLowerCase(),cat=$('#digitalCategoryFilter')?.value||'',stf=$('#digitalStatusFilter')?.value||'';
   $('#dsAvailable').textContent=digitalItems.filter(x=>x.status==='available').length;$('#dsClaimed').textContent=digitalItems.filter(x=>x.status==='claimed').length;$('#dsDelivered').textContent=digitalItems.filter(x=>x.status==='delivered').length;$('#dsTotal').textContent=digitalItems.length;
   let ps=digitalProductsV34.filter(p=>{const u=digitalUnitsV34(p.id);if(cat&&p.category!==cat)return false;if(stf&&!u.some(x=>x.status===stf))return false;if(q&&!([p.product_name,p.category].join(' ').toLowerCase().includes(q)||u.some(x=>[x.note,x.buyer_ref].join(' ').toLowerCase().includes(q))))return false;return true});
-  grid.innerHTML=ps.length?ps.map(p=>{const u=digitalUnitsV34(p.id),av=u.filter(x=>x.status==='available').length,cl=u.filter(x=>x.status==='claimed').length,de=u.filter(x=>x.status==='delivered').length;const a=currentEmployee.role==='admin'?`<button class="btn" onclick="viewDigitalProductV34('${p.id}')">Lihat Stok</button><button class="btn primary" onclick="addDigitalStockV34('${p.id}')">+ Tambah Stok</button>`:(av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>');return `<div class="digital-product-card"><div class="digital-product-head"><div><b style="font-size:17px">${esc(p.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(p.category)}</span></div></div><span class="badge ${av?'hadir':'sakit'}">${av?'Tersedia':'Habis'}</span></div><div class="digital-stock-number">${av}</div><div class="muted">stok tersedia</div><div class="muted" style="margin-top:7px">Diambil ${cl} • Terkirim ${de} • Total ${u.length}</div><div class="digital-product-actions">${a}</div></div>`}).join(''):'<div class="card">Belum ada produk yang cocok.</div>';
+  grid.innerHTML=ps.length?ps.map(p=>{const u=digitalUnitsV34(p.id),av=u.filter(x=>x.status==='available').length,cl=u.filter(x=>x.status==='claimed').length,de=u.filter(x=>x.status==='delivered').length;const a=currentEmployee.role==='admin'?`<button class="btn" onclick="viewDigitalProductV34('${p.id}')">Lihat Stok</button><button class="btn primary" onclick="addDigitalStockV34('${p.id}')">+ Tambah Stok</button>`:(av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>');return `<div class="digital-product-card"><div class="digital-product-head"><div><b style="font-size:17px">${esc(p.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(p.category)}</span></div></div><span class="badge ${av?'hadir':'sakit'}">${av?'Tersedia':'Habis'}</span></div><div style="margin-top:10px;font-weight:900">${Number(p.sale_price||0)>0?'Rp'+Number(p.sale_price||0).toLocaleString('id-ID'):'<span style="color:#b45309">Harga belum diisi</span>'}</div><div class="digital-stock-number">${av}</div><div class="muted">stok tersedia</div><div class="muted" style="margin-top:7px">Diambil ${cl} • Terkirim ${de} • Total ${u.length}</div><div class="digital-product-actions">${a}</div></div>`}).join(''):'<div class="card">Belum ada produk yang cocok.</div>';
 }
 window.viewDigitalProductV34=id=>{const p=digitalProductsV34.find(x=>x.id===id),u=digitalUnitsV34(id);if(!p)return;const body=u.length?u.map((x,i)=>`<div class="digital-unit"><b>#${i+1}</b> <span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span><div class="digital-unit-cred">${esc(digitalSecrets[x.id]||'Credential tersembunyi')}</div><div class="muted">${esc(x.note||'-')} ${x.buyer_ref?'• Buyer: '+esc(x.buyer_ref):''}</div>${x.start_date?`<div class="muted" style="margin-top:5px">Masa aktif: <b>${formatDateV347(x.start_date)}</b> → <b>${formatDateV347(x.expiry_date)}</b></div>`:''}</div>`).join(''):'<div class="muted">Belum ada unit stok.</div>';const m=document.createElement('div');m.className='modal open';m.innerHTML=`<div class="box"><h3>${esc(p.product_name)}</h3><div class="muted">${esc(p.category)} • ${u.length} unit</div>${body}<div class="actions"><button class="btn" id="v34close">Tutup</button></div></div>`;document.body.appendChild(m);m.querySelector('#v34close').onclick=()=>m.remove()};
 
@@ -2653,6 +2653,7 @@ function openDigitalProductManagerV344(productId=''){
       <datalist id="v349CategoryList">${[...new Set([...'Netflix,HBO MAX,Spotify,Gmail,YouTube,VIU,Canva,Disney,Drama Box,CapCut,Lainnya'.split(','),...digitalProductsV34.map(x=>x.category).filter(Boolean)])].map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist>
     </label>
     <label class="field">Nama Produk<input id="v344ProductName" value="${esc(p?.product_name||'')}" placeholder="Contoh: Netflix Premium"></label>
+    <label class="field">Harga Jual (Rp)<input id="v35ProductPrice" type="number" min="0" step="100" value="${Number(p?.sale_price||0)}" placeholder="Contoh: 25000"><span class="muted">Otomatis masuk omzet saat stok diambil buyer.</span></label>
     <div class="actions"><button class="btn" id="v344CancelProduct">Batal</button><button class="btn primary" id="v344SaveProduct">Simpan Produk</button></div>
   </div>`;
   document.body.appendChild(m);
@@ -2660,11 +2661,12 @@ function openDigitalProductManagerV344(productId=''){
   m.querySelector('#v344SaveProduct').onclick=async()=>{
     const category=m.querySelector('#v344ProductCategory').value.trim();
     const product_name=m.querySelector('#v344ProductName').value.trim();
+    const sale_price=Math.max(0,Number(m.querySelector('#v35ProductPrice')?.value||0));
     if(!category){alert('Kategori wajib diisi.');return}if(!product_name){alert('Nama produk wajib diisi.');return}
     const btn=m.querySelector('#v344SaveProduct');btn.disabled=true;btn.textContent='Menyimpan...';
     let r;
-    if(p) r=await sb.from('digital_products').update({category,product_name,updated_at:new Date().toISOString()}).eq('id',p.id).select().single();
-    else r=await sb.from('digital_products').insert({category,product_name}).select().single();
+    if(p) r=await sb.from('digital_products').update({category,product_name,sale_price,updated_at:new Date().toISOString()}).eq('id',p.id).select().single();
+    else r=await sb.from('digital_products').insert({category,product_name,sale_price}).select().single();
     if(r.error){btn.disabled=false;btn.textContent='Simpan Produk';alert(r.error.message);return}
     m.remove();await loadDigitalSafe();
   };
