@@ -2632,6 +2632,18 @@ function openDigitalProductManagerV344(productId=''){
   };
 }
 window.editDigitalProductV344=id=>openDigitalProductManagerV344(id);
+window.deleteDigitalProductV345=async id=>{
+  if(currentEmployee?.role!=='admin')return;
+  const p=digitalProductsV34.find(x=>x.id===id);if(!p)return;
+  const units=digitalUnitsV34(id);
+  const warning=units.length?`\n\nPERINGATAN: ${units.length} item stok/riwayat di produk ini juga akan dihapus permanen.`:'';
+  if(!confirm(`Hapus produk "${p.product_name}"?${warning}\n\nTindakan ini tidak bisa dibatalkan.`))return;
+  const r=await sb.rpc('delete_digital_product_v345',{p_product_id:id});
+  if(r.error){alert('Gagal menghapus produk: '+r.error.message);return}
+  await loadDigitalSafe();
+  alert(`Produk "${p.product_name}" berhasil dihapus.`);
+};
+
 
 function setupPaqihDigitalManagerV344(){
   if(!isPaqihDigitalManagerV344())return;
@@ -2659,6 +2671,9 @@ renderDigital=function(){
     const p=visibleProducts[i];if(!p)return;
     const actions=card.querySelector('.digital-product-actions');if(!actions)return;
     const edit=document.createElement('button');edit.className='btn';edit.textContent='Edit Produk';edit.onclick=()=>openDigitalProductManagerV344(p.id);actions.appendChild(edit);
+    if(currentEmployee?.role==='admin'){
+      const del=document.createElement('button');del.className='btn danger';del.textContent='Hapus Produk';del.onclick=()=>deleteDigitalProductV345(p.id);actions.appendChild(del);
+    }
   });
 };
 /* ===== END V34.4 PAQIH PRODUCT MANAGER ===== */
