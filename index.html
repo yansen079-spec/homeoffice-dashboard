@@ -2338,15 +2338,19 @@ $('#confirmSalesImport').onclick=async()=>{
   await sb.from('sales_import_batches').insert({file_name:salesPreviewFileName,uploaded_by:currentEmployee.id,row_count:salesPreviewData.length,revenue_total:salesPreviewData.reduce((s,x)=>s+x.amount,0)});
   resetSalesPreview(); await loadSalesSafe(); alert(`Import selesai. Data baru: ${inserted}. Duplikat dilewati: ${duplicates}.`);
 };
-function setupSalesRealtime(){
-  try{sb.channel('yanstore-sales-live').on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>loadSalesSafe()).subscribe()}catch(e){console.error(e)}
-}
+// sales_transactions sudah dipantau oleh channel utama HomeOffice.
+// Jangan membuat channel kedua supaya subscription tidak menumpuk saat login ulang.
+function setupSalesRealtime(){ return; }
 /* ===== END V20 SALES RECAP ===== */
 
 
-/* ===== V20.1 FULL REALTIME ===== */
+/* ===== V20.2 RESILIENT FULL REALTIME ===== */
 let fullRealtimeChannel=null;
 let realtimeRefreshTimer=null;
+let realtimeRetryTimer=null;
+let realtimeFallbackTimer=null;
+let realtimeRetryCount=0;
+let realtimeGeneration=0;
 
 function setRealtimeStatus(text,mode){
   const el=$('#realtimeStatus');
@@ -2360,38 +2364,64 @@ function scheduleRealtimeRefresh(source){
   clearTimeout(realtimeRefreshTimer);
   realtimeRefreshTimer=setTimeout(async()=>{
     try{
-      // Core HomeOffice data
       await refreshData();
-
-      // Isolated modules
       if(typeof loadAttendanceArchiveSafe==='function') await loadAttendanceArchiveSafe();
       if(typeof loadStockSafe==='function') await loadStockSafe();
       if(typeof loadRoutineSafe==='function') await loadRoutineSafe();
       if(typeof loadDigitalSafe==='function') await loadDigitalSafe();
       if(typeof loadSalesSafe==='function') await loadSalesSafe();
+      if(typeof loadSellerCenterSafe==='function') await loadSellerCenterSafe();
 
-      // Re-render dashboard after all module data is fresh
       if(typeof renderBossDashboard==='function') renderBossDashboard();
       if(typeof renderSalesDashboard==='function') renderSalesDashboard();
       if(typeof renderBossNotifications==='function') renderBossNotifications();
 
-      setRealtimeStatus('Realtime aktif','ok');
-      console.log('Realtime update:',source);
+      console.log('Realtime/fallback update:',source);
     }catch(err){
       console.error('Realtime refresh gagal:',err);
-      setRealtimeStatus('Realtime terhubung, refresh data gagal','warn');
+      setRealtimeStatus('Data tersambung, refresh gagal','warn');
     }
   },350);
 }
 
-function setupFullRealtime(){
+function startRealtimeFallback(){
+  if(realtimeFallbackTimer)return;
+  // Selama websocket reconnect, data tetap diperbarui berkala agar dashboard tidak beku.
+  realtimeFallbackTimer=setInterval(()=>scheduleRealtimeRefresh('fallback-poll'),20000);
+}
+
+function stopRealtimeFallback(){
+  if(realtimeFallbackTimer){
+    clearInterval(realtimeFallbackTimer);
+    realtimeFallbackTimer=null;
+  }
+}
+
+function retryFullRealtime(reason){
+  if(realtimeRetryTimer)return;
+  startRealtimeFallback();
+  realtimeRetryCount=Math.min(realtimeRetryCount+1,5);
+  const delay=Math.min(15000,1000*Math.pow(2,realtimeRetryCount-1));
+  setRealtimeStatus('Realtime menyambung ulang...','warn');
+  console.warn('Realtime reconnect:',reason,'dalam',delay,'ms');
+  realtimeRetryTimer=setTimeout(()=>{
+    realtimeRetryTimer=null;
+    setupFullRealtime(true);
+  },delay);
+}
+
+function setupFullRealtime(isRetry=false){
+  const myGeneration=++realtimeGeneration;
   try{
     if(fullRealtimeChannel){
-      sb.removeChannel(fullRealtimeChannel);
+      const old=fullRealtimeChannel;
       fullRealtimeChannel=null;
+      try{sb.removeChannel(old)}catch(_){ }
     }
 
-    fullRealtimeChannel=sb.channel('homeoffice-full-realtime')
+    if(!isRetry)setRealtimeStatus('Menghubungkan realtime...','warn');
+
+    const ch=sb.channel('homeoffice-full-realtime-'+myGeneration)
       .on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>scheduleRealtimeRefresh('attendance'))
       .on('postgres_changes',{event:'*',schema:'public',table:'employees'},()=>scheduleRealtimeRefresh('employees'))
       .on('postgres_changes',{event:'*',schema:'public',table:'leave_requests'},()=>scheduleRealtimeRefresh('leave_requests'))
@@ -2402,16 +2432,29 @@ function setupFullRealtime(){
       .on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>scheduleRealtimeRefresh('digital_inventory'))
       .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>scheduleRealtimeRefresh('sales_transactions'))
       .subscribe((status)=>{
-        if(status==='SUBSCRIBED')setRealtimeStatus('Realtime aktif','ok');
-        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setRealtimeStatus('Realtime bermasalah','off');
-        else setRealtimeStatus('Menghubungkan realtime...','warn');
+        // Abaikan callback dari channel lama yang sengaja kita tutup.
+        if(myGeneration!==realtimeGeneration)return;
+        if(status==='SUBSCRIBED'){
+          fullRealtimeChannel=ch;
+          realtimeRetryCount=0;
+          if(realtimeRetryTimer){clearTimeout(realtimeRetryTimer);realtimeRetryTimer=null;}
+          stopRealtimeFallback();
+          setRealtimeStatus('Realtime aktif','ok');
+          scheduleRealtimeRefresh('reconnected');
+        }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+          retryFullRealtime(status);
+        }else{
+          setRealtimeStatus('Menghubungkan realtime...','warn');
+        }
       });
+
+    fullRealtimeChannel=ch;
   }catch(err){
     console.error('Setup realtime gagal:',err);
-    setRealtimeStatus('Realtime gagal aktif','off');
+    retryFullRealtime('exception');
   }
 }
-/* ===== END V20.1 FULL REALTIME ===== */
+/* ===== END V20.2 RESILIENT FULL REALTIME ===== */
 
 
 
