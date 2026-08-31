@@ -2703,5 +2703,28 @@ renderDigital=function(){
 
 sb.auth.getSession().then(async ({data})=>{if(data.session)await boot(data.session.user)});
 </script>
+
+<style>
+/* V36.1 realtime notification UX */
+.v361sec{padding:9px 12px 5px;font-size:11px;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:.05em}.v361new{color:#dc2626}.v361dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:6px}.v361time{font-size:10px;color:#94a3b8;margin-top:5px}.v361live{font-size:10px;color:#16a34a;font-weight:800;margin-left:6px}.v361action{margin-top:7px;border:0;border-radius:8px;padding:6px 9px;background:#dbeafe;color:#2563eb;font-weight:800;font-size:10px;cursor:pointer}
+</style>
+<script>
+/* V36.1: badge = genuinely new events; realtime refresh; persistent issues separated */
+let v361Channel=null,v361LastSeen=Number(localStorage.getItem('yan_v361_last_seen')||0),v361Busy=false;
+function v361Ts(x){return x?new Date(x).getTime():0}
+function v361Ago(ts){if(!ts)return 'Masih perlu ditangani';const d=Math.max(0,Date.now()-ts),m=Math.floor(d/60000);if(m<1)return 'Baru saja';if(m<60)return m+' menit lalu';const h=Math.floor(m/60);if(h<24)return h+' jam lalu';return new Date(ts).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+function v361EventTs(x){if(x.k?.startsWith('sale:'))return v361Ts(x._created_at);if(x.k?.startsWith('ord:'))return v361Ts(x._created_at);if(x.k?.startsWith('wd:'))return v361Ts(x._created_at);return 0}
+function v361IsNew(x){const t=v361EventTs(x);return t>0&&t>v361LastSeen&&!v36ReadKeys.has(x.k)}
+function v361Render(){v36EnsurePanel();const list=$('#v36NotifList');if(!list)return;const fresh=v36Notifs.filter(v361IsNew),issues=v36Notifs.filter(x=>!v361IsNew(x));let html='';if(fresh.length){html+=`<div class="v361sec v361new"><span class="v361dot"></span>Baru (${fresh.length})</div>`+fresh.map(v361Card).join('')}html+=`<div class="v361sec">⚠️ Masih Perlu Ditangani (${issues.length})</div>`+(issues.length?issues.map(v361Card).join(''):`<div class="v36empty" style="padding:18px">✅ Tidak ada masalah aktif.</div>`);list.innerHTML=html;list.querySelectorAll('.v36ni').forEach(el=>el.onclick=e=>{if(e.target.closest('.v361action'))return;v36Mark(el.dataset.k)});list.querySelectorAll('.v361action').forEach(b=>b.onclick=e=>{e.stopPropagation();v361Go(b.dataset.kind)});v361Badge(fresh.length)}
+function v361Card(x){const ts=v361EventTs(x);const kind=x.k?.startsWith('stock')?'stock':x.k?.startsWith('exp:')?'stock':x.k?.startsWith('wd:')?'withdraw':x.k?.startsWith('ord:')?'order':x.k?.startsWith('sale:')?'sales':'home';return `<div class="v36ni ${v36ReadKeys.has(x.k)?'':'unread'}" data-k="${esc(x.k)}"><div class="v36ico">${x.ico}</div><div><div class="v36title">${esc(x.t)}</div><div class="v36msg">${esc(x.m)}</div><div class="v361time">${esc(v361Ago(ts))}${ts?' • kejadian baru':' • kondisi aktif'}</div><button class="v361action" data-kind="${kind}">Periksa</button></div></div>`}
+function v361Badge(n){const b=v36Bell();if(!b)return;let badge=b.querySelector('.v36badge');if(!badge){v36Render();return}badge.textContent=n>99?'99+':n;badge.style.display=n?'grid':'none'}
+function v361Go(kind){$('#v36NotifPanel')?.classList.remove('open');const map={stock:['digital','gudang'],withdraw:['withdraw'],order:['seller','market'],sales:['sales','penjualan']};for(const key of map[kind]||[]){const el=[...document.querySelectorAll('button,a,[data-page],[data-section]')].find(x=>(x.textContent||'').toLowerCase().includes(key));if(el){el.click();return}}}
+const v36RenderOriginal=v36Render;v36Render=v361Render;
+const v36LoadOriginal=v36Load;v36Load=async function(){if(v361Busy)return;v361Busy=true;try{await v36LoadOriginal();/* enrich timestamps */const ids={sale:new Map(),ord:new Map(),wd:new Map()};const [sr,or,wr]=await Promise.all([sb.from('sales_transactions').select('id,created_at').order('created_at',{ascending:false}).limit(20),sb.from('marketplace_orders').select('id,created_at').order('created_at',{ascending:false}).limit(30),sb.from('withdrawal_requests').select('id,created_at').order('created_at',{ascending:false}).limit(30)]);(sr.data||[]).forEach(x=>ids.sale.set(String(x.id),x.created_at));(or.data||[]).forEach(x=>ids.ord.set(String(x.id),x.created_at));(wr.data||[]).forEach(x=>ids.wd.set(String(x.id),x.created_at));v36Notifs.forEach(x=>{const [p,id]=String(x.k).split(':');if(p==='sale')x._created_at=ids.sale.get(id);if(p==='ord')x._created_at=ids.ord.get(id);if(p==='wd')x._created_at=ids.wd.get(id)});v361Render()}finally{v361Busy=false}}
+function v361Opened(){const now=Date.now();v361LastSeen=now;localStorage.setItem('yan_v361_last_seen',String(now));setTimeout(v361Render,50)}
+setTimeout(()=>{const b=v36Bell();if(b&&!b.dataset.v361){b.dataset.v361='1';b.addEventListener('click',()=>{if($('#v36NotifPanel')?.classList.contains('open'))v361Opened()})}},3000);
+function v361Realtime(){if(v361Channel)try{sb.removeChannel(v361Channel)}catch{};v361Channel=sb.channel('boss-smart-notif-v361').on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>v36Load()).subscribe();}
+setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){v361Realtime();v36Load()}},3500);
+</script>
 </body>
 </html>
