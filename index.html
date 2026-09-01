@@ -2736,20 +2736,224 @@ function v361Realtime(){if(v361Channel)try{sb.removeChannel(v361Channel)}catch{}
 setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){v361Realtime();v36Load()}},3500);
 </script>
 
+
+
 <style>
-.v363sec{padding:9px 12px 6px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.v363new{color:#dc2626;background:#fff7f7}.v363old{color:#b45309}.v363fresh{border-left:3px solid #ef4444!important;background:#fffafa!important}.v363sound{border:1px solid #dbe3ee;background:#fff;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer}
+/* ===== V36.4 REALTIME NOTIFICATION FINAL ===== */
+.v364-section{padding:10px 14px 7px;font-size:11px;font-weight:900;letter-spacing:.055em;text-transform:uppercase}
+.v364-section.new{color:#dc2626;background:#fff7f7;border-top:1px solid #fee2e2;border-bottom:1px solid #fee2e2}
+.v364-section.old{color:#a16207;background:#fffdf5;border-top:1px solid #fef3c7}
+.v364-card-new{border-left:4px solid #ef4444!important;background:#fffafa!important}
+.v364-time{font-size:10px;color:#64748b;margin-top:5px;font-weight:700}
+.v364-tag{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:9px;font-weight:900}
+#v364SoundBtn{border:1px solid #dbe3ee;background:#fff;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
+#v364SoundBtn.on{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
 </style>
+
 <script>
-/* V36.3: newest notifications always first + one-shot bell sound */
-const V363K='yanstore_notif_v363',V363S='yanstore_notif_sound_v363';let v363Sound=localStorage.getItem(V363S)!=='off',v363Started=false,v363Prev=new Set(),v363Ctx;
-function v363get(){try{return JSON.parse(localStorage.getItem(V363K)||'{}')}catch{return {}}}
-function v363put(x){localStorage.setItem(V363K,JSON.stringify(x))}
-function v363key(n){return String(n.k||n.key||n.id||((n.t||'')+'|'+(n.m||'')))}
-function v363sync(a){let s=v363get(),now=Date.now(),active=new Set;a.forEach(n=>{let k=v363key(n);active.add(k);if(!s[k]||s[k].active===false)s[k]={active:true,read:false,first:now};else s[k].active=true});Object.keys(s).forEach(k=>{if(!active.has(k))s[k].active=false});v363put(s);return s}
-function v363ring(){if(!v363Sound)return;try{let A=window.AudioContext||window.webkitAudioContext;v363Ctx=v363Ctx||new A();let c=v363Ctx,n=c.currentTime;[[880,0,.13],[1175,.12,.2]].forEach(x=>{let o=c.createOscillator(),g=c.createGain();o.frequency.value=x[0];g.gain.setValueAtTime(.0001,n+x[1]);g.gain.exponentialRampToValueAtTime(.13,n+x[1]+.02);g.gain.exponentialRampToValueAtTime(.0001,n+x[1]+x[2]);o.connect(g);g.connect(c.destination);o.start(n+x[1]);o.stop(n+x[1]+x[2]+.03)})}catch(e){}}
-function v363button(){let p=document.querySelector('#bossNotifyPanel,#v36NotifPanel,.notify-panel');if(!p||p.querySelector('#v363sound'))return;let h=p.firstElementChild,b=document.createElement('button');b.id='v363sound';b.className='v363sound';b.textContent=v363Sound?'🔊 Suara ON':'🔇 Suara OFF';b.onclick=e=>{e.stopPropagation();v363Sound=!v363Sound;localStorage.setItem(V363S,v363Sound?'on':'off');b.textContent=v363Sound?'🔊 Suara ON':'🔇 Suara OFF';if(v363Sound)v363ring()};h?.appendChild(b)}
-function v363render(){let a=Array.isArray(window.v36Notifs)?window.v36Notifs:[];if(!a.length){v363button();return}let s=v363sync(a),fresh=a.filter(n=>!s[v363key(n)].read),old=a.filter(n=>s[v363key(n)].read);fresh.sort((a,b)=>s[v363key(b)].first-s[v363key(a)].first);old.sort((a,b)=>s[v363key(b)].first-s[v363key(a)].first);let l=document.querySelector('#v36NotifList,#bossNotifyList,.notify-list');if(!l)return;let esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let card=(n,f)=>`<div class="v36ni ${f?'unread v363fresh':''}" data-v363="${esc(v363key(n))}"><div class="v36ico">${n.ico||'🔔'}</div><div><div class="v36title">${esc(n.t||'Notifikasi')}</div><div class="v36msg">${esc(n.m||'')}</div><div style="font-size:10px;color:#94a3b8;margin-top:4px">${f?'🆕 BARU':'Masih perlu ditangani'}</div></div></div>`;l.innerHTML=`<div class="v363sec v363new">🆕 BARU (${fresh.length})</div>`+(fresh.length?fresh.map(n=>card(n,1)).join(''):'<div class="v36empty" style="padding:12px">Tidak ada notifikasi baru.</div>')+`<div class="v363sec v363old">⚠️ MASIH PERLU DITANGANI (${old.length})</div>`+(old.length?old.map(n=>card(n,0)).join(''):'<div class="v36empty" style="padding:12px">Tidak ada masalah lama.</div>');l.querySelectorAll('[data-v363]').forEach(e=>e.onclick=()=>{let q=v363get();if(q[e.dataset.v363])q[e.dataset.v363].read=true;v363put(q);setTimeout(v363render,20)});let badge=document.querySelector('#bossBellBadge,.v36badge');if(badge){badge.textContent=fresh.length>99?'99+':fresh.length;badge.style.display=fresh.length?'grid':'none'}v363button();let keys=new Set(fresh.map(v363key));if(v363Started&&[...keys].some(k=>!v363Prev.has(k)))v363ring();v363Started=true;v363Prev=keys}
-setTimeout(()=>{let p=document.querySelector('#bossNotifyPanel,#v36NotifPanel,.notify-panel');if(p)new MutationObserver(()=>{clearTimeout(window.__v363);window.__v363=setTimeout(v363render,80)}).observe(p,{childList:true,subtree:true});v363render()},2500);
+/* ===== V36.4 REALTIME NOTIFICATION FINAL =====
+   - newest unread always on top
+   - exact first-seen clock time
+   - direct Supabase realtime subscriptions
+   - bell only for genuinely new notification keys
+   - no MutationObserver loops
+*/
+const V364_STATE='yanstore_v364_notif_state';
+const V364_SOUND='yanstore_v364_sound';
+let v364SoundOn=localStorage.getItem(V364_SOUND)!=='off';
+let v364KnownKeys=new Set();
+let v364Initialised=false;
+let v364Channel=null;
+let v364AudioCtx=null;
+let v364Busy=false;
+
+function v364ReadState(){
+  try{return JSON.parse(localStorage.getItem(V364_STATE)||'{}')||{}}
+  catch{return {}}
+}
+function v364WriteState(st){localStorage.setItem(V364_STATE,JSON.stringify(st))}
+function v364Key(n){return String(n?.k||n?.key||n?.id||((n?.t||'')+'|'+(n?.m||'')))}
+function v364Escape(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function v364Clock(ts){
+  return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+function v364DateTime(ts){
+  return new Date(ts).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+function v364Priority(n){
+  const z=((n?.t||'')+' '+(n?.m||'')+' '+v364Key(n)).toLowerCase();
+  if(z.includes('pembayaran')||z.includes('order')||z.includes('withdraw'))return 1;
+  if(z.includes('habis'))return 2;
+  if(z.includes('menipis'))return 3;
+  if(z.includes('expired')||z.includes('kadalu'))return 4;
+  if(z.includes('terlambat')||z.includes('checkout'))return 5;
+  return 6;
+}
+function v364Sync(items){
+  const st=v364ReadState(),now=Date.now(),active=new Set();
+  items.forEach(n=>{
+    const k=v364Key(n);active.add(k);
+    if(!st[k]||st[k].active===false){
+      st[k]={active:true,read:false,firstSeen:now,lastSeen:now};
+    }else{
+      st[k].active=true;st[k].lastSeen=now;
+    }
+  });
+  Object.keys(st).forEach(k=>{if(!active.has(k))st[k].active=false});
+  v364WriteState(st);
+  return st;
+}
+function v364Ring(){
+  if(!v364SoundOn)return;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    v364AudioCtx=v364AudioCtx||new AC();
+    if(v364AudioCtx.state==='suspended')v364AudioCtx.resume();
+    const c=v364AudioCtx,n=c.currentTime;
+    [[987.77,0,.12],[1318.51,.11,.18]].forEach(([freq,delay,dur])=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='sine';o.frequency.setValueAtTime(freq,n+delay);
+      g.gain.setValueAtTime(.0001,n+delay);
+      g.gain.exponentialRampToValueAtTime(.15,n+delay+.018);
+      g.gain.exponentialRampToValueAtTime(.0001,n+delay+dur);
+      o.connect(g);g.connect(c.destination);o.start(n+delay);o.stop(n+delay+dur+.03);
+    });
+  }catch(e){console.warn('Bell sound:',e)}
+}
+document.addEventListener('pointerdown',()=>{
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(AC&&!v364AudioCtx)v364AudioCtx=new AC();
+    if(v364AudioCtx?.state==='suspended')v364AudioCtx.resume();
+  }catch(e){}
+},{once:true});
+
+function v364SoundButton(){
+  const panel=document.querySelector('#bossNotifyPanel,#v36NotifPanel,.notify-panel');
+  if(!panel)return;
+  let b=panel.querySelector('#v364SoundBtn');
+  if(!b){
+    const head=panel.firstElementChild;
+    if(!head)return;
+    b=document.createElement('button');
+    b.id='v364SoundBtn';
+    b.onclick=e=>{
+      e.stopPropagation();
+      v364SoundOn=!v364SoundOn;
+      localStorage.setItem(V364_SOUND,v364SoundOn?'on':'off');
+      v364SoundButton();
+      if(v364SoundOn)v364Ring();
+    };
+    head.appendChild(b);
+  }
+  b.className=v364SoundOn?'on':'';
+  b.textContent=v364SoundOn?'🔊 Suara ON':'🔇 Suara OFF';
+}
+function v364MarkOne(k){
+  const st=v364ReadState();
+  if(st[k]){st[k].read=true;v364WriteState(st)}
+  v364Render();
+}
+function v364MarkAll(){
+  const st=v364ReadState();
+  Object.keys(st).forEach(k=>{if(st[k].active)st[k].read=true});
+  v364WriteState(st);v364Render();
+}
+function v364Render(){
+  const items=Array.isArray(window.v36Notifs)?window.v36Notifs:[];
+  v364SoundButton();
+  if(!items.length)return;
+
+  const st=v364Sync(items);
+  const fresh=items.filter(n=>st[v364Key(n)]?.active&&!st[v364Key(n)]?.read)
+    .sort((a,b)=>(st[v364Key(b)]?.firstSeen||0)-(st[v364Key(a)]?.firstSeen||0)||v364Priority(a)-v364Priority(b));
+  const old=items.filter(n=>st[v364Key(n)]?.active&&st[v364Key(n)]?.read)
+    .sort((a,b)=>v364Priority(a)-v364Priority(b)||(st[v364Key(b)]?.firstSeen||0)-(st[v364Key(a)]?.firstSeen||0));
+
+  const list=document.querySelector('#v36NotifList,#bossNotifyList,.notify-list');
+  if(!list)return;
+
+  const card=(n,isNew)=>{
+    const k=v364Key(n),ts=st[k]?.firstSeen||Date.now();
+    return `<div class="v36ni ${isNew?'unread v364-card-new':''}" data-v364-key="${v364Escape(k)}">
+      <div class="v36ico">${n.ico||'🔔'}</div>
+      <div>
+        <div class="v36title">${v364Escape(n.t||'Notifikasi')}${isNew?'<span class="v364-tag">BARU</span>':''}</div>
+        <div class="v36msg">${v364Escape(n.m||'')}</div>
+        <div class="v364-time">🕒 Masuk ${v364Clock(ts)}${isNew?' • belum dibaca':' • sudah dibaca'}</div>
+      </div>
+    </div>`;
+  };
+
+  list.innerHTML=
+    `<div class="v364-section new">🆕 NOTIFIKASI BARU (${fresh.length})</div>`+
+    (fresh.length?fresh.map(n=>card(n,true)).join(''):'<div class="v36empty" style="padding:14px">Tidak ada notifikasi baru.</div>')+
+    `<div class="v364-section old">⚠️ MASIH PERLU DITANGANI (${old.length})</div>`+
+    (old.length?old.map(n=>card(n,false)).join(''):'<div class="v36empty" style="padding:14px">✅ Tidak ada notifikasi lama.</div>');
+
+  list.querySelectorAll('[data-v364-key]').forEach(el=>{
+    el.onclick=()=>v364MarkOne(el.dataset.v364Key);
+  });
+
+  const badge=document.querySelector('#bossBellBadge,.v36badge');
+  if(badge){
+    badge.textContent=fresh.length>99?'99+':fresh.length;
+    badge.style.display=fresh.length?'grid':'none';
+  }
+
+  const readAll=document.querySelector('#v36ReadAll,#bossNotifyReadAll');
+  if(readAll&&!readAll.dataset.v364){
+    readAll.dataset.v364='1';
+    readAll.onclick=e=>{e.stopPropagation();v364MarkAll()};
+  }
+
+  const current=new Set(fresh.map(v364Key));
+  if(v364Initialised){
+    const added=[...current].filter(k=>!v364KnownKeys.has(k));
+    if(added.length)v364Ring();
+  }else{
+    v364Initialised=true;
+  }
+  v364KnownKeys=current;
+}
+async function v364Refresh(){
+  if(v364Busy)return;
+  v364Busy=true;
+  try{
+    if(typeof window.v36Load==='function')await window.v36Load();
+    setTimeout(v364Render,80);
+  }catch(e){console.warn('Notif realtime refresh:',e)}
+  finally{setTimeout(()=>{v364Busy=false},120)}
+}
+function v364Realtime(){
+  if(typeof sb==='undefined')return;
+  if(v364Channel){try{sb.removeChannel(v364Channel)}catch(e){}}
+  v364Channel=sb.channel('boss-notification-v364')
+    .on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'attendance'},v364Refresh)
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED')console.info('V36.4 notification realtime active');
+    });
+}
+setTimeout(()=>{
+  try{
+    if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){
+      v364Refresh();v364Realtime();
+    }
+  }catch(e){}
+},3000);
+
+/* fallback check only; realtime remains primary */
+setInterval(()=>{
+  try{
+    if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin')v364Refresh();
+  }catch(e){}
+},30000);
 </script>
 </body>
 </html>
