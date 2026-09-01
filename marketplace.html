@@ -236,6 +236,7 @@ function ysCheckOrder(){ysShowOrder(document.getElementById('ysResumeCode').valu
 /* V38 UI layer. Existing create order + Midtrans functions remain untouched. */
 let v38Sort='recommended',v38StockOnly=false;
 function v4211ProductUrl(id){return 'product.html?id='+encodeURIComponent(id)}
+function v4212StoreUrl(name){return 'store.html?seller='+encodeURIComponent(name||'YANSMART Seller')}
 
 function v38EnsureUI(){
   if(!document.querySelector('.v38-trustbar')){
@@ -318,7 +319,7 @@ render=function(){
       ${x.image_url?`<img class="productPhoto" src="${esc(x.image_url)}" alt="${esc(x.product_name||x.title)}">`:`<div class="visualGlow"></div><div class="productIcon">${esc(iconOf(x))}</div><div class="visualCopy"><b>${esc(x.product_name||x.title)}</b><span>${esc(categoryOf(x)==='game'?'Game & Top Up':categoryOf(x)==='jasa'?'Digital Service':categoryOf(x)==='digital'?'Digital Premium':'YANSMART')}</span></div>`}
     </div>
     <div class="cardbody">
-      <div class="storeRow"><span class="storeAvatar">${esc((x.store_name||'Y').slice(0,1).toUpperCase())}</span><span class="v38-verified">${esc(x.store_name||x.seller_name||'YANSMART Seller')}</span></div>
+      <div class="storeRow" data-open-store="${esc(x.store_name||x.seller_name||'YANSMART Seller')}" style="cursor:pointer" title="Buka toko"><span class="storeAvatar">${esc((x.store_name||x.seller_name||'Y').slice(0,1).toUpperCase())}</span><span class="v38-verified">${esc(x.store_name||x.seller_name||'YANSMART Seller')} · Lihat Toko →</span></div>
       <div class="cardTitle" data-open-product="${esc(x.listing_id)}" style="cursor:pointer">${esc(x.title)}</div>
       <div class="desc">${esc(x.description||x.product_name||'Produk digital YANSMART')}</div>
       <div class="price">${rupiah(x.sell_price)}</div>
@@ -330,7 +331,7 @@ render=function(){
     </div>
   </article>`).join(''):'<div class="empty">Belum ada listing yang cocok dengan pencarian atau filter ini.</div>';
   document.querySelectorAll('.buyBtn:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>openOrder(btn.dataset.id)));
-  document.querySelectorAll('[data-detail]').forEach(btn=>btn.addEventListener('click',()=>location.href=v4211ProductUrl(btn.dataset.detail)));document.querySelectorAll('[data-open-product]').forEach(el=>el.addEventListener('click',()=>location.href=v4211ProductUrl(el.dataset.openProduct)));
+  document.querySelectorAll('[data-detail]').forEach(btn=>btn.addEventListener('click',()=>location.href=v4211ProductUrl(btn.dataset.detail)));document.querySelectorAll('[data-open-product]').forEach(el=>el.addEventListener('click',()=>location.href=v4211ProductUrl(el.dataset.openProduct)));document.querySelectorAll('[data-open-store]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();location.href=v4212StoreUrl(el.dataset.openStore)}));
   v38RenderFeatured();
 };
 
