@@ -67,7 +67,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 </style>
 </head>
 <body>
-<header class="topbar"><div class="shell nav"><a class="brand" href="#home"><img class="logo" src="assets/yansmart-logo-final.png" alt="Logo YANSMART"><div class="brandcopy"><div class="brandname">YAN<span>SMART</span></div><div class="brandtag">Marketplace Digital & Game</div></div></a><nav class="links"><button class="navlink active" data-scroll="home">Beranda</button><button class="navlink" data-scroll="products">Produk</button><button class="navlink" data-scroll="categories">Kategori</button><button class="navlink" data-scroll="how">Cara Beli</button></nav><div class="navright"><button class="lang">🇮🇩 ID</button><a class="sellerBtn" href="seller.html">✦ Seller Portal</a></div></div></header>
+<header class="topbar"><div class="shell nav"><a class="brand" href="#home"><img class="logo" src="assets/yansmart-header-logo-v421.webp" alt="Logo YANSMART"><div class="brandcopy"><div class="brandname">YAN<span>SMART</span></div><div class="brandtag">Marketplace Digital & Game</div></div></a><nav class="links"><button class="navlink active" data-scroll="home">Beranda</button><button class="navlink" data-scroll="products">Produk</button><button class="navlink" data-scroll="categories">Kategori</button><button class="navlink" data-scroll="how">Cara Beli</button></nav><div class="navright"><button class="lang">🇮🇩 ID</button><a class="sellerBtn" href="seller.html">✦ Seller Portal</a></div></div></header>
 <main class="shell main" id="home">
 <section class="heroes">
 <article class="hero heroMain"><div class="gridfx"></div><div class="orbs"></div><div class="heroArt" aria-hidden="true"><span class="floatChip chip1"><i>♫</i> Premium</span><span class="floatChip chip2"><i>🎮</i> Game</span><span class="floatChip chip3"><i>◇</i> Digital</span><span class="floatChip chip4"><i>⚡</i> Jasa</span></div><div class="heroContent"><span class="eyebrow">✦ Marketplace Digital Terpercaya</span><h1 class="heroTitle">YAN<span>STORE</span></h1><p class="heroText">Temukan produk digital dan layanan game dari seller internal yang sudah disetujui. Order tercatat langsung ke sistem HomeOffice YANSMART.</p><div class="benefits"><span class="mini"><b>◇</b> Seller terverifikasi</span><span class="mini"><b>⚡</b> Proses cepat</span><span class="mini"><b>◉</b> Support seller</span><span class="mini"><b>⌁</b> Harga transparan</span></div></div></article>
@@ -308,7 +308,7 @@ render=function(){
   v38RenderFeatured();
 };
 
-setTimeout(()=>{v38EnsureUI();render()},500);
+/* v42.5: removed redundant delayed render; normal load() remains authoritative */
 </script>
 
 <style>
@@ -770,7 +770,7 @@ body{
   // Switch public marketplace logo to YANSMART asset.
   const logo=document.querySelector('.brand .logo');
   if(logo){
-    logo.src='assets/yansmart-logo-final.png';
+    logo.src='assets/yansmart-header-logo-v421.webp';
     logo.alt='YANSMART';
   }
 
@@ -846,5 +846,21 @@ body{
   border:2px solid #7657ff!important;
   box-shadow:0 0 0 3px rgba(124,60,255,.12),0 0 26px rgba(84,92,255,.35)!important;
 }
+</style>
+
+<style>
+/* V42.5 STABLE HEADER LOGO */
+.brand .logo{
+  width:54px!important;
+  height:54px!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  background:#050b18!important;
+  border:2px solid #7657ff!important;
+  box-shadow:0 0 0 3px rgba(124,60,255,.12),0 0 26px rgba(84,92,255,.35)!important;
+}
+@media(max-width:520px){.brand .logo{width:44px!important;height:44px!important}}
 </style>
 </body></html>
