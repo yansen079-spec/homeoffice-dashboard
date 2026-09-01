@@ -892,3 +892,36 @@ body{
 
 <!-- V42.7 SELF-CONTAINED VISUAL FIX: header logo + hero banner embedded to avoid GitHub Pages asset 404s -->
 </body></html>
+
+<!-- ===== V42.8 NAVIGATION FOUNDATION ===== -->
+<style>
+#how{scroll-margin-top:96px}#products,#categories,#home{scroll-margin-top:96px}
+.navlink{transition:.18s ease}.navlink:focus-visible,.sellerBtn:focus-visible,.brand:focus-visible,.cat:focus-visible,.searchBtn:focus-visible{outline:2px solid #9b6cff;outline-offset:3px}
+.ys-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,18px);z-index:99999;background:#111a31;border:1px solid #493481;color:#fff;padding:11px 16px;border-radius:12px;font-weight:800;font-size:12px;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 16px 45px #0008}.ys-toast.show{opacity:1;transform:translate(-50%,0)}
+#how.ys-how{display:block;padding:20px 22px;background:linear-gradient(135deg,rgba(16,27,51,.96),rgba(13,18,39,.96));border:1px solid #30405f;border-radius:18px;color:#dbe4f4}
+.ys-how-title{font-size:18px;font-weight:950;margin-bottom:14px}.ys-how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.ys-how-step{border:1px solid #293958;background:#0b1428;border-radius:14px;padding:14px}.ys-how-step b{display:block;color:#fff;margin:6px 0}.ys-how-step span{font-size:11px;color:#91a0ba;line-height:1.45}.ys-how-num{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#6d38e8;color:#fff;font-weight:950}@media(max-width:760px){.ys-how-grid{grid-template-columns:1fr 1fr}}@media(max-width:460px){.ys-how-grid{grid-template-columns:1fr}}
+</style>
+<script>
+(()=>{
+  const qs=(s)=>document.querySelector(s);
+  const navs=[...document.querySelectorAll('.navlink[data-scroll]')];
+  const ids=['home','products','categories','how'];
+  const toast=document.createElement('div');toast.className='ys-toast';document.body.appendChild(toast);
+  let tt;function say(t){toast.textContent=t;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),1700)}
+
+  // Buyer-friendly Cara Beli section (replaces technical sandbox copy only).
+  const how=qs('#how');
+  if(how){how.classList.add('ys-how');how.innerHTML=`<div class="ys-how-title">🛒 Cara Beli di YANSMART</div><div class="ys-how-grid"><div class="ys-how-step"><div class="ys-how-num">1</div><b>Pilih Produk</b><span>Cari produk atau pilih kategori yang kamu butuhkan.</span></div><div class="ys-how-step"><div class="ys-how-num">2</div><b>Checkout</b><span>Buka detail produk, cek stok, lalu tekan Checkout.</span></div><div class="ys-how-step"><div class="ys-how-num">3</div><b>Bayar Aman</b><span>Lengkapi data pembeli dan lanjutkan pembayaran melalui Midtrans.</span></div><div class="ys-how-step"><div class="ys-how-num">4</div><b>Pesanan Diproses</b><span>Setelah pembayaran terkonfirmasi, pesanan masuk untuk diproses.</span></div></div>`}
+
+  function go(id,push=true){const el=document.getElementById(id);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'start'});navs.forEach(n=>n.classList.toggle('active',n.dataset.scroll===id));if(push&&history.replaceState)history.replaceState(null,'','#'+id)}
+  navs.forEach(n=>n.addEventListener('click',()=>go(n.dataset.scroll)));
+  qs('.brand')?.addEventListener('click',(e)=>{e.preventDefault();go('home')});
+  qs('.lang')?.addEventListener('click',()=>say('Bahasa Indonesia aktif 🇮🇩'));
+  qs('#search')?.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();qs('#searchButton')?.click()}});
+
+  // Keep active nav in sync while scrolling.
+  const obs=new IntersectionObserver(es=>{const hit=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!hit)return;navs.forEach(n=>n.classList.toggle('active',n.dataset.scroll===hit.target.id))},{rootMargin:'-18% 0px -62% 0px',threshold:[0,.15,.4]});
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+  const initial=location.hash.slice(1);if(ids.includes(initial))setTimeout(()=>go(initial,false),80);
+})();
+</script>
