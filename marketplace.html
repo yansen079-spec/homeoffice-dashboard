@@ -894,6 +894,50 @@ body{
 </style>
 
 <!-- V42.7 SELF-CONTAINED VISUAL FIX: header logo + hero banner embedded to avoid GitHub Pages asset 404s -->
+
+<!-- ===== V42.15 BUYER AUTH HEADER ===== -->
+<style>
+.ysBuyerAuth{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.ysBuyerAuth a{height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:0 13px;text-decoration:none;font-weight:900;font-size:13px;transition:.18s ease}
+.ysBuyerAuth .ysLogin{border:1px solid #2b3b5c;background:#10182b;color:#eef2ff}
+.ysBuyerAuth .ysLogin:hover{border-color:#7c3cff;color:#c4a7ff;background:#151b34}
+.ysBuyerAuth .ysRegister{border:1px solid #6d3bea;background:linear-gradient(135deg,#47209a,#6d31de);color:#fff;box-shadow:0 7px 20px #6d28d926}
+.ysBuyerAuth .ysRegister:hover{filter:brightness(1.12)}
+.ysBuyerAuth .ysAccount{border:1px solid #6d3bea;background:#151638;color:#d9c8ff}
+@media(max-width:900px){.ysBuyerAuth a{padding:0 10px;font-size:12px}.ysBuyerAuth{gap:5px}}
+@media(max-width:620px){.ysBuyerAuth .ysLogin,.ysBuyerAuth .ysRegister{width:38px;padding:0;font-size:0}.ysBuyerAuth .ysLogin:after{content:'↪';font-size:16px}.ysBuyerAuth .ysRegister:after{content:'+';font-size:20px}.ysBuyerAuth .ysAccount{padding:0 10px}.ysBuyerAuth .ysAccount .ysAccountText{display:none}}
+</style>
+<script>
+(()=>{
+  function lang(){return localStorage.getItem('yansmart_language')==='en'?'en':'id'}
+  function labels(){return lang()==='en'?{login:'Sign In',register:'Sign Up',account:'My Account'}:{login:'Masuk',register:'Daftar',account:'Akun Saya'}}
+  function findTarget(){
+    return document.querySelector('a.buyerBtn[href^="account.html"]') ||
+           [...document.querySelectorAll('a.navbtn[href^="account.html"],a.navBtn[href^="account.html"]')].find(a=>!a.closest('.ysBuyerAuth'));
+  }
+  let wrap=null, logged=false;
+  function render(){
+    const L=labels();
+    if(!wrap)return;
+    if(logged){
+      wrap.innerHTML='<a class="ysAccount" href="account.html"><span>👤</span>&nbsp;<span class="ysAccountText">'+L.account+'</span></a>';
+    }else{
+      wrap.innerHTML='<a class="ysLogin" href="account.html?mode=login">'+L.login+'</a><a class="ysRegister" href="account.html?mode=register">'+L.register+'</a>';
+    }
+  }
+  async function init(){
+    const old=findTarget(); if(!old)return;
+    wrap=document.createElement('span'); wrap.className='ysBuyerAuth'; old.replaceWith(wrap);
+    render();
+    try{const {data}=await sb.auth.getSession();logged=!!data?.session;render()}catch(e){console.warn('Buyer session header:',e)}
+    try{sb.auth.onAuthStateChange((_e,s)=>{logged=!!s;render()})}catch(_){ }
+    document.addEventListener('click',e=>{if(e.target.closest('.langOption,.langOpt,[data-lang]'))setTimeout(render,30)});
+    window.addEventListener('storage',e=>{if(e.key==='yansmart_language')render()});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body></html>
 
 <!-- ===== V42.8 NAVIGATION FOUNDATION ===== -->

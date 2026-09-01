@@ -73,4 +73,21 @@ document.getElementById('forgotBtn').onclick=async()=>{const email=document.getE
 applyLang();
 })();
 </script>
+
+<!-- ===== V42.15 DIRECT AUTH MODE ===== -->
+<script>
+(()=>{
+ function applyMode(mode){
+   const login=document.getElementById('loginForm'),reg=document.getElementById('registerForm');
+   if(!login||!reg)return;
+   if(mode==='register'){login.classList.add('hidden');reg.classList.remove('hidden')}
+   else{reg.classList.add('hidden');login.classList.remove('hidden')}
+ }
+ const initial=new URLSearchParams(location.search).get('mode');
+ if(initial==='register'||initial==='login')applyMode(initial);
+ document.getElementById('showRegister')?.addEventListener('click',()=>{history.replaceState(null,'',location.pathname+'?mode=register');applyMode('register')});
+ document.getElementById('showLogin')?.addEventListener('click',()=>{history.replaceState(null,'',location.pathname+'?mode=login');applyMode('login')});
+})();
+</script>
+
 </body></html>
