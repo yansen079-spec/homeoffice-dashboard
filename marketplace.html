@@ -159,4 +159,257 @@ async function ysResumePayment(code){try{ysModal('⏳','Membuat pembayaran...','
 async function ysShowOrder(code){try{ysModal('⏳','Memeriksa pembayaran...','Mengambil status terbaru dari server.',code,false);let o=await ysFindOrder(code);if(o.payment_status==='Dibayar')ysModal('✅','Pembayaran Berhasil','Pembayaran sudah diterima. Pesanan '+(o.status||'Diproses')+'.',o.order_code,false);else if(o.status==='Dibatalkan'||o.payment_status==='Gagal')ysModal('❌','Pesanan Dibatalkan','Pembayaran gagal/kedaluwarsa dan stok telah dilepas kembali.',o.order_code,false);else ysModal('⏳','Menunggu Pembayaran','Order sudah ada. Lanjutkan pembayaran tanpa membuat order baru.',o.order_code,true)}catch(e){ysModal('⚠️','Status tidak ditemukan',e.message||'Gagal membaca order.',code,false)}}
 function ysCheckOrder(){ysShowOrder(document.getElementById('ysResumeCode').value)}
 (function(){let p=new URLSearchParams(location.search),c=p.get('order_id')||p.get('order_code')||localStorage.getItem('yanstore_last_order');if(c){document.getElementById('ysResumeCode').value=c;setTimeout(()=>ysShowOrder(c),700)}})();
-</script></body></html>
+</script>
+<style>
+/* ===== V38 MARKETPLACE MAKEOVER — UI ONLY, PAYMENT FLOW UNTOUCHED ===== */
+:root{
+  --v38-card:#0f172a;
+  --v38-line:rgba(148,163,184,.16);
+  --v38-soft:rgba(124,60,255,.12);
+}
+.v38-trustbar{width:min(1460px,calc(100% - 52px));margin:16px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.v38-trust{border:1px solid var(--v38-line);background:rgba(15,23,42,.68);backdrop-filter:blur(12px);border-radius:14px;padding:11px 13px;display:flex;gap:10px;align-items:center;color:#dbe4f3;font-size:12px;font-weight:800}
+.v38-trust i{font-style:normal;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(124,60,255,.14)}
+.v38-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 18px}
+.v38-tools select,.v38-toggle{height:42px;border:1px solid #26324d;background:#10182b;color:#e5e7eb;border-radius:12px;padding:0 12px;font-weight:800}
+.v38-toggle{display:flex;align-items:center;gap:7px;cursor:pointer}.v38-toggle input{accent-color:#7c3cff}
+.v38-featured{margin:22px 0 10px;padding:18px;border:1px solid var(--v38-line);border-radius:20px;background:linear-gradient(135deg,rgba(124,60,255,.10),rgba(59,130,246,.05))}
+.v38-featured-head{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:12px}.v38-featured-head h3{margin:0;font-size:18px}.v38-featured-head span{font-size:11px;color:#94a3b8}
+.v38-featured-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.v38-mini{border:1px solid var(--v38-line);background:#0d1426;border-radius:14px;padding:12px;cursor:pointer;transition:.2s}.v38-mini:hover{transform:translateY(-2px);border-color:#5b46d6}.v38-mini b{display:block;font-size:13px;line-height:1.3}.v38-mini small{display:block;color:#94a3b8;margin:5px 0}.v38-mini strong{color:#c4b5fd}
+.card{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.card:hover{transform:translateY(-5px);border-color:#6047d7;box-shadow:0 24px 55px rgba(0,0,0,.38)}
+.v38-badges{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:4}.v38-badge{padding:6px 8px;border-radius:999px;font-size:9px;font-weight:950;letter-spacing:.04em;text-transform:uppercase;backdrop-filter:blur(8px)}
+.v38-ready{background:rgba(34,197,94,.16);color:#86efac;border:1px solid rgba(34,197,94,.28)}.v38-low{background:rgba(245,158,11,.16);color:#fcd34d;border:1px solid rgba(245,158,11,.30)}.v38-out{background:rgba(239,68,68,.16);color:#fca5a5;border:1px solid rgba(239,68,68,.30)}
+.v38-verified{display:inline-flex;align-items:center;gap:4px;color:#93c5fd;font-size:10px;font-weight:900}.v38-verified:before{content:"✓";display:grid;place-items:center;width:14px;height:14px;border-radius:50%;background:#2563eb;color:white;font-size:9px}
+.v38-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:8px;margin-top:11px}.v38-detail{border:1px solid #334155;background:#111827;color:#dbeafe;border-radius:11px;font-weight:900;cursor:pointer}.buyBtn{margin:0!important}
+.buyBtn[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+#v38Detail{position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:99980;display:none;align-items:center;justify-content:center;padding:18px}.v38-open{display:flex!important}
+.v38-modal{width:min(760px,100%);max-height:88vh;overflow:auto;border:1px solid #334155;border-radius:22px;background:#0b1224;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.v38-modal-top{height:210px;position:relative;overflow:hidden;background:radial-gradient(circle at 20% 20%,rgba(124,60,255,.28),transparent 30%),linear-gradient(135deg,#0d1832,#1b0d32)}.v38-modal-top img{width:100%;height:100%;object-fit:cover}.v38-modal-close{position:absolute;right:14px;top:14px;width:38px;height:38px;border:1px solid #475569;border-radius:11px;background:#0f172acc;color:#fff;font-size:18px;cursor:pointer}.v38-modal-body{padding:22px}.v38-modal-store{font-size:11px;color:#93c5fd;font-weight:900;margin-bottom:8px}.v38-modal-title{font-size:25px;font-weight:950;line-height:1.15}.v38-modal-desc{color:#aab4c8;line-height:1.65;margin:12px 0}.v38-modal-price{font-size:27px;font-weight:950;color:#c4b5fd;margin:12px 0}.v38-modal-meta{display:flex;gap:8px;flex-wrap:wrap}.v38-chip{border:1px solid #334155;border-radius:999px;padding:7px 10px;color:#cbd5e1;font-size:11px;font-weight:800}.v38-modal-buy{width:100%;margin-top:18px;border:0;border-radius:12px;padding:13px;background:linear-gradient(135deg,#7c3cff,#4f46e5);font-weight:950;color:#fff;cursor:pointer}
+#ysResumeBox{border-color:#334155!important;background:linear-gradient(135deg,#111827,#0f172a)!important;color:#e5e7eb;box-shadow:0 12px 35px rgba(0,0,0,.2)}#ysResumeBox strong{color:#c4b5fd}#ysResumeBox input{background:#0b1224!important;color:#fff!important;border-color:#334155!important}#ysResumeBox button{background:linear-gradient(135deg,#7c3cff,#4f46e5)!important}
+@media(max-width:900px){.v38-trustbar{grid-template-columns:1fr 1fr;width:min(100% - 24px,1460px)}.v38-featured-row{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.shell{padding-left:14px!important;padding-right:14px!important}.heroes{grid-template-columns:1fr!important}.heroPromo{display:none}.hero{min-height:260px}.heroContent{padding:24px}.heroTitle{font-size:42px}.v38-trustbar{grid-template-columns:1fr}.v38-featured-row{grid-template-columns:1fr 1fr}.v38-actions{grid-template-columns:1fr}.v38-modal-title{font-size:21px}}
+</style>
+
+<div id="v38Detail">
+  <div class="v38-modal">
+    <div class="v38-modal-top" id="v38ModalTop">
+      <button class="v38-modal-close" onclick="v38CloseDetail()">×</button>
+    </div>
+    <div class="v38-modal-body">
+      <div class="v38-modal-store" id="v38ModalStore"></div>
+      <div class="v38-modal-title" id="v38ModalTitle"></div>
+      <div class="v38-modal-desc" id="v38ModalDesc"></div>
+      <div class="v38-modal-price" id="v38ModalPrice"></div>
+      <div class="v38-modal-meta" id="v38ModalMeta"></div>
+      <button class="v38-modal-buy" id="v38ModalBuy">Checkout Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* V38 UI layer. Existing create order + Midtrans functions remain untouched. */
+let v38Sort='recommended',v38StockOnly=false;
+
+function v38EnsureUI(){
+  if(!document.querySelector('.v38-trustbar')){
+    const main=document.querySelector('.main');
+    if(main)main.insertAdjacentHTML('beforebegin',`<div class="v38-trustbar">
+      <div class="v38-trust"><i>⚡</i><div>Proses Cepat<br><small style="color:#94a3b8">Produk digital praktis</small></div></div>
+      <div class="v38-trust"><i>🔐</i><div>Pembayaran Aman<br><small style="color:#94a3b8">Diproses melalui Midtrans</small></div></div>
+      <div class="v38-trust"><i>🏪</i><div>Multi Seller<br><small style="color:#94a3b8">Pilihan toko dalam satu marketplace</small></div></div>
+      <div class="v38-trust"><i>📦</i><div>Stok Realtime<br><small style="color:#94a3b8">Ketersediaan langsung diperbarui</small></div></div>
+    </div>`);
+  }
+
+  const search=document.querySelector('#search');
+  if(search&&!document.querySelector('#v38Sort')){
+    const anchor=search.closest('.searchBox,.searchbar,.filters,.toolbar')||search.parentElement;
+    if(anchor)anchor.insertAdjacentHTML('afterend',`<div class="v38-tools">
+      <select id="v38Sort">
+        <option value="recommended">Urutkan: Rekomendasi</option>
+        <option value="priceAsc">Harga Termurah</option>
+        <option value="priceDesc">Harga Tertinggi</option>
+        <option value="stockDesc">Stok Terbanyak</option>
+        <option value="nameAsc">Nama A–Z</option>
+      </select>
+      <label class="v38-toggle"><input type="checkbox" id="v38StockOnly"> Hanya yang tersedia</label>
+    </div>`);
+    document.querySelector('#v38Sort').onchange=e=>{v38Sort=e.target.value;render()};
+    document.querySelector('#v38StockOnly').onchange=e=>{v38StockOnly=e.target.checked;render()};
+  }
+  if(!document.querySelector('#v38Featured')){
+    const products=document.querySelector('#products');
+    if(products)products.insertAdjacentHTML('afterbegin',`<section class="v38-featured" id="v38Featured"><div class="v38-featured-head"><div><h3>✨ Pilihan Cepat</h3><span>Produk dengan stok tersedia saat ini</span></div></div><div class="v38-featured-row" id="v38FeaturedRow"></div></section>`);
+  }
+}
+function v38StockBadge(stock){
+  stock=Number(stock||0);
+  if(stock<=0)return '<span class="v38-badge v38-out">Habis</span>';
+  if(stock<=3)return '<span class="v38-badge v38-low">Stok Terbatas</span>';
+  return '<span class="v38-badge v38-ready">Ready</span>';
+}
+function v38SortRows(a){
+  const out=[...a];
+  if(v38Sort==='priceAsc')out.sort((x,y)=>Number(x.sell_price)-Number(y.sell_price));
+  if(v38Sort==='priceDesc')out.sort((x,y)=>Number(y.sell_price)-Number(x.sell_price));
+  if(v38Sort==='stockDesc')out.sort((x,y)=>Number(y.stock)-Number(x.stock));
+  if(v38Sort==='nameAsc')out.sort((x,y)=>String(x.title||'').localeCompare(String(y.title||''),'id'));
+  if(v38Sort==='recommended')out.sort((x,y)=>(Number(y.stock>0)-Number(x.stock>0))||Number(y.stock)-Number(x.stock));
+  return out;
+}
+function v38RenderFeatured(){
+  const el=document.querySelector('#v38FeaturedRow');if(!el)return;
+  const a=v38SortRows((rows||[]).filter(x=>Number(x.stock||0)>0)).slice(0,4);
+  el.innerHTML=a.length?a.map(x=>`<div class="v38-mini" onclick="v38OpenDetail('${esc(x.listing_id)}')"><b>${esc(x.title)}</b><small>${esc(x.store_name||x.seller_name||'YANSTORE Seller')} • Stok ${Number(x.stock||0)}</small><strong>${rupiah(x.sell_price)}</strong></div>`).join(''):'<div class="empty">Belum ada produk ready.</div>';
+}
+function v38OpenDetail(id){
+  const x=(rows||[]).find(r=>String(r.listing_id)===String(id));if(!x)return;
+  const top=document.querySelector('#v38ModalTop');
+  top.innerHTML=`<button class="v38-modal-close" onclick="v38CloseDetail()">×</button>${x.image_url?`<img src="${esc(x.image_url)}" alt="${esc(x.title)}">`:`<div style="height:100%;display:grid;place-items:center;font-size:64px;font-weight:950">${esc(iconOf(x))}</div>`}`;
+  document.querySelector('#v38ModalStore').innerHTML=`<span class="v38-verified">${esc(x.store_name||x.seller_name||'YANSTORE Seller')}</span>`;
+  document.querySelector('#v38ModalTitle').textContent=x.title||x.product_name||'Produk';
+  document.querySelector('#v38ModalDesc').textContent=x.description||x.product_name||'Produk digital YANSTORE';
+  document.querySelector('#v38ModalPrice').textContent=rupiah(x.sell_price);
+  document.querySelector('#v38ModalMeta').innerHTML=`<span class="v38-chip">Stok ${Number(x.stock||0)}</span><span class="v38-chip">${esc(categoryOf(x)==='game'?'Game & Top Up':categoryOf(x)==='jasa'?'Jasa Digital':'Produk Digital')}</span>`;
+  const b=document.querySelector('#v38ModalBuy');b.disabled=Number(x.stock||0)<=0;b.textContent=Number(x.stock||0)>0?'Checkout Sekarang':'Stok Habis';b.onclick=()=>{v38CloseDetail();openOrder(x.listing_id)};
+  document.querySelector('#v38Detail').classList.add('v38-open');
+}
+function v38CloseDetail(){document.querySelector('#v38Detail')?.classList.remove('v38-open')}
+document.querySelector('#v38Detail')?.addEventListener('click',e=>{if(e.target.id==='v38Detail')v38CloseDetail()});
+
+const v38OldRender=render;
+render=function(){
+  v38EnsureUI();
+  const q=$('#search').value.trim().toLowerCase();
+  let f=(rows||[]).filter(x=>(activeCat==='all'||categoryOf(x)===activeCat)&&(!q||[x.title,x.product_name,x.store_name,x.seller_name,x.description].some(v=>String(v||'').toLowerCase().includes(q))));
+  if(v38StockOnly)f=f.filter(x=>Number(x.stock||0)>0);
+  f=v38SortRows(f);
+  $('#countChip').textContent=f.length+' listing';
+  $('#grid').innerHTML=f.length?f.map(x=>`<article class="card">
+    <div class="visual ${categoryOf(x)} ${x.image_url?'hasPhoto':''}">
+      <div class="v38-badges">${v38StockBadge(x.stock)}</div>
+      ${x.image_url?`<img class="productPhoto" src="${esc(x.image_url)}" alt="${esc(x.product_name||x.title)}">`:`<div class="visualGlow"></div><div class="productIcon">${esc(iconOf(x))}</div><div class="visualCopy"><b>${esc(x.product_name||x.title)}</b><span>${esc(categoryOf(x)==='game'?'Game & Top Up':categoryOf(x)==='jasa'?'Digital Service':categoryOf(x)==='digital'?'Digital Premium':'YANSTORE')}</span></div>`}
+    </div>
+    <div class="cardbody">
+      <div class="storeRow"><span class="storeAvatar">${esc((x.store_name||'Y').slice(0,1).toUpperCase())}</span><span class="v38-verified">${esc(x.store_name||x.seller_name||'YANSTORE Seller')}</span></div>
+      <div class="cardTitle">${esc(x.title)}</div>
+      <div class="desc">${esc(x.description||x.product_name||'Produk digital YANSTORE')}</div>
+      <div class="price">${rupiah(x.sell_price)}</div>
+      <div class="cardMeta"><span>${esc(categoryOf(x)==='game'?'Game & Top Up':categoryOf(x)==='jasa'?'Jasa Digital':'Digital')}</span><span class="stock">Stok ${Number(x.stock||0)}</span></div>
+      <div class="v38-actions">
+        <button class="v38-detail" data-detail="${esc(x.listing_id)}">Lihat Detail</button>
+        <button class="buyBtn" data-id="${esc(x.listing_id)}" ${Number(x.stock||0)<=0?'disabled':''}>${Number(x.stock||0)>0?'Checkout':'Stok Habis'}</button>
+      </div>
+    </div>
+  </article>`).join(''):'<div class="empty">Belum ada listing yang cocok dengan pencarian atau filter ini.</div>';
+  document.querySelectorAll('.buyBtn:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>openOrder(btn.dataset.id)));
+  document.querySelectorAll('[data-detail]').forEach(btn=>btn.addEventListener('click',()=>v38OpenDetail(btn.dataset.detail)));
+  v38RenderFeatured();
+};
+
+setTimeout(()=>{v38EnsureUI();render()},500);
+</script>
+
+<style>
+/* ===== V39 YANSTORE MASCOT EDITION ===== */
+.v39-mascot-wrap{
+  position:fixed;right:24px;bottom:22px;z-index:9000;
+  width:180px;filter:drop-shadow(0 18px 30px rgba(79,70,229,.32));
+  animation:v39Float 3.4s ease-in-out infinite;
+}
+.v39-mascot{
+  width:100%;display:block;cursor:pointer;
+  transition:transform .25s ease,filter .25s ease;
+}
+.v39-mascot:hover{transform:scale(1.06) rotate(-1deg);filter:brightness(1.08)}
+.v39-glow{
+  position:absolute;left:18%;right:18%;bottom:3%;height:22%;
+  background:radial-gradient(ellipse,rgba(124,60,255,.6),rgba(37,99,235,.18),transparent 72%);
+  filter:blur(12px);z-index:-1;animation:v39Glow 2s ease-in-out infinite;
+}
+.v39-bubble{
+  position:absolute;right:138px;bottom:118px;width:205px;
+  background:rgba(10,18,38,.96);color:#fff;border:1px solid rgba(129,92,246,.55);
+  box-shadow:0 14px 45px rgba(0,0,0,.35),0 0 24px rgba(124,60,255,.22);
+  border-radius:17px 17px 5px 17px;padding:12px 14px;
+  font-size:12px;line-height:1.45;opacity:0;transform:translateY(8px) scale(.96);
+  pointer-events:none;transition:.25s;
+}
+.v39-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+.v39-bubble b{display:block;color:#c4b5fd;font-size:13px;margin-bottom:2px}
+.v39-status{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 9px #22c55e;margin-right:5px}
+.v39-hero-mascot{
+  position:absolute;right:3%;bottom:-7%;width:min(37vw,430px);z-index:2;
+  animation:v39HeroFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 20px 38px rgba(91,33,182,.35));
+  pointer-events:none;
+}
+.v39-hero-mascot img{width:100%;display:block}
+.v39-spark{position:absolute;border-radius:50%;background:#c4b5fd;box-shadow:0 0 12px #8b5cf6;animation:v39Spark 2.8s linear infinite;z-index:1}
+.v39-s1{width:5px;height:5px;right:8%;top:18%}.v39-s2{width:4px;height:4px;right:32%;top:12%;animation-delay:.8s}.v39-s3{width:6px;height:6px;right:22%;bottom:15%;animation-delay:1.5s}
+@keyframes v39Float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(1deg)}}
+@keyframes v39HeroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes v39Glow{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.12)}}
+@keyframes v39Spark{0%{opacity:0;transform:translateY(10px) scale(.5)}35%{opacity:1}100%{opacity:0;transform:translateY(-42px) scale(1.2)}}
+@media(max-width:850px){
+ .v39-hero-mascot{width:260px;right:-35px;opacity:.58}
+ .v39-mascot-wrap{width:118px;right:10px;bottom:12px}
+ .v39-bubble{right:88px;bottom:80px;width:180px}
+}
+@media(max-width:520px){
+ .v39-hero-mascot{width:205px;right:-55px;bottom:-2%;opacity:.42}
+ .v39-mascot-wrap{width:92px}
+ .v39-bubble{right:67px;bottom:62px;width:165px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .v39-mascot-wrap,.v39-hero-mascot,.v39-glow,.v39-spark{animation:none!important}
+}
+</style>
+
+<div class="v39-mascot-wrap" id="v39Mascot">
+  <div class="v39-bubble" id="v39Bubble">
+    <b><span class="v39-status"></span>YANSTORE Assistant</b>
+    <span id="v39BubbleText">Hai 👋 Selamat belanja! Ada yang bisa dibantu?</span>
+  </div>
+  <div class="v39-glow"></div>
+  <img class="v39-mascot" src="assets/yanstore-mascot.png" alt="YANSTORE Assistant">
+</div>
+
+<script>
+/* V39 visual-only mascot layer. Checkout/Midtrans untouched. */
+(function(){
+ const mascot=document.getElementById('v39Mascot'), bubble=document.getElementById('v39Bubble'), text=document.getElementById('v39BubbleText');
+ if(!mascot||!bubble)return;
+ const msgs=[
+  'Hai 👋 Selamat belanja di YANSTORE!',
+  'Cari produk digital? Pakai pencarian di atas 🔎',
+  'Stok di sini diperbarui realtime ⚡',
+  'Pembayaran aman diproses melalui Midtrans 🔐',
+  'Klik Lihat Detail sebelum checkout kalau mau cek produknya ✨'
+ ];
+ let i=0,timer;
+ function show(msg){
+   if(msg)text.textContent=msg;
+   bubble.classList.add('show');
+   clearTimeout(timer);
+   timer=setTimeout(()=>bubble.classList.remove('show'),4200);
+ }
+ mascot.addEventListener('click',()=>{i=(i+1)%msgs.length;show(msgs[i])});
+ setTimeout(()=>show(msgs[0]),1200);
+ setInterval(()=>{if(!bubble.classList.contains('show')){i=(i+1)%msgs.length;show(msgs[i])}},18000);
+
+ const hero=document.querySelector('.hero,.heroMain,.heroCard');
+ if(hero && !hero.querySelector('.v39-hero-mascot')){
+   const cs=getComputedStyle(hero);
+   if(cs.position==='static')hero.style.position='relative';
+   hero.style.overflow='hidden';
+   hero.insertAdjacentHTML('beforeend',`
+    <div class="v39-hero-mascot">
+      <span class="v39-spark v39-s1"></span><span class="v39-spark v39-s2"></span><span class="v39-spark v39-s3"></span>
+      <img src="assets/yanstore-mascot.png" alt="Maskot YANSTORE">
+    </div>`);
+ }
+})();
+</script>
+</body></html>
