@@ -536,4 +536,38 @@ body{
   if(title)title.innerHTML='Produk <span>Terpopuler</span> 🔥';
 })();
 </script>
+
+<style>
+/* ===== V40.1 FINAL HERO ===== */
+.heroMain{
+  background:
+    linear-gradient(90deg,rgba(4,12,30,.18),rgba(12,8,34,.08)),
+    url("assets/yanstore-hero-v401.webp") center center/cover no-repeat!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.heroMain .heroContent{display:none!important}
+.heroMain .v40-mascot-stage{display:none!important}
+.heroMain:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 42px rgba(3,7,18,.24);
+  border-radius:inherit;
+}
+@media(max-width:840px){
+ .heroMain{background-position:center center!important;min-height:350px!important}
+}
+@media(max-width:600px){
+ .heroMain{min-height:280px!important;background-position:58% center!important}
+}
+</style>
+<script>
+/* V40.1 visual-only hero replacement. Payment flow untouched. */
+(function(){
+  const h=document.querySelector('.heroMain');
+  if(h){
+    h.setAttribute('aria-label','YANSTORE Marketplace Digital Terpercaya');
+    h.title='YANSTORE Marketplace Digital Terpercaya';
+  }
+})();
+</script>
 </body></html>
