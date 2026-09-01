@@ -158,7 +158,32 @@ async function ysFindOrder(code){code=String(code||'').trim().toUpperCase();if(!
 async function ysResumePayment(code){try{ysModal('⏳','Membuat pembayaran...','Jangan tutup halaman ini.',code,false);let {data,error}=await sb.functions.invoke('midtrans-create-snap',{body:{order_code:code}});if(error)throw error;if(!data?.redirect_url)throw Error(data?.error||'Link pembayaran tidak tersedia.');localStorage.setItem('yanstore_last_order',code);location.href=data.redirect_url}catch(e){ysModal('❌','Tidak dapat melanjutkan pembayaran',e.message||'Terjadi kesalahan.',code,false)}}
 async function ysShowOrder(code){try{ysModal('⏳','Memeriksa pembayaran...','Mengambil status terbaru dari server.',code,false);let o=await ysFindOrder(code);if(o.payment_status==='Dibayar')ysModal('✅','Pembayaran Berhasil','Pembayaran sudah diterima. Pesanan '+(o.status||'Diproses')+'.',o.order_code,false);else if(o.status==='Dibatalkan'||o.payment_status==='Gagal')ysModal('❌','Pesanan Dibatalkan','Pembayaran gagal/kedaluwarsa dan stok telah dilepas kembali.',o.order_code,false);else ysModal('⏳','Menunggu Pembayaran','Order sudah ada. Lanjutkan pembayaran tanpa membuat order baru.',o.order_code,true)}catch(e){ysModal('⚠️','Status tidak ditemukan',e.message||'Gagal membaca order.',code,false)}}
 function ysCheckOrder(){ysShowOrder(document.getElementById('ysResumeCode').value)}
-(function(){let p=new URLSearchParams(location.search),c=p.get('order_id')||p.get('order_code')||localStorage.getItem('yanstore_last_order');if(c){document.getElementById('ysResumeCode').value=c;setTimeout(()=>ysShowOrder(c),700)}})();
+(function(){
+  const p=new URLSearchParams(location.search);
+  const urlCode=p.get('order_id')||p.get('order_code');
+  const lastCode=localStorage.getItem('yanstore_last_order');
+
+  // Order terakhir hanya dipakai untuk mengisi kolom cek pesanan.
+  // Jangan otomatis membuka popup setiap kali halaman direfresh.
+  if(lastCode) document.getElementById('ysResumeCode').value=lastCode;
+
+  // Popup status hanya otomatis dibuka ketika benar-benar kembali
+  // dari halaman pembayaran dengan order_id/order_code di URL.
+  if(urlCode){
+    document.getElementById('ysResumeCode').value=urlCode;
+    localStorage.setItem('yanstore_last_order',urlCode);
+    setTimeout(async()=>{
+      await ysShowOrder(urlCode);
+      // Bersihkan parameter pembayaran agar refresh berikutnya tidak memunculkan popup lagi.
+      try{
+        const clean=new URL(location.href);
+        clean.searchParams.delete('order_id');
+        clean.searchParams.delete('order_code');
+        history.replaceState({},'',clean.pathname+clean.search+clean.hash);
+      }catch(e){}
+    },700);
+  }
+})();
 </script>
 <style>
 /* ===== V38 MARKETPLACE MAKEOVER — UI ONLY, PAYMENT FLOW UNTOUCHED ===== */
