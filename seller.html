@@ -57,4 +57,20 @@ $('#saveProduct').onclick=async()=>{const base={p_product_id:$('#productId').val
 async function applyStore(){const name=$('#applyName').value.trim(),store=$('#applyStore').value.trim(),contact=$('#applyContact').value.trim(),desc=$('#applyDescription').value.trim();if(name.length<2||store.length<3||contact.length<5){$('#applyMsg').textContent='Lengkapi nama seller, nama toko, dan kontak.';return}const {error}=await sb.rpc('apply_public_seller',{p_display_name:name,p_store_name:store,p_contact:contact,p_store_description:desc||null});if(error){$('#applyMsg').textContent=error.message;return}$('#applyMsg').textContent='Pengajuan berhasil dikirim.';const {data:{user}}=await sb.auth.getUser();if(user)await boot(user)}
 $('#productImagesInput').addEventListener('change',e=>{const files=[...e.target.files];for(const file of files){if(productImages.length>=5)break;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){alert('Format foto harus JPG, PNG, atau WEBP.');continue}if(file.size>5*1024*1024){alert('Ukuran '+file.name+' lebih dari 5 MB.');continue}productImages.push({file,preview:URL.createObjectURL(file),url:null})}e.target.value='';renderProductImagePreview();if(files.length&&productImages.length>=5)alert('Maksimal 5 foto produk.')});$('#addProductBtn').onclick=()=>openProduct();$('#quickAdd').onclick=()=>{openTab('products');openProduct()};$('#quickOrders').onclick=()=>openTab('orders');$('#cancelProduct').onclick=()=>$('#productModal').classList.remove('open');$('#productSearch').oninput=renderProducts;$('#requestBtn').onclick=()=>$('#withdrawModal').classList.add('open');$('#cancelWd').onclick=()=>$('#withdrawModal').classList.remove('open');$('#saveWd').onclick=async()=>{const amount=Number($('#wdAmount').value||0),type=$('#wdType').value.trim(),account=$('#wdAccount').value.trim(),name=$('#wdName').value.trim();if(amount<=0||!type||!account||!name)return alert('Lengkapi data penarikan.');const {error}=await sb.rpc('request_seller_withdrawal',{p_amount:amount,p_destination_type:type,p_destination_account:account,p_destination_name:name});if(error)return alert(error.message);$('#withdrawModal').classList.remove('open');await loadData();alert('Permintaan penarikan sudah dikirim.')};$('#applyBtn').onclick=applyStore;$('#loginBtn').onclick=signIn;$('#signupBtn').onclick=signUp;$('#forgotBtn').onclick=forgotPassword;$('#password').onkeydown=e=>{if(e.key==='Enter')signIn()};$('#logoutBtn').onclick=$('#pendingLogout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 (async()=>{if(await handleRecovery())return;const {data}=await sb.auth.getSession();if(data.session)await boot(data.session.user)})();
-</script></body></html>
+</script>
+<style>
+/* V42 YANSMART Seller Center branding */
+.brandname,.seller-brand-title{
+  background:linear-gradient(90deg,#fff,#a855f7 58%,#38bdf8);
+  -webkit-background-clip:text;background-clip:text;color:transparent!important;
+}
+</style>
+<script>
+(function(){
+  document.title=document.title.replace(/YANSTORE/gi,'YANSMART');
+  document.querySelectorAll('img').forEach(img=>{
+    if((img.alt||'').toUpperCase().includes('YANSTORE'))img.alt=(img.alt||'').replace(/YANSTORE/gi,'YANSMART');
+  });
+})();
+</script>
+</body></html>
