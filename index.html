@@ -2952,6 +2952,58 @@ setInterval(()=>{
     if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin')v364Refresh();
   }catch(e){}
 },30000);
+
+// ===== v42.22 YANSMART ADMIN MARKETPLACE =====
+let maSellers=[],maProducts=[],maOrders=[];
+const maMoney=n=>'Rp'+Number(n||0).toLocaleString('id-ID');
+const maDate=v=>v?new Date(v).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}):'-';
+const maEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function showMarketAdminTab(id,btn){
+  document.querySelectorAll('#marketAdmin .seller-panel').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.querySelectorAll('#marketAdminTabs button').forEach(x=>x.classList.remove('active'));
+  btn?.classList.add('active');
+}
+async function loadMarketAdmin(){
+  if(currentEmployee?.role!=='admin') return;
+  const [s,p,o]=await Promise.all([
+    sb.from('sellers').select('id,display_name,store_name,contact,email,status,created_at,applied_at,approved_at').order('created_at',{ascending:false}),
+    sb.from('seller_products').select('id,seller_id,name,category,sell_price,stock,status,stock_mode,created_at').order('created_at',{ascending:false}),
+    sb.from('marketplace_orders').select('id,order_code,seller_id,buyer_name,buyer_contact,buyer_email,product_name,listing_title,store_name,total_amount,status,payment_status,created_at').order('created_at',{ascending:false}).limit(500)
+  ]);
+  if(s.error||p.error||o.error){alert('Gagal memuat Admin Marketplace: '+(s.error?.message||p.error?.message||o.error?.message));return}
+  maSellers=s.data||[];maProducts=p.data||[];maOrders=o.data||[];
+  const active=maSellers.filter(x=>x.status==='approved').length,pending=maSellers.filter(x=>x.status==='pending').length,susp=maSellers.filter(x=>x.status==='suspended').length;
+  const paid=maOrders.filter(x=>x.payment_status==='Dibayar'), revenue=paid.reduce((a,x)=>a+Number(x.total_amount||0),0);
+  const buyers=new Set(maOrders.map(x=>(x.buyer_email||x.buyer_contact||'').trim().toLowerCase()).filter(Boolean));
+  $('#maSellers').textContent=maSellers.length;$('#maSellerSub').textContent=active+' aktif';$('#maPending').textContent=pending;$('#maProducts').textContent=maProducts.length;$('#maOrders').textContent=maOrders.length;$('#maPaidSub').textContent=paid.length+' dibayar';$('#maRevenue').textContent=maMoney(revenue);$('#maBuyers').textContent=buyers.size;$('#maSuspended').textContent=susp;$('#maDigital').textContent=maProducts.filter(x=>x.stock_mode==='digital').length;
+  renderMASellers();renderMAProducts();renderMAOrders();
+}
+function renderMASellers(){
+  const q=($('#maSellerSearch')?.value||'').toLowerCase(),f=$('#maSellerFilter')?.value||'';
+  const rows=maSellers.filter(x=>(!f||x.status===f)&&[x.store_name,x.display_name,x.email,x.contact].join(' ').toLowerCase().includes(q));
+  $('#maSellerRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${maEsc(x.store_name||'-')}</b><br><small>${maEsc(x.display_name||'-')}</small></td><td>${maEsc(x.email||x.contact||'-')}</td><td><span class="badge ${x.status==='approved'?'aktif':x.status==='pending'?'menunggu':'sakit'}">${x.status==='approved'?'Aktif':x.status==='pending'?'Menunggu Approval':'Suspend'}</span></td><td>${maDate(x.applied_at||x.created_at)}</td><td><div class="rowactions">${x.status==='pending'?`<button class="btn primary" onclick="maSetSeller('${x.id}','approved')">Setujui</button><button class="btn danger" onclick="maSetSeller('${x.id}','suspended')">Tolak</button>`:x.status==='approved'?`<button class="btn danger" onclick="maSetSeller('${x.id}','suspended')">Suspend</button>`:`<button class="btn primary" onclick="maSetSeller('${x.id}','approved')">Pulihkan</button>`}<button class="btn" onclick="window.open('store.html?seller=${x.id}','_blank')">Toko ↗</button></div></td></tr>`).join(''):`<tr><td colspan="5" class="muted">Tidak ada seller.</td></tr>`;
+}
+async function maSetSeller(id,status){
+  const label=status==='approved'?'mengaktifkan seller ini':'menonaktifkan seller ini';
+  if(!confirm('Yakin ingin '+label+'?'))return;
+  const patch={status,updated_at:new Date().toISOString()};if(status==='approved')patch.approved_at=new Date().toISOString();
+  const {error}=await sb.from('sellers').update(patch).eq('id',id);
+  if(error){alert(error.message);return} await loadMarketAdmin();
+}
+function renderMAProducts(){
+  const q=($('#maProductSearch')?.value||'').toLowerCase(),f=($('#maProductFilter')?.value||'').toLowerCase();
+  const sellerMap=Object.fromEntries(maSellers.map(x=>[x.id,x.store_name||x.display_name||'-']));
+  const rows=maProducts.filter(x=>(!f||String(x.status||'').toLowerCase()===f)&&[x.name,x.category,sellerMap[x.seller_id]].join(' ').toLowerCase().includes(q));
+  $('#maProductRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${maEsc(x.name)}</b><br><small>${maEsc(x.category||'-')}</small></td><td>${maEsc(sellerMap[x.seller_id]||'-')}</td><td>${maMoney(x.sell_price)}</td><td>${Number(x.stock||0)}</td><td>${x.stock_mode==='digital'?'🔐 Digital':'📦 Manual'}</td><td><span class="badge ${String(x.status).toLowerCase()==='aktif'?'aktif':'nonaktif'}">${maEsc(x.status||'-')}</span></td></tr>`).join(''):`<tr><td colspan="6" class="muted">Tidak ada produk.</td></tr>`;
+}
+function renderMAOrders(){
+  const q=($('#maOrderSearch')?.value||'').toLowerCase(),f=$('#maOrderFilter')?.value||'';
+  const rows=maOrders.filter(x=>(!f||x.payment_status===f)&&[x.order_code,x.buyer_name,x.buyer_email,x.product_name,x.listing_title,x.store_name].join(' ').toLowerCase().includes(q));
+  $('#maOrderRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${maEsc(x.order_code||'-')}</b></td><td>${maEsc(x.buyer_name||'-')}<br><small>${maEsc(x.buyer_email||x.buyer_contact||'-')}</small></td><td>${maEsc(x.listing_title||x.product_name||'-')}<br><small>${maEsc(x.store_name||'-')}</small></td><td><b>${maMoney(x.total_amount)}</b></td><td><span class="badge ${x.payment_status==='Dibayar'?'aktif':x.payment_status==='Gagal'?'sakit':'menunggu'}">${maEsc(x.payment_status||'-')}</span></td><td>${maEsc(x.status||'-')}</td><td>${maDate(x.created_at)}</td></tr>`).join(''):`<tr><td colspan="7" class="muted">Tidak ada transaksi.</td></tr>`;
+}
+// ===== END v42.22 =====
+
 </script>
 </body>
 </html>
