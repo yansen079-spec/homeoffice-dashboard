@@ -63,4 +63,4 @@ document.getElementById('search').addEventListener('input',render);document.getE
 })();
 </script>
 
-</body></html>
+<script>document.addEventListener('click',e=>{const b=e.target.closest('button,a');if(!b||!(b.textContent||'').toLowerCase().includes('chat seller'))return;const sid=new URLSearchParams(location.search).get('seller');if(!sid)return;e.preventDefault();location.href=`chat.html?seller=${encodeURIComponent(sid)}`},true);</script></body></html>

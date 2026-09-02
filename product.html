@@ -79,4 +79,4 @@ const langBtn=document.getElementById('langBtn'),menu=document.getElementById('l
 })();
 </script>
 
-</body></html>
+<script>document.addEventListener('click',e=>{const b=e.target.closest('button,a');if(!b||!(b.textContent||'').toLowerCase().includes('chat seller'))return;const sl=document.querySelector('a[href*="store.html?seller="]');if(!sl)return;e.preventDefault();const su=new URL(sl.href),sid=su.searchParams.get('seller'),lid=new URLSearchParams(location.search).get('id');location.href=`chat.html?seller=${encodeURIComponent(sid)}&listing=${encodeURIComponent(lid||'')}`},true);</script></body></html>
