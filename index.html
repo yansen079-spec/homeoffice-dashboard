@@ -399,6 +399,13 @@ aside .userbox{
 @media(max-width:850px){.boss-bell{top:12px;right:12px}.notify-panel{top:66px;right:12px}}
 /* ===== END V20.8 ===== */
 
+
+/* ===== V42.24.1 BUSINESS FINANCE ===== */
+#businessfinance .bossdash{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:1100px){#businessfinance .bossdash{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:900px){#businessfinance .bfgrid{grid-template-columns:1fr!important}}
+@media(max-width:520px){#businessfinance .bossdash{grid-template-columns:1fr!important}}
+/* ===== END V42.24.1 ===== */
 </style>
 <style>
 .digital-product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.digital-product-card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:18px}.digital-product-head{display:flex;justify-content:space-between;gap:12px}.digital-stock-number{font-size:34px;font-weight:900;margin:12px 0 2px}.digital-product-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.digital-unit{border:1px solid #e6eaf0;border-radius:12px;padding:12px;background:#f8fafc;margin:8px 0}.digital-unit-cred{font-family:monospace;white-space:pre-wrap;word-break:break-word;margin-top:7px}@media(max-width:600px){.digital-product-grid{grid-template-columns:1fr}}
@@ -438,6 +445,7 @@ aside .userbox{
       <button data-page="sellercenter" class="adminOnly">🛒 Seller Center</button>
       <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
 <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
+      <button data-page="businessfinance" class="adminOnly">💰 Keuangan Usaha</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -769,7 +777,45 @@ aside .userbox{
       </div>
     </section>
 
-    <section id="routine" class="page hidden">
+    
+<section id="businessfinance" class="page hidden">
+  <div class="top">
+    <div><h1>💰 Keuangan Usaha</h1><div class="muted">Pantau modal, omzet, pengeluaran, dan keuntungan YANSTORE.</div></div>
+    <button class="btn" onclick="loadBusinessFinance()">↻ Refresh</button>
+  </div>
+  <div class="bossdash">
+    <div class="bosscard"><span>💼 Total Modal</span><b id="bfModal">Rp 0</b><small class="muted">Modal periode terpilih</small></div>
+    <div class="bosscard"><span>📈 Omzet</span><b id="bfOmzet">Rp 0</b><small class="muted">Dari Rekap Penjualan</small></div>
+    <div class="bosscard"><span>🧾 Pengeluaran</span><b id="bfExpense">Rp 0</b><small class="muted">Biaya operasional</small></div>
+    <div class="bosscard"><span>💵 Laba Kotor</span><b id="bfGross">Rp 0</b><small class="muted">Omzet − Modal</small></div>
+    <div class="bosscard"><span>✨ Laba Bersih</span><b id="bfNet">Rp 0</b><small class="muted">Omzet − Modal − Pengeluaran</small></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="toolbar"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <label>Dari <input class="input" type="date" id="bfFrom" onchange="loadBusinessFinance()"></label>
+      <label>Sampai <input class="input" type="date" id="bfTo" onchange="loadBusinessFinance()"></label>
+      <button class="btn" onclick="bfThisMonth()">Bulan Ini</button>
+    </div></div>
+  </div>
+  <div class="bfgrid" style="display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:16px">
+    <div class="card">
+      <h3 style="margin-top:0">Tambah Catatan</h3>
+      <label>Jenis</label><select class="input" id="bfType" style="width:100%;margin:6px 0 12px"><option value="modal">💼 Modal</option><option value="pengeluaran">🧾 Pengeluaran</option></select>
+      <label>Tanggal</label><input class="input" type="date" id="bfDate" style="width:100%;margin:6px 0 12px">
+      <label>Kategori</label><select class="input" id="bfCategory" style="width:100%;margin:6px 0 12px"><option>Stok / Produk</option><option>Operasional</option><option>Tools / Langganan</option><option>Gaji</option><option>Listrik / Internet</option><option>Refund</option><option>Lainnya</option></select>
+      <label>Keterangan</label><input class="input" id="bfDesc" placeholder="Contoh: Modal Canva Premium" style="width:100%;margin:6px 0 12px">
+      <label>Supplier / Tujuan <span class="muted">(opsional)</span></label><input class="input" id="bfSupplier" placeholder="Nama supplier / penerima" style="width:100%;margin:6px 0 12px">
+      <label>Nominal (Rp)</label><input class="input" id="bfAmount" type="number" min="1" placeholder="100000" style="width:100%;margin:6px 0 14px">
+      <button class="btn primary" style="width:100%" onclick="saveBusinessFinance()">＋ Simpan Catatan</button>
+    </div>
+    <div class="card">
+      <div class="toolbar"><div><h3 style="margin:0">Riwayat Modal & Pengeluaran</h3><div class="muted">Khusus Bos/Admin.</div></div><input class="input" id="bfSearch" placeholder="Cari catatan..." oninput="renderBusinessFinance()"></div>
+      <div class="table"><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Keterangan</th><th>Supplier/Tujuan</th><th>Nominal</th><th>Aksi</th></tr></thead><tbody id="bfRows"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section id="routine" class="page hidden">
       <div class="top">
         <div><h1 id="routineTitle">Job Harian</h1><div class="muted" id="routineSubtitle"></div></div>
         <button class="btn primary adminOnly" id="addRoutineJob">+ Tambah Job Harian</button>
@@ -1078,11 +1124,12 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
   $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
   $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   if(id==='profile')renderProfile();
+  if(id==='businessfinance')loadBusinessFinance();
 }
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
@@ -3033,6 +3080,7 @@ async function saveBusinessFinance(){const date=$('#bfDate').value,type=$('#bfTy
 async function deleteBusinessFinance(id){if(!confirm('Hapus catatan keuangan ini?'))return;const {error}=await sb.from('business_finance_entries').delete().eq('id',id);if(error){alert(error.message);return}await loadBusinessFinance()}
 // ===== END v42.24 =====
 
+\n// ===== v42.24.1 BUSINESS FINANCE =====\nlet bfEntries=[];\nconst bfRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');\nconst bfISO=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};\nfunction bfThisMonth(){const n=new Date(),first=new Date(n.getFullYear(),n.getMonth(),1),last=new Date(n.getFullYear(),n.getMonth()+1,0);$('#bfFrom').value=bfISO(first);$('#bfTo').value=bfISO(last);loadBusinessFinance()}\nasync function loadBusinessFinance(){\n if(!currentEmployee||currentEmployee.role!=='admin')return;\n if(!$('#bfFrom')?.value){const n=new Date();$('#bfFrom').value=bfISO(new Date(n.getFullYear(),n.getMonth(),1));$('#bfTo').value=bfISO(new Date(n.getFullYear(),n.getMonth()+1,0));$('#bfDate').value=bfISO(n)}\n const from=$('#bfFrom').value,to=$('#bfTo').value;\n const [f,s]=await Promise.all([\n   sb.from('business_finance_entries').select('*').gte('entry_date',from).lte('entry_date',to).order('entry_date',{ascending:false}).order('created_at',{ascending:false}),\n   sb.from('sales_transactions').select('transaction_date,amount').gte('transaction_date',from).lte('transaction_date',to)\n ]);\n if(f.error){alert('Gagal memuat keuangan: '+f.error.message);return}\n bfEntries=f.data||[];\n const sales=s.error?[]:(s.data||[]);\n const modal=bfEntries.filter(x=>x.entry_type==='modal').reduce((a,x)=>a+Number(x.amount||0),0);\n const expense=bfEntries.filter(x=>x.entry_type==='pengeluaran').reduce((a,x)=>a+Number(x.amount||0),0);\n const omzet=sales.reduce((a,x)=>a+Number(x.amount||0),0),gross=omzet-modal,net=gross-expense;\n $('#bfModal').textContent=bfRp(modal);$('#bfOmzet').textContent=bfRp(omzet);$('#bfExpense').textContent=bfRp(expense);$('#bfGross').textContent=bfRp(gross);$('#bfNet').textContent=bfRp(net);\n renderBusinessFinance();\n}\nfunction renderBusinessFinance(){const q=($('#bfSearch')?.value||'').toLowerCase();const rows=bfEntries.filter(x=>[x.description,x.category,x.supplier,x.entry_type].join(' ').toLowerCase().includes(q));$('#bfRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.entry_date}</td><td><span class="badge ${x.entry_type==='modal'?'menunggu':'sakit'}">${x.entry_type==='modal'?'💼 Modal':'🧾 Pengeluaran'}</span></td><td>${esc(x.category||'-')}</td><td><b>${esc(x.description||'-')}</b></td><td>${esc(x.supplier||'-')}</td><td><b>${bfRp(x.amount)}</b></td><td><button class="btn danger" onclick="deleteBusinessFinance('${x.id}')">Hapus</button></td></tr>`).join(''):`<tr><td colspan="7" class="muted">Belum ada catatan modal atau pengeluaran pada periode ini.</td></tr>`}\nasync function saveBusinessFinance(){const date=$('#bfDate').value,type=$('#bfType').value,category=$('#bfCategory').value,description=$('#bfDesc').value.trim(),supplier=$('#bfSupplier').value.trim(),amount=Number($('#bfAmount').value);if(!date||!description||!amount||amount<=0){alert('Tanggal, keterangan, dan nominal wajib diisi.');return}const {data:{user}}=await sb.auth.getUser();const {error}=await sb.from('business_finance_entries').insert({entry_date:date,entry_type:type,category,description,supplier:supplier||null,amount,created_by:user?.id});if(error){alert(error.message);return}$('#bfDesc').value='';$('#bfSupplier').value='';$('#bfAmount').value='';await loadBusinessFinance()}\nasync function deleteBusinessFinance(id){if(!confirm('Hapus catatan keuangan ini?'))return;const {error}=await sb.from('business_finance_entries').delete().eq('id',id);if(error){alert(error.message);return}await loadBusinessFinance()}\n// ===== END v42.24.1 =====\n
 </script>
 </body>
 </html>
