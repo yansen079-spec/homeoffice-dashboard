@@ -3004,6 +3004,35 @@ function renderMAOrders(){
 }
 // ===== END v42.22 =====
 
+
+// ===== v42.24 BUSINESS FINANCE =====
+let bfEntries=[];
+const bfRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const bfISO=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+function bfThisMonth(){const n=new Date(),first=new Date(n.getFullYear(),n.getMonth(),1),last=new Date(n.getFullYear(),n.getMonth()+1,0);$('#bfFrom').value=bfISO(first);$('#bfTo').value=bfISO(last);loadBusinessFinance()}
+async function loadBusinessFinance(){
+ if(currentEmployee?.role!=='admin')return;
+ if(!$('#bfFrom')?.value){const n=new Date();$('#bfFrom').value=bfISO(new Date(n.getFullYear(),n.getMonth(),1));$('#bfTo').value=bfISO(new Date(n.getFullYear(),n.getMonth()+1,0));$('#bfDate').value=bfISO(n)}
+ const from=$('#bfFrom').value,to=$('#bfTo').value;
+ const [f,s]=await Promise.all([
+   sb.from('business_finance_entries').select('*').gte('entry_date',from).lte('entry_date',to).order('entry_date',{ascending:false}).order('created_at',{ascending:false}),
+   sb.from('sales_transactions').select('*').gte('sale_date',from).lte('sale_date',to)
+ ]);
+ if(f.error){alert('Gagal memuat keuangan: '+f.error.message);return}
+ bfEntries=f.data||[];
+ const sales=s.error?[]:(s.data||[]);
+ const getAmount=x=>Number(x.amount??x.total??x.jumlah??x.sale_amount??0);
+ const modal=bfEntries.filter(x=>x.entry_type==='modal').reduce((a,x)=>a+Number(x.amount||0),0);
+ const expense=bfEntries.filter(x=>x.entry_type==='pengeluaran').reduce((a,x)=>a+Number(x.amount||0),0);
+ const omzet=sales.reduce((a,x)=>a+getAmount(x),0),gross=omzet-modal,net=gross-expense;
+ $('#bfModal').textContent=bfRp(modal);$('#bfOmzet').textContent=bfRp(omzet);$('#bfExpense').textContent=bfRp(expense);$('#bfGross').textContent=bfRp(gross);$('#bfNet').textContent=bfRp(net);
+ renderBusinessFinance();
+}
+function renderBusinessFinance(){const q=($('#bfSearch')?.value||'').toLowerCase();const rows=bfEntries.filter(x=>[x.description,x.category,x.supplier,x.entry_type].join(' ').toLowerCase().includes(q));$('#bfRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.entry_date}</td><td><span class="badge ${x.entry_type==='modal'?'menunggu':'sakit'}">${x.entry_type==='modal'?'💼 Modal':'🧾 Pengeluaran'}</span></td><td>${x.category||'-'}</td><td><b>${x.description||'-'}</b></td><td>${x.supplier||'-'}</td><td><b>${bfRp(x.amount)}</b></td><td><button class="btn danger" onclick="deleteBusinessFinance('${x.id}')">Hapus</button></td></tr>`).join(''):`<tr><td colspan="7" class="muted">Belum ada catatan modal atau pengeluaran pada periode ini.</td></tr>`}
+async function saveBusinessFinance(){const date=$('#bfDate').value,type=$('#bfType').value,category=$('#bfCategory').value,description=$('#bfDesc').value.trim(),supplier=$('#bfSupplier').value.trim(),amount=Number($('#bfAmount').value);if(!date||!description||!amount||amount<=0){alert('Tanggal, keterangan, dan nominal wajib diisi.');return}const {data:{user}}=await sb.auth.getUser();const {error}=await sb.from('business_finance_entries').insert({entry_date:date,entry_type:type,category,description,supplier:supplier||null,amount,created_by:user?.id});if(error){alert(error.message);return}$('#bfDesc').value='';$('#bfSupplier').value='';$('#bfAmount').value='';await loadBusinessFinance()}
+async function deleteBusinessFinance(id){if(!confirm('Hapus catatan keuangan ini?'))return;const {error}=await sb.from('business_finance_entries').delete().eq('id',id);if(error){alert(error.message);return}await loadBusinessFinance()}
+// ===== END v42.24 =====
+
 </script>
 </body>
 </html>
