@@ -437,7 +437,6 @@ aside .userbox{
       <button data-page="payroll" class="adminOnly">💰 Penggajian</button>
       <button data-page="sellercenter" class="adminOnly">🛒 Seller Center</button>
       <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
-      <button data-page="stock" id="stockNav">▣ Stok Produk</button>
       <button data-page="leave" id="leaveNav">☷ Pengajuan</button>
       <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
@@ -1056,7 +1055,7 @@ async function boot(user){
 
   $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $('#attendanceSubtitle').textContent=emp.role==='admin'?'Lihat absensi semua karyawan.':'Riwayat absensi milik kamu sendiri.';
-  $('#stockNav').textContent=emp.role==='admin'?'▣ Stok Produk':'▣ Stok Hari Ini';
+  /* v42.19: legacy Stok Produk menu retired; stock is managed from Seller Center */
   $('#stockTitle').textContent=emp.role==='admin'?'Stok Produk YANSTORE':'Stok Hari Ini';
   $('#stockSubtitle').textContent=emp.role==='admin'?'Kelola stok produk premium.':'Lihat stok produk premium terbaru secara realtime.';
   $('#routineNav').textContent=emp.role==='admin'?'☑ Job Harian Karyawan':'☑ Job Harian Saya';
