@@ -162,11 +162,10 @@ function ysCheckOrder(){ysShowOrder(document.getElementById('ysResumeCode').valu
 (function(){
   const p=new URLSearchParams(location.search);
   const urlCode=p.get('order_id')||p.get('order_code');
-  const lastCode=localStorage.getItem('yanstore_last_order');
-
-  // Order terakhir hanya dipakai untuk mengisi kolom cek pesanan.
-  // Jangan otomatis membuka popup setiap kali halaman direfresh.
-  if(lastCode) document.getElementById('ysResumeCode').value=lastCode;
+  // Kolom cek pesanan selalu kosong saat halaman dibuka / direfresh.
+  // Order lama tetap tersimpan untuk kebutuhan sistem, tetapi tidak di-autofill.
+  const resumeInput=document.getElementById('ysResumeCode');
+  if(resumeInput) resumeInput.value='';
 
   // Popup status hanya otomatis dibuka ketika benar-benar kembali
   // dari halaman pembayaran dengan order_id/order_code di URL.
