@@ -806,7 +806,7 @@ aside .userbox{
       <label>Keterangan</label><input class="input" id="bfDesc" placeholder="Contoh: Modal Canva Premium" style="width:100%;margin:6px 0 12px">
       <label>Supplier / Tujuan <span class="muted">(opsional)</span></label><input class="input" id="bfSupplier" placeholder="Nama supplier / penerima" style="width:100%;margin:6px 0 12px">
       <label>Nominal (Rp)</label><input class="input" id="bfAmount" type="number" min="1" placeholder="100000" style="width:100%;margin:6px 0 14px">
-      <button class="btn primary" style="width:100%" onclick="saveBusinessFinance()">＋ Simpan Catatan</button>
+      <button class="btn primary" style="width:100%" id="bfSaveBtn" type="button">＋ Simpan Catatan</button>
     </div>
     <div class="card">
       <div class="toolbar"><div><h3 style="margin:0">Riwayat Modal & Pengeluaran</h3><div class="muted">Khusus Bos/Admin.</div></div><input class="input" id="bfSearch" placeholder="Cari catatan..." oninput="renderBusinessFinance()"></div>
@@ -3159,7 +3159,7 @@ function renderBusinessFinance() {
 }
 
 async function saveBusinessFinance() {
-  const saveBtn = document.querySelector('#businessFinance button[onclick="saveBusinessFinance()"]');
+  const saveBtn = document.getElementById('bfSaveBtn');
 
   try {
     const date = $('#bfDate').value;
@@ -3234,6 +3234,20 @@ async function deleteBusinessFinance(id) {
 // ===== END v42.24.2 =====
 
 \n
+
+// v42.24.3 robust finance save binding
+document.addEventListener('click', function(e){
+  const btn=e.target.closest('#bfSaveBtn');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if(typeof saveBusinessFinance==='function'){
+    saveBusinessFinance();
+  }else{
+    alert('Fungsi Keuangan Usaha belum termuat. Silakan refresh halaman.');
+  }
+});
+
 </script>
 </body>
 </html>
