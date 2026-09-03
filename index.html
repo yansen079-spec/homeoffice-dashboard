@@ -3052,35 +3052,188 @@ function renderMAOrders(){
 // ===== END v42.22 =====
 
 
-// ===== v42.24 BUSINESS FINANCE =====
-let bfEntries=[];
-const bfRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
-const bfISO=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
-function bfThisMonth(){const n=new Date(),first=new Date(n.getFullYear(),n.getMonth(),1),last=new Date(n.getFullYear(),n.getMonth()+1,0);$('#bfFrom').value=bfISO(first);$('#bfTo').value=bfISO(last);loadBusinessFinance()}
-async function loadBusinessFinance(){
- if(currentEmployee?.role!=='admin')return;
- if(!$('#bfFrom')?.value){const n=new Date();$('#bfFrom').value=bfISO(new Date(n.getFullYear(),n.getMonth(),1));$('#bfTo').value=bfISO(new Date(n.getFullYear(),n.getMonth()+1,0));$('#bfDate').value=bfISO(n)}
- const from=$('#bfFrom').value,to=$('#bfTo').value;
- const [f,s]=await Promise.all([
-   sb.from('business_finance_entries').select('*').gte('entry_date',from).lte('entry_date',to).order('entry_date',{ascending:false}).order('created_at',{ascending:false}),
-   sb.from('sales_transactions').select('*').gte('sale_date',from).lte('sale_date',to)
- ]);
- if(f.error){alert('Gagal memuat keuangan: '+f.error.message);return}
- bfEntries=f.data||[];
- const sales=s.error?[]:(s.data||[]);
- const getAmount=x=>Number(x.amount??x.total??x.jumlah??x.sale_amount??0);
- const modal=bfEntries.filter(x=>x.entry_type==='modal').reduce((a,x)=>a+Number(x.amount||0),0);
- const expense=bfEntries.filter(x=>x.entry_type==='pengeluaran').reduce((a,x)=>a+Number(x.amount||0),0);
- const omzet=sales.reduce((a,x)=>a+getAmount(x),0),gross=omzet-modal,net=gross-expense;
- $('#bfModal').textContent=bfRp(modal);$('#bfOmzet').textContent=bfRp(omzet);$('#bfExpense').textContent=bfRp(expense);$('#bfGross').textContent=bfRp(gross);$('#bfNet').textContent=bfRp(net);
- renderBusinessFinance();
-}
-function renderBusinessFinance(){const q=($('#bfSearch')?.value||'').toLowerCase();const rows=bfEntries.filter(x=>[x.description,x.category,x.supplier,x.entry_type].join(' ').toLowerCase().includes(q));$('#bfRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.entry_date}</td><td><span class="badge ${x.entry_type==='modal'?'menunggu':'sakit'}">${x.entry_type==='modal'?'💼 Modal':'🧾 Pengeluaran'}</span></td><td>${x.category||'-'}</td><td><b>${x.description||'-'}</b></td><td>${x.supplier||'-'}</td><td><b>${bfRp(x.amount)}</b></td><td><button class="btn danger" onclick="deleteBusinessFinance('${x.id}')">Hapus</button></td></tr>`).join(''):`<tr><td colspan="7" class="muted">Belum ada catatan modal atau pengeluaran pada periode ini.</td></tr>`}
-async function saveBusinessFinance(){const date=$('#bfDate').value,type=$('#bfType').value,category=$('#bfCategory').value,description=$('#bfDesc').value.trim(),supplier=$('#bfSupplier').value.trim(),amount=Number($('#bfAmount').value);if(!date||!description||!amount||amount<=0){alert('Tanggal, keterangan, dan nominal wajib diisi.');return}const {data:{user}}=await sb.auth.getUser();const {error}=await sb.from('business_finance_entries').insert({entry_date:date,entry_type:type,category,description,supplier:supplier||null,amount,created_by:user?.id});if(error){alert(error.message);return}$('#bfDesc').value='';$('#bfSupplier').value='';$('#bfAmount').value='';await loadBusinessFinance()}
-async function deleteBusinessFinance(id){if(!confirm('Hapus catatan keuangan ini?'))return;const {error}=await sb.from('business_finance_entries').delete().eq('id',id);if(error){alert(error.message);return}await loadBusinessFinance()}
-// ===== END v42.24 =====
 
-\n// ===== v42.24.1 BUSINESS FINANCE =====\nlet bfEntries=[];\nconst bfRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');\nconst bfISO=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};\nfunction bfThisMonth(){const n=new Date(),first=new Date(n.getFullYear(),n.getMonth(),1),last=new Date(n.getFullYear(),n.getMonth()+1,0);$('#bfFrom').value=bfISO(first);$('#bfTo').value=bfISO(last);loadBusinessFinance()}\nasync function loadBusinessFinance(){\n if(!currentEmployee||currentEmployee.role!=='admin')return;\n if(!$('#bfFrom')?.value){const n=new Date();$('#bfFrom').value=bfISO(new Date(n.getFullYear(),n.getMonth(),1));$('#bfTo').value=bfISO(new Date(n.getFullYear(),n.getMonth()+1,0));$('#bfDate').value=bfISO(n)}\n const from=$('#bfFrom').value,to=$('#bfTo').value;\n const [f,s]=await Promise.all([\n   sb.from('business_finance_entries').select('*').gte('entry_date',from).lte('entry_date',to).order('entry_date',{ascending:false}).order('created_at',{ascending:false}),\n   sb.from('sales_transactions').select('transaction_date,amount').gte('transaction_date',from).lte('transaction_date',to)\n ]);\n if(f.error){alert('Gagal memuat keuangan: '+f.error.message);return}\n bfEntries=f.data||[];\n const sales=s.error?[]:(s.data||[]);\n const modal=bfEntries.filter(x=>x.entry_type==='modal').reduce((a,x)=>a+Number(x.amount||0),0);\n const expense=bfEntries.filter(x=>x.entry_type==='pengeluaran').reduce((a,x)=>a+Number(x.amount||0),0);\n const omzet=sales.reduce((a,x)=>a+Number(x.amount||0),0),gross=omzet-modal,net=gross-expense;\n $('#bfModal').textContent=bfRp(modal);$('#bfOmzet').textContent=bfRp(omzet);$('#bfExpense').textContent=bfRp(expense);$('#bfGross').textContent=bfRp(gross);$('#bfNet').textContent=bfRp(net);\n renderBusinessFinance();\n}\nfunction renderBusinessFinance(){const q=($('#bfSearch')?.value||'').toLowerCase();const rows=bfEntries.filter(x=>[x.description,x.category,x.supplier,x.entry_type].join(' ').toLowerCase().includes(q));$('#bfRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.entry_date}</td><td><span class="badge ${x.entry_type==='modal'?'menunggu':'sakit'}">${x.entry_type==='modal'?'💼 Modal':'🧾 Pengeluaran'}</span></td><td>${esc(x.category||'-')}</td><td><b>${esc(x.description||'-')}</b></td><td>${esc(x.supplier||'-')}</td><td><b>${bfRp(x.amount)}</b></td><td><button class="btn danger" onclick="deleteBusinessFinance('${x.id}')">Hapus</button></td></tr>`).join(''):`<tr><td colspan="7" class="muted">Belum ada catatan modal atau pengeluaran pada periode ini.</td></tr>`}\nasync function saveBusinessFinance(){const date=$('#bfDate').value,type=$('#bfType').value,category=$('#bfCategory').value,description=$('#bfDesc').value.trim(),supplier=$('#bfSupplier').value.trim(),amount=Number($('#bfAmount').value);if(!date||!description||!amount||amount<=0){alert('Tanggal, keterangan, dan nominal wajib diisi.');return}const {data:{user}}=await sb.auth.getUser();const {error}=await sb.from('business_finance_entries').insert({entry_date:date,entry_type:type,category,description,supplier:supplier||null,amount,created_by:user?.id});if(error){alert(error.message);return}$('#bfDesc').value='';$('#bfSupplier').value='';$('#bfAmount').value='';await loadBusinessFinance()}\nasync function deleteBusinessFinance(id){if(!confirm('Hapus catatan keuangan ini?'))return;const {error}=await sb.from('business_finance_entries').delete().eq('id',id);if(error){alert(error.message);return}await loadBusinessFinance()}\n// ===== END v42.24.1 =====\n
+
+// ===== v42.24.2 BUSINESS FINANCE FIX =====
+let bfEntries = [];
+
+const bfRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+const bfISO = d => {
+  const x = new Date(d);
+  return x.getFullYear() + '-' +
+    String(x.getMonth() + 1).padStart(2, '0') + '-' +
+    String(x.getDate()).padStart(2, '0');
+};
+
+function bfThisMonth() {
+  const n = new Date();
+  const first = new Date(n.getFullYear(), n.getMonth(), 1);
+  const last = new Date(n.getFullYear(), n.getMonth() + 1, 0);
+  $('#bfFrom').value = bfISO(first);
+  $('#bfTo').value = bfISO(last);
+  loadBusinessFinance();
+}
+
+async function loadBusinessFinance() {
+  if (!currentEmployee || currentEmployee.role !== 'admin') return;
+
+  const fromEl = $('#bfFrom');
+  const toEl = $('#bfTo');
+  const dateEl = $('#bfDate');
+
+  if (!fromEl.value) {
+    const n = new Date();
+    fromEl.value = bfISO(new Date(n.getFullYear(), n.getMonth(), 1));
+    toEl.value = bfISO(new Date(n.getFullYear(), n.getMonth() + 1, 0));
+    dateEl.value = bfISO(n);
+  }
+  if (!dateEl.value) dateEl.value = bfISO(new Date());
+
+  const from = fromEl.value;
+  const to = toEl.value;
+
+  const [financeResult, salesResult] = await Promise.all([
+    sb.from('business_finance_entries')
+      .select('*')
+      .gte('entry_date', from)
+      .lte('entry_date', to)
+      .order('entry_date', { ascending: false })
+      .order('created_at', { ascending: false }),
+    sb.from('sales_transactions')
+      .select('transaction_date,amount')
+      .gte('transaction_date', from)
+      .lte('transaction_date', to)
+  ]);
+
+  if (financeResult.error) {
+    alert('Gagal memuat keuangan: ' + financeResult.error.message);
+    return;
+  }
+
+  bfEntries = financeResult.data || [];
+  const sales = salesResult.error ? [] : (salesResult.data || []);
+
+  const modal = bfEntries
+    .filter(x => x.entry_type === 'modal')
+    .reduce((a, x) => a + Number(x.amount || 0), 0);
+
+  const expense = bfEntries
+    .filter(x => x.entry_type === 'pengeluaran')
+    .reduce((a, x) => a + Number(x.amount || 0), 0);
+
+  const omzet = sales.reduce((a, x) => a + Number(x.amount || 0), 0);
+  const gross = omzet - modal;
+  const net = gross - expense;
+
+  $('#bfModal').textContent = bfRp(modal);
+  $('#bfOmzet').textContent = bfRp(omzet);
+  $('#bfExpense').textContent = bfRp(expense);
+  $('#bfGross').textContent = bfRp(gross);
+  $('#bfNet').textContent = bfRp(net);
+
+  renderBusinessFinance();
+}
+
+function renderBusinessFinance() {
+  const q = ($('#bfSearch')?.value || '').toLowerCase();
+  const rows = bfEntries.filter(x =>
+    [x.description, x.category, x.supplier, x.entry_type]
+      .join(' ')
+      .toLowerCase()
+      .includes(q)
+  );
+
+  $('#bfRows').innerHTML = rows.length
+    ? rows.map(x => `
+      <tr>
+        <td>${x.entry_date}</td>
+        <td><span class="badge ${x.entry_type === 'modal' ? 'menunggu' : 'sakit'}">${x.entry_type === 'modal' ? '💼 Modal' : '🧾 Pengeluaran'}</span></td>
+        <td>${esc(x.category || '-')}</td>
+        <td><b>${esc(x.description || '-')}</b></td>
+        <td>${esc(x.supplier || '-')}</td>
+        <td><b>${bfRp(x.amount)}</b></td>
+        <td><button class="btn danger" onclick="deleteBusinessFinance('${x.id}')">Hapus</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="muted">Belum ada catatan modal atau pengeluaran pada periode ini.</td></tr>';
+}
+
+async function saveBusinessFinance() {
+  const saveBtn = document.querySelector('#businessFinance button[onclick="saveBusinessFinance()"]');
+
+  try {
+    const date = $('#bfDate').value;
+    const type = $('#bfType').value;
+    const category = $('#bfCategory').value;
+    const description = $('#bfDesc').value.trim();
+    const supplier = $('#bfSupplier').value.trim();
+    const amount = Number($('#bfAmount').value);
+
+    if (!date || !description || !amount || amount <= 0) {
+      alert('Tanggal, keterangan, dan nominal wajib diisi.');
+      return;
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Menyimpan...';
+    }
+
+    const { data: { user }, error: userError } = await sb.auth.getUser();
+    if (userError || !user) {
+      alert('Sesi login tidak ditemukan. Silakan login ulang.');
+      return;
+    }
+
+    const { error } = await sb.from('business_finance_entries').insert({
+      entry_date: date,
+      entry_type: type,
+      category,
+      description,
+      supplier: supplier || null,
+      amount,
+      created_by: user.id
+    });
+
+    if (error) {
+      alert('Gagal menyimpan catatan: ' + error.message);
+      return;
+    }
+
+    $('#bfDesc').value = '';
+    $('#bfSupplier').value = '';
+    $('#bfAmount').value = '';
+
+    await loadBusinessFinance();
+    alert('Catatan keuangan berhasil disimpan.');
+  } catch (err) {
+    alert('Terjadi error saat menyimpan: ' + (err?.message || err));
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '＋ Simpan Catatan';
+    }
+  }
+}
+
+async function deleteBusinessFinance(id) {
+  if (!confirm('Hapus catatan keuangan ini?')) return;
+
+  const { error } = await sb
+    .from('business_finance_entries')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    alert('Gagal menghapus: ' + error.message);
+    return;
+  }
+
+  await loadBusinessFinance();
+}
+// ===== END v42.24.2 =====
+
+\n
 </script>
 </body>
 </html>
