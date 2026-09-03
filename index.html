@@ -806,7 +806,7 @@ aside .userbox{
       <label>Keterangan</label><input class="input" id="bfDesc" placeholder="Contoh: Modal Canva Premium" style="width:100%;margin:6px 0 12px">
       <label>Supplier / Tujuan <span class="muted">(opsional)</span></label><input class="input" id="bfSupplier" placeholder="Nama supplier / penerima" style="width:100%;margin:6px 0 12px">
       <label>Nominal (Rp)</label><input class="input" id="bfAmount" type="number" min="1" placeholder="100000" style="width:100%;margin:6px 0 14px">
-      <button class="btn primary" style="width:100%" id="bfSaveBtn" type="button">＋ Simpan Catatan</button>
+      <button class="btn primary" style="width:100%" id="bfSaveBtn" type="button" onclick="saveBusinessFinance()">＋ Simpan Catatan</button>
     </div>
     <div class="card">
       <div class="toolbar"><div><h3 style="margin:0">Riwayat Modal & Pengeluaran</h3><div class="muted">Khusus Bos/Admin.</div></div><input class="input" id="bfSearch" placeholder="Cari catatan..." oninput="renderBusinessFinance()"></div>
@@ -3233,7 +3233,7 @@ async function deleteBusinessFinance(id) {
 }
 // ===== END v42.24.2 =====
 
-\n
+
 
 // v42.24.3 robust finance save binding
 document.addEventListener('click', function(e){
