@@ -2315,8 +2315,8 @@ async function loadPayrollDailyPaymentsSafe(){
     const cycle=payrollCycleV50(month);
     const {data,error}=await sb.from('payroll_daily_payments')
       .select('*')
-      .gte('pay_date',cycle.start)
-      .lte('pay_date',cycle.end)
+      .gte('payment_date',cycle.start)
+      .lte('payment_date',cycle.end)
       .order('created_at',{ascending:false});
     if(error)throw error;
     payrollDailyPayments=data||[];
@@ -2327,7 +2327,7 @@ async function loadPayrollDailyPaymentsSafe(){
 }
 
 function payrollPaidTodayV49(employeeId){
-  return payrollDailyPayments.find(x=>x.employee_id===employeeId&&x.pay_date===ymd())||null;
+  return payrollDailyPayments.find(x=>x.employee_id===employeeId&&x.payment_date===ymd())||null;
 }
 
 function payrollTodayAttendanceV49(employeeId){
@@ -2345,9 +2345,9 @@ window.payDailySalaryV49=async employeeId=>{
   if(!confirm('Tandai gaji harian '+emp.full_name+' sebesar '+rupiah(daily)+' sebagai SUDAH DIBAYAR hari ini via '+method+'?'))return;
   const {error}=await sb.from('payroll_daily_payments').insert({
     employee_id:employeeId,
-    pay_date:ymd(),
+    payment_date:ymd(),
     amount:daily,
-    payment_method:method,
+    method:method,
     paid_by:currentEmployee.id,
     note:'Pembayaran gaji harian manual '+ymd()
   });
@@ -2456,7 +2456,7 @@ function renderPayroll(){
               <b>${rupiah(x.daily)}</b>
             </div>
             ${paid
-              ? `<div class="pay49-paid"><strong>✓ Sudah Dibayar</strong><small>${esc(paid.payment_method)} • ${esc(new Date(paid.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}))}</small></div>`
+              ? `<div class="pay49-paid"><strong>✓ Sudah Dibayar</strong><small>${esc(paid.method)} • ${esc(new Date(paid.paid_at||paid.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}))}</small></div>`
               : `<div class="pay49-unpaid"><strong>Belum Dibayar</strong><small>Ditandai manual oleh Bos</small></div>`
             }
           </div>
