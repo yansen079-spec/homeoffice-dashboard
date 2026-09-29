@@ -640,6 +640,44 @@ aside .userbox{
 @media(max-width:768px){.rep47-head,.set47-head,.sc47-head{flex-direction:column}.rep47-export{width:100%}.rep47-filter-card{grid-template-columns:1fr}.set47-form-grid{grid-template-columns:1fr}.set47-field.full{grid-column:auto}.set47-savebar,.sc47-panel-head{flex-direction:column;align-items:stretch}.set47-savebar .btn{width:100%}.sc47-head-actions{width:100%}.sc47-head-actions .btn,.sc47-head-actions a{flex:1 1 160px;text-align:center}.sc47-panel-head .input{min-width:0;width:100%}.sc47-inline{width:100%}.sc47-inline .input,.sc47-inline .btn,.sc47-inline a{flex:1 1 160px}}
 @media(max-width:520px){.rep47-head h1,.set47-head h1,.sc47-head h1{font-size:25px}.rep47-stats,.sc47-kpis{grid-template-columns:1fr}.set47-days{grid-template-columns:1fr}.set47-preview{grid-template-columns:1fr}}
 /* ===== END V47 ===== */
+</style><style>
+/* ===== V48 PAYROLL CARD REDESIGN ===== */
+#payroll{padding-bottom:30px}
+.pay48-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+.pay48-head h1{margin:4px 0 7px;font-size:31px;letter-spacing:-.6px;color:#0f172a}
+.pay48-eyebrow{font-size:11px;font-weight:900;letter-spacing:.11em;color:#2563eb}
+.pay48-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+.pay48-control-card{display:grid;grid-template-columns:230px minmax(250px,1fr) 260px;gap:12px;background:#fff;border:1px solid #e3e8f0;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 8px 26px rgba(15,23,42,.03)}
+.pay48-field{display:grid;gap:6px}.pay48-field label{font-size:11px;font-weight:800;color:#64748b}.pay48-field .input{height:44px;width:100%;border-radius:11px}
+.pay48-period-info{background:#f8fafc;border:1px solid #edf2f7;border-radius:13px;padding:11px 13px}.pay48-period-info span,.pay48-period-info small{display:block;color:#94a3b8;font-size:10px}.pay48-period-info b{display:block;color:#0f172a;font-size:14px;margin:4px 0}
+
+.pay48-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.pay48-stat{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:17px;box-shadow:0 8px 26px rgba(15,23,42,.035);min-width:0}
+.pay48-stat.featured{border-color:#bbf7d0;background:linear-gradient(180deg,#fff,#f0fdf4)}
+.pay48-icon{width:50px;height:50px;flex:0 0 50px;border-radius:14px;display:grid;place-items:center;font-size:20px;font-weight:900}
+.pay48-stat.blue .pay48-icon{background:#dbeafe}.pay48-stat.amber .pay48-icon{background:#fef3c7}.pay48-stat.red .pay48-icon{background:#fee2e2}.pay48-stat.green .pay48-icon{background:#dcfce7}
+.pay48-stat span{display:block;color:#64748b;font-size:12px}.pay48-stat b{display:block;color:#0f172a;font-size:25px;line-height:1.05;margin:4px 0;overflow-wrap:anywhere}.pay48-stat small{font-size:10px;color:#94a3b8}
+
+.pay48-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:4px 0 12px}.pay48-section-head h3{margin:0;font-size:18px;color:#0f172a}.pay48-section-head p{margin:4px 0 0;font-size:11px;color:#94a3b8}.pay48-count{font-size:11px;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:7px 11px}.pay48-count span{font-weight:900;color:#0f172a}
+
+.pay48-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pay48-card{background:#fff;border:1px solid #e3e8f0;border-radius:18px;padding:17px;box-shadow:0 8px 28px rgba(15,23,42,.035);min-width:0}
+.pay48-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.pay48-person{display:flex;gap:11px;align-items:center;min-width:0}.pay48-avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:grid;place-items:center;background:#e8efff;color:#3157a6;font-size:12px;font-weight:900}.pay48-person b{display:block;color:#0f172a;font-size:14px}.pay48-person small{display:block;color:#94a3b8;font-size:10px;margin-top:2px}
+.pay48-net{text-align:right}.pay48-net span{display:block;color:#64748b;font-size:10px}.pay48-net b{display:block;color:#15803d;font-size:20px;margin-top:2px}
+.pay48-empty-salary{display:inline-flex;margin-top:5px;padding:3px 7px;border-radius:999px;background:#fff7ed;color:#c2410c;font-size:9px;font-weight:900}
+
+.pay48-money-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.pay48-money-box{background:#f8fafc;border:1px solid #edf2f7;border-radius:12px;padding:10px}.pay48-money-box span{display:block;font-size:9px;color:#94a3b8}.pay48-money-box b{display:block;margin-top:4px;color:#0f172a;font-size:13px}.pay48-money-box.deduct b{color:#dc2626}
+
+.pay48-attendance{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:13px}.pay48-att{border-radius:10px;padding:8px;text-align:center;background:#f8fafc;border:1px solid #edf2f7}.pay48-att b{display:block;font-size:14px;color:#0f172a}.pay48-att span{display:block;font-size:9px;color:#94a3b8;margin-top:2px}.pay48-att.late{background:#fffbeb}.pay48-att.leave{background:#f8f5ff}
+.pay48-card-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #edf2f7;padding-top:12px}.pay48-daily{font-size:10px;color:#64748b}.pay48-daily b{color:#0f172a}.pay48-card-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.pay48-card-actions .btn{padding:7px 9px!important;min-height:34px!important;font-size:10px!important}
+.pay48-empty{grid-column:1/-1;background:#fff;border:1px dashed #cbd5e1;border-radius:18px;padding:34px;text-align:center;color:#94a3b8}
+
+@media(max-width:1050px){.pay48-stats{grid-template-columns:repeat(2,1fr)}.pay48-control-card{grid-template-columns:1fr 1fr}.pay48-period-info{grid-column:1/-1}}
+@media(max-width:820px){.pay48-head{flex-direction:column}.pay48-actions{width:100%;justify-content:flex-start}.pay48-grid{grid-template-columns:1fr}.pay48-section-head{align-items:flex-start;flex-direction:column}}
+@media(max-width:580px){.pay48-head h1{font-size:25px}.pay48-control-card,.pay48-stats{grid-template-columns:1fr}.pay48-period-info{grid-column:auto}.pay48-actions .btn{flex:1 1 160px}.pay48-money-row{grid-template-columns:1fr}.pay48-attendance{grid-template-columns:repeat(2,1fr)}.pay48-card-top{flex-direction:column}.pay48-net{text-align:left}.pay48-card-footer{align-items:flex-start;flex-direction:column}.pay48-card-actions{justify-content:flex-start}}
+/* ===== END V48 ===== */
 </style></head>
 <body>
 <section id="login" class="login">
@@ -1108,47 +1146,50 @@ aside .userbox{
       </div>
     </section>
     <section id="payroll" class="page hidden">
-      <div class="pay46-head">
+      <div class="pay48-head">
         <div>
-          <div class="pay46-eyebrow">HOME OFFICE • PENGGAJIAN</div>
+          <div class="pay48-eyebrow">HOME OFFICE • PENGGAJIAN</div>
           <h1>💰 Penggajian</h1>
-          <div class="muted">Gaji harian berdasarkan absensi lengkap, periode tanggal 1–30.</div>
+          <div class="muted">Kelola gaji karyawan dengan tampilan ringkas, jelas, dan siap dipakai setiap bulan.</div>
         </div>
-        <div class="pay46-actions">
+        <div class="pay48-actions">
           <button class="btn" id="payrollSettingsBtn">⚙ Atur Potongan</button>
           <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
         </div>
       </div>
 
-      <div class="pay46-filter-card">
-        <div class="pay46-field">
-          <label>Periode Bulan</label>
+      <div class="pay48-control-card">
+        <div class="pay48-field">
+          <label>Periode Gajian</label>
           <input class="input" id="payrollMonth" type="month">
         </div>
-        <div class="pay46-field">
-          <label>Karyawan</label>
+        <div class="pay48-field">
+          <label>Tampilkan Karyawan</label>
           <select class="input" id="payrollEmployee"><option value="">Semua karyawan</option></select>
         </div>
-      </div>
-
-      <div class="pay46-stats">
-        <div class="pay46-stat blue"><div class="pay46-icon">💼</div><div><span>Total Gaji Kotor</span><b id="pBase">Rp0</b><small>sebelum potongan</small></div></div>
-        <div class="pay46-stat amber"><div class="pay46-icon">⏱</div><div><span>Total Terlambat</span><b id="pLate">0</b><small>kejadian terlambat</small></div></div>
-        <div class="pay46-stat red"><div class="pay46-icon">−</div><div><span>Total Potongan</span><b id="pPenalty">Rp0</b><small>potongan periode ini</small></div></div>
-        <div class="pay46-stat green"><div class="pay46-icon">✓</div><div><span>Total Gaji Bersih</span><b id="pNet">Rp0</b><small>estimasi dibayarkan</small></div></div>
-      </div>
-
-      <div class="pay46-table-card">
-        <div class="pay46-table-head">
-          <div><h3>▣ Rincian Penggajian</h3><p>Perhitungan gaji tiap karyawan sesuai absensi dan aturan potongan.</p></div>
-        </div>
-        <div class="table pay46-table-wrap">
-          <table class="pay46-table">
-            <thead><tr><th>No</th><th>Karyawan</th><th>Gaji / Hari</th><th>Hari Dibayar</th><th>Gaji Kotor</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
-            <tbody id="payrollRows"></tbody>
-          </table>
+        <div class="pay48-period-info">
+          <span>Periode payroll</span>
+          <b id="pay48PeriodLabel">Tanggal 1–30</b>
+          <small>Perhitungan mengikuti absensi lengkap.</small>
         </div>
       </div>
+
+      <div class="pay48-stats">
+        <div class="pay48-stat blue"><div class="pay48-icon">💼</div><div><span>Gaji Kotor</span><b id="pBase">Rp0</b><small>Sebelum potongan</small></div></div>
+        <div class="pay48-stat amber"><div class="pay48-icon">⏱</div><div><span>Keterlambatan</span><b id="pLate">0</b><small>Total kejadian</small></div></div>
+        <div class="pay48-stat red"><div class="pay48-icon">−</div><div><span>Total Potongan</span><b id="pPenalty">Rp0</b><small>Periode berjalan</small></div></div>
+        <div class="pay48-stat green featured"><div class="pay48-icon">✓</div><div><span>Total Dibayarkan</span><b id="pNet">Rp0</b><small>Gaji bersih</small></div></div>
+      </div>
+
+      <div class="pay48-section-head">
+        <div>
+          <h3>👥 Rincian Gaji Karyawan</h3>
+          <p>Setiap kartu menampilkan perhitungan gaji dan absensi tanpa tabel panjang.</p>
+        </div>
+        <div class="pay48-count"><span id="pay48EmployeeCount">0</span> karyawan</div>
+      </div>
+
+      <div class="pay48-grid" id="payrollRows"></div>
     </section>
     <section id="reports" class="page hidden">
       <div class="rep47-head">
@@ -2286,22 +2327,62 @@ function renderPayroll(){
   $('#pLate').textContent=rows.reduce((s,x)=>s+x.late,0);
   $('#pPenalty').textContent=rupiah(rows.reduce((s,x)=>s+x.penalty,0));
   $('#pNet').textContent=rupiah(rows.reduce((s,x)=>s+x.net,0));
+  if($('#pay48EmployeeCount'))$('#pay48EmployeeCount').textContent=rows.length;
 
-  $('#payrollRows').innerHTML=rows.length?rows.map((x,i)=>`<tr>
-    <td>${i+1}</td>
-    <td><div class="pay46-person"><div class="pay46-avatar">${esc(payrollInitialsV46(x.emp.full_name))}</div><div><b>${esc(x.emp.full_name)}</b><div class="muted">${esc(x.emp.job_title||'Karyawan')}</div></div></div></td>
-    <td class="pay46-money">${rupiah(x.daily)}</td>
-    <td><b>${x.paidDays} hari</b></td>
-    <td class="pay46-money">${rupiah(x.gross)}</td>
-    <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||0)}</td>
-    <td>${x.izin} × ${rupiah(payrollSettings?.izin_penalty||0)}</td>
-    <td>${x.sakit} × ${rupiah(payrollSettings?.sakit_penalty||0)}</td>
-    <td>${x.cuti} × ${rupiah(payrollSettings?.cuti_penalty||0)}</td>
-    <td class="pay46-money">${rupiah(x.penalty)}</td>
-    <td class="pay46-net">${rupiah(x.net)}</td>
-    <td class="pay46-action"><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji</button></td>
-  </tr>`).join(''):'<tr><td colspan="12" style="text-align:center;color:#8793a5;padding:32px">Belum ada data karyawan.</td></tr>';
+  const month=$('#payrollMonth')?.value||ymd().slice(0,7);
+  if($('#pay48PeriodLabel')){
+    const [yy,mm]=month.split('-');
+    const label=new Date(Number(yy),Number(mm)-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+    $('#pay48PeriodLabel').textContent='1–30 '+label;
+  }
+
+  $('#payrollRows').innerHTML=rows.length?rows.map(x=>{
+    const noSalary=Number(x.daily||0)<=0;
+    return `<div class="pay48-card">
+      <div class="pay48-card-top">
+        <div class="pay48-person">
+          <div class="pay48-avatar">${esc(payrollInitialsV46(x.emp.full_name))}</div>
+          <div>
+            <b>${esc(x.emp.full_name)}</b>
+            <small>${esc(x.emp.job_title||'Karyawan')}</small>
+            ${noSalary?'<span class="pay48-empty-salary">Gaji harian belum diatur</span>':''}
+          </div>
+        </div>
+        <div class="pay48-net"><span>Gaji Bersih</span><b>${rupiah(x.net)}</b></div>
+      </div>
+
+      <div class="pay48-money-row">
+        <div class="pay48-money-box"><span>Gaji Kotor</span><b>${rupiah(x.gross)}</b></div>
+        <div class="pay48-money-box deduct"><span>Potongan</span><b>− ${rupiah(x.penalty)}</b></div>
+        <div class="pay48-money-box"><span>Hari Dibayar</span><b>${x.paidDays} hari</b></div>
+      </div>
+
+      <div class="pay48-attendance">
+        <div class="pay48-att late"><b>${x.late}</b><span>Terlambat</span></div>
+        <div class="pay48-att leave"><b>${x.izin}</b><span>Izin</span></div>
+        <div class="pay48-att leave"><b>${x.sakit}</b><span>Sakit</span></div>
+        <div class="pay48-att leave"><b>${x.cuti}</b><span>Cuti</span></div>
+      </div>
+
+      <div class="pay48-card-footer">
+        <div class="pay48-daily">Gaji harian: <b>${rupiah(x.daily)}</b></div>
+        <div class="pay48-card-actions">
+          <button class="btn" onclick="editSalary('${x.emp.id}')">✎ Edit Gaji</button>
+          <button class="btn primary" onclick="openPayrollSlipForEmployeeV48('${x.emp.id}')">🧾 Slip Gaji</button>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="pay48-empty">Belum ada data karyawan untuk periode ini.</div>';
 }
+
+window.openPayrollSlipForEmployeeV48=id=>{
+  const sel=$('#payrollEmployee');
+  if(!sel)return;
+  sel.value=id;
+  renderPayroll();
+  buildSalarySlip();
+};
+
 $('#payrollMonth').onchange=renderPayroll;
 $('#payrollEmployee').onchange=renderPayroll;
 
