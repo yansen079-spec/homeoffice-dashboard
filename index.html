@@ -1372,8 +1372,49 @@ function renderBossNotifications(){
   if(typeof digitalItems!=='undefined'){const soon=Date.now()+7*86400000;digitalItems.filter(x=>x.expiry_date&&new Date(x.expiry_date+'T23:59:59').getTime()>=Date.now()&&new Date(x.expiry_date+'T23:59:59').getTime()<=soon).slice(0,8).forEach(x=>{const d=Math.max(0,Math.ceil((new Date(x.expiry_date+'T23:59:59')-Date.now())/86400000));add('exp:'+x.id+':'+x.expiry_date,'⏳','Akun akan expired',x.product_name+' • '+(d===0?'hari ini':d+' hari lagi'),'digitalstock','Expired '+x.expiry_date)})}
   if(typeof withdrawalRequests!=='undefined'){const w=withdrawalRequests.filter(x=>x.status==='pending');if(w.length)add('wd:'+w.map(x=>x.id).join(','),'💸',w.length+' withdrawal menunggu','Total '+rupiah(w.reduce((a,x)=>a+Number(x.amount||0),0))+' perlu diperiksa.','sellercenter','Butuh verifikasi')}
   if(typeof marketplaceOrders!=='undefined'){const paid=marketplaceOrders.filter(x=>x.payment_status==='Dibayar'&&x.status!=='Selesai'&&x.status!=='Dibatalkan');if(paid.length)add('paid:'+paid.map(x=>x.id+':'+x.status).join(','),'🛒',paid.length+' order sudah dibayar',paid.slice(0,3).map(x=>x.order_code+' • '+rupiah(x.total_amount)).join(', '),'sellercenter','Pembayaran masuk')}
-  const salesToday=salesTransactions.filter(x=>x.transaction_date===today);if(salesToday.length){const latest=[...salesToday].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];add('sales:'+today+':'+salesToday.length+':'+latest?.id,'💰','Penjualan hari ini '+rupiah(salesToday.reduce((a,x)=>a+Number(x.amount||0),0)),salesToday.length+' transaksi tercatat hari ini.','salesrecap','Omzet otomatis')}
-  bossNotifications=notes;const read=bossNotifReadSet(),unread=notes.filter(n=>!read.has(n.key));const badge=$('#bossBellBadge'),list=$('#bossNotifyList');if(badge){badge.textContent=unread.length>99?'99+':unread.length;badge.classList.toggle('hidden',unread.length===0)}
+  const salesToday=salesTransactions.filter(x=>x.transaction_date===today);
+  if(salesToday.length){
+    [...salesToday]
+      .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))
+      .slice(0,50)
+      .forEach(x=>{
+        add(
+          'money:'+x.id,
+          '💵',
+          'Uang masuk '+rupiah(x.amount),
+          (x.product_name||'Produk')+' • '+(x.customer_name||'Buyer'),
+          'salesrecap',
+          x.source_file==='Gudang Digital Otomatis'?'Pesanan Gudang Digital':'Transaksi penjualan'
+        );
+      });
+
+    const latest=[...salesToday].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0];
+    add(
+      'sales:'+today+':'+salesToday.length+':'+latest?.id,
+      '💰',
+      'Penjualan hari ini '+rupiah(salesToday.reduce((a,x)=>a+Number(x.amount||0),0)),
+      salesToday.length+' transaksi tercatat hari ini.',
+      'salesrecap',
+      'Omzet hari ini'
+    );
+  }
+  bossNotifications=notes;
+
+  if(Array.isArray(window.v36Notifs)){
+    const seen=new Set(window.v36Notifs.map(n=>String(n.k||n.key||'')));
+    notes.forEach(n=>{
+      if(seen.has(String(n.key)))return;
+      window.v36Notifs.push({
+        k:n.key,
+        ico:n.icon,
+        t:n.title,
+        m:n.desc+(n.meta?' • '+n.meta:'')
+      });
+      seen.add(String(n.key));
+    });
+  }
+
+  const read=bossNotifReadSet(),unread=notes.filter(n=>!read.has(n.key));const badge=$('#bossBellBadge'),list=$('#bossNotifyList');if(badge){badge.textContent=unread.length>99?'99+':unread.length;badge.classList.toggle('hidden',unread.length===0)}
   if(list)list.innerHTML=notes.length?notes.map(n=>`<div class="notify-item ${read.has(n.key)?'read':'unread'}"><span class="notify-icon">${n.icon}</span><span class="notify-copy"><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div><div class="notify-meta">${esc(n.meta||'')}</div><div class="notify-actions"><button class="notify-mini" onclick="bossNotifAction('${n.key}','${n.page}')">Periksa</button>${read.has(n.key)?'':`<button class="notify-mini gray" onclick="markBossNotificationRead('${n.key}')">Tandai dibaca</button>`}</div></span></div>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua aman</b><div style="margin-top:5px">Belum ada hal penting yang perlu perhatian Bos.</div></div>`;
 }
 window.markBossNotificationRead=markBossNotificationRead;window.markAllBossNotificationsRead=markAllBossNotificationsRead;window.bossNotifAction=bossNotifAction;
@@ -3110,7 +3151,7 @@ const v36RenderOriginal=v36Render;v36Render=v361Render;
 const v36LoadOriginal=v36Load;v36Load=async function(){if(v361Busy)return;v361Busy=true;try{await v36LoadOriginal();/* enrich timestamps */const ids={sale:new Map(),ord:new Map(),wd:new Map()};const [sr,or,wr]=await Promise.all([sb.from('sales_transactions').select('id,created_at').order('created_at',{ascending:false}).limit(20),sb.from('marketplace_orders').select('id,created_at').order('created_at',{ascending:false}).limit(30),sb.from('withdrawal_requests').select('id,created_at').order('created_at',{ascending:false}).limit(30)]);(sr.data||[]).forEach(x=>ids.sale.set(String(x.id),x.created_at));(or.data||[]).forEach(x=>ids.ord.set(String(x.id),x.created_at));(wr.data||[]).forEach(x=>ids.wd.set(String(x.id),x.created_at));v36Notifs.forEach(x=>{const [p,id]=String(x.k).split(':');if(p==='sale')x._created_at=ids.sale.get(id);if(p==='ord')x._created_at=ids.ord.get(id);if(p==='wd')x._created_at=ids.wd.get(id)});v361Render()}finally{v361Busy=false}}
 function v361Opened(){const now=Date.now();v361LastSeen=now;localStorage.setItem('yan_v361_last_seen',String(now));setTimeout(v361Render,50)}
 setTimeout(()=>{const b=v36Bell();if(b&&!b.dataset.v361){b.dataset.v361='1';b.addEventListener('click',()=>{if($('#v36NotifPanel')?.classList.contains('open'))v361Opened()})}},3000);
-function v361Realtime(){if(v361Channel)try{sb.removeChannel(v361Channel)}catch{};v361Channel=sb.channel('boss-smart-notif-v361').on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>v36Load()).subscribe();}
+function v361Realtime(){if(v361Channel)try{sb.removeChannel(v361Channel)}catch{};v361Channel=sb.channel('boss-smart-notif-v361').on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'seller_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>v36Load()).subscribe();}
 setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){v361Realtime();v36Load()}},3500);
 </script>
 
@@ -3312,6 +3353,7 @@ function v364Realtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},v364Refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},v364Refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},v364Refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'seller_orders'},v364Refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},v364Refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'attendance'},v364Refresh)
     .subscribe(status=>{
