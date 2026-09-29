@@ -2607,7 +2607,7 @@ function digitalUnitsV34(pid){return digitalItems.filter(x=>x.product_id===pid)}
 async function loadDigitalSafe(){
   try{
     const pr=await sb.from('digital_products').select('*').eq('active',true).order('product_name');if(pr.error)throw pr.error;digitalProductsV34=pr.data||[];
-    let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:true}).limit(10000);if(currentEmployee.role!=='admin')q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
+    let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:false}).limit(10000);if(currentEmployee.role!=='admin')q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
     const r=await q;if(r.error)throw r.error;digitalItems=r.data||[];digitalSecrets={};
     if(currentEmployee.role==='admin'||currentEmployee.username==='paqih'){const sr=await sb.from('digital_inventory_secrets').select('*');if(sr.error)throw sr.error;(sr.data||[]).forEach(x=>digitalSecrets[x.item_id]=x.secret_value)}
     renderDigital();
