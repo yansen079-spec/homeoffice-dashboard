@@ -1795,7 +1795,7 @@ async function boot(user){
   $('#digitalStockTitle').textContent=emp.role==='admin'?'Gudang Digital YANSTORE':'Ambil Stok untuk Buyer';
   $('#digitalStockSubtitle').textContent=emp.role==='admin'?'Kelola item digital satu-per-satu.':'Ambil satu item untuk buyer, lalu tandai setelah dikirim.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
-  $('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
+  $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
   if(emp.role==='admin')await loadBossNotificationReadsSafe();
   go('dashboard'); await refreshData();
   await loadAttendanceArchiveSafe();
