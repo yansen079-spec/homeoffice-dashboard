@@ -1462,14 +1462,15 @@ async function boot(user){
 function go(id){
   if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
-  $('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
-  $('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+
+  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
 
   const bell=$('#bossBell');
   if(bell)bell.classList.toggle('hidden',!(currentEmployee?.role==='admin'&&id==='dashboard'));
   if(id!=='dashboard'){
     $('#bossNotifyPanel')?.classList.add('hidden');
-    $('#v36NotifPanel')?.classList.remove('open');
+    document.querySelector('#v36NotifPanel')?.classList.remove('open');
   }
 
   if(id==='profile')renderProfile();
