@@ -1151,7 +1151,7 @@ aside .userbox{
         <div>
           <div class="pay48-eyebrow">HOME OFFICE • PENGGAJIAN</div>
           <h1>💰 Penggajian</h1>
-          <div class="muted">Kelola gaji karyawan dengan tampilan ringkas, jelas, dan siap dipakai setiap bulan.</div>
+          <div class="muted">Kelola gaji karyawan dengan siklus gajian setiap tanggal 28.</div>
         </div>
         <div class="pay48-actions">
           <button class="btn" id="payrollSettingsBtn">⚙ Atur Potongan</button>
@@ -1161,7 +1161,7 @@ aside .userbox{
 
       <div class="pay48-control-card">
         <div class="pay48-field">
-          <label>Periode Gajian</label>
+          <label>Periode Gajian (Tanggal 28)</label>
           <input class="input" id="payrollMonth" type="month">
         </div>
         <div class="pay48-field">
@@ -1170,8 +1170,8 @@ aside .userbox{
         </div>
         <div class="pay48-period-info">
           <span>Periode payroll</span>
-          <b id="pay48PeriodLabel">Tanggal 1–30</b>
-          <small>Perhitungan mengikuti absensi lengkap.</small>
+          <b id="pay48PeriodLabel">-</b>
+          <small>Periode otomatis dimulai setelah gajian tanggal 28.</small>
         </div>
       </div>
 
@@ -2237,11 +2237,9 @@ function buildSalarySlip(){
   let rows=getPayrollRows();
   let x=rows.find(r=>r.emp.id===selected);
   if(!x){alert('Data karyawan tidak ditemukan.');return}
-  let month=$('#payrollMonth').value||ymd().slice(0,7);
-  let [yy,mm]=month.split('-');
-  let period=new Date(Number(yy),Number(mm)-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  let month=$('#payrollMonth').value||payrollDefaultMonthV50();
   $('#slipOffice').textContent=(officeSettings&&officeSettings.office_name)||'HomeOffice';
-  $('#slipPeriod').textContent='Tanggal 1–30 • '+period;
+  $('#slipPeriod').textContent='Periode '+payrollCycleLabelV50(month)+' • Gajian tanggal 28';
   $('#slipName').textContent=x.emp.full_name;
   $('#slipDaily').textContent=rupiah(x.daily);
   $('#slipPaidDays').textContent=x.paidDays+' hari';
@@ -2285,14 +2283,40 @@ $('#savePayrollSettings').onclick=async()=>{
 
 const rupiah=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
 
+function payrollDefaultMonthV50(){
+  const now=new Date();
+  let y=now.getFullYear(),m=now.getMonth()+1;
+  if(now.getDate()>28){
+    m+=1;
+    if(m>12){m=1;y+=1}
+  }
+  return y+'-'+String(m).padStart(2,'0');
+}
+
+function payrollCycleV50(month){
+  const [y,m]=String(month||payrollDefaultMonthV50()).split('-').map(Number);
+  const end=new Date(y,m-1,28);
+  const start=new Date(y,m-2,29);
+  const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return {start:fmt(start),end:fmt(end),startDate:start,endDate:end};
+}
+
+function payrollCycleLabelV50(month){
+  const r=payrollCycleV50(month);
+  const f=d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+  return f(r.startDate)+' – '+f(r.endDate);
+}
+
 async function loadPayrollDailyPaymentsSafe(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   try{
-    const month=$('#payrollMonth')?.value||ymd().slice(0,7);
+    if($('#payrollMonth')&&!$('#payrollMonth').value)$('#payrollMonth').value=payrollDefaultMonthV50();
+    const month=$('#payrollMonth')?.value||payrollDefaultMonthV50();
+    const cycle=payrollCycleV50(month);
     const {data,error}=await sb.from('payroll_daily_payments')
       .select('*')
-      .gte('pay_date',month+'-01')
-      .lte('pay_date',month+'-31')
+      .gte('pay_date',cycle.start)
+      .lte('pay_date',cycle.end)
       .order('created_at',{ascending:false});
     if(error)throw error;
     payrollDailyPayments=data||[];
@@ -2314,26 +2338,21 @@ window.payDailySalaryV49=async employeeId=>{
   const emp=employees.find(x=>x.id===employeeId);
   if(!emp)return;
   const daily=Number(emp.daily_salary||0);
-  const att=payrollTodayAttendanceV49(employeeId);
   const existing=payrollPaidTodayV49(employeeId);
-  if(existing){alert('Gaji hari ini sudah dibayar.');return}
+  if(existing){alert('Gaji hari ini sudah ditandai dibayar.');return}
   if(daily<=0){alert('Atur gaji harian karyawan terlebih dahulu.');return}
-  if(!att||!att.check_in||!att.check_out){
-    alert('Gaji harian hanya bisa ditandai dibayar setelah absensi masuk dan pulang lengkap hari ini.');
-    return;
-  }
   const method=$('#payMethod-'+employeeId)?.value||'Transfer';
-  if(!confirm('Bayar gaji hari ini untuk '+emp.full_name+' sebesar '+rupiah(daily)+' via '+method+'?'))return;
+  if(!confirm('Tandai gaji harian '+emp.full_name+' sebesar '+rupiah(daily)+' sebagai SUDAH DIBAYAR hari ini via '+method+'?'))return;
   const {error}=await sb.from('payroll_daily_payments').insert({
     employee_id:employeeId,
     pay_date:ymd(),
     amount:daily,
     payment_method:method,
     paid_by:currentEmployee.id,
-    note:'Gaji harian '+ymd()
+    note:'Pembayaran gaji harian manual '+ymd()
   });
   if(error){
-    if(error.code==='23505')alert('Gaji hari ini sudah pernah dibayar.');
+    if(error.code==='23505')alert('Gaji hari ini sudah pernah ditandai dibayar.');
     else alert('Gagal mencatat pembayaran: '+error.message);
     return;
   }
@@ -2352,8 +2371,9 @@ window.undoDailySalaryV49=async employeeId=>{
 
 function getPayrollRows(){
   if(!currentEmployee || currentEmployee.role!=='admin') return [];
-  if(!$('#payrollMonth').value) $('#payrollMonth').value=ymd().slice(0,7);
+  if(!$('#payrollMonth').value) $('#payrollMonth').value=payrollDefaultMonthV50();
   let month=$('#payrollMonth').value;
+  const cycle=payrollCycleV50(month);
   let selected=$('#payrollEmployee').value;
   const old=selected;
 
@@ -2364,14 +2384,12 @@ function getPayrollRows(){
   if(selected) staff=staff.filter(x=>x.id===selected);
 
   return staff.map(emp=>{
-    let a=attendance.filter(x=>x.employee_id===emp.id && x.attendance_date && x.attendance_date.startsWith(month));
-    // V16: periode payroll hanya tanggal 1–30. Tanggal 31 tidak dihitung.
-    a=a.filter(x=>Number((x.attendance_date||'').slice(-2))<=30);
+    let a=attendance.filter(x=>x.employee_id===emp.id && x.attendance_date && x.attendance_date>=cycle.start && x.attendance_date<=cycle.end);
     let paidDays=a.filter(x=>x.check_in&&x.check_out).length;
     let late=a.filter(x=>x.status==='Terlambat').length;
     let izin=a.filter(x=>x.status==='Izin').length;
     let sakit=a.filter(x=>x.status==='Sakit').length;
-    let cuti=leaveRequests.filter(x=>x.employee_id===emp.id&&x.status==='Disetujui'&&x.leave_type==='Cuti'&&x.start_date&&x.start_date.startsWith(month)&&Number(x.start_date.slice(-2))<=30).length;
+    let cuti=leaveRequests.filter(x=>x.employee_id===emp.id&&x.status==='Disetujui'&&x.leave_type==='Cuti'&&x.start_date&&x.start_date>=cycle.start&&x.start_date<=cycle.end).length;
     let daily=Number(emp.daily_salary||0);
     let gross=paidDays*daily;
     let latePenalty=late*Number(payrollSettings?.late_penalty||0);
@@ -2397,12 +2415,8 @@ function renderPayroll(){
   $('#pNet').textContent=rupiah(rows.reduce((s,x)=>s+x.net,0));
   if($('#pay48EmployeeCount'))$('#pay48EmployeeCount').textContent=rows.length;
 
-  const month=$('#payrollMonth')?.value||ymd().slice(0,7);
-  if($('#pay48PeriodLabel')){
-    const [yy,mm]=month.split('-');
-    const label=new Date(Number(yy),Number(mm)-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
-    $('#pay48PeriodLabel').textContent='1–30 '+label;
-  }
+  const month=$('#payrollMonth')?.value||payrollDefaultMonthV50();
+  if($('#pay48PeriodLabel'))$('#pay48PeriodLabel').textContent=payrollCycleLabelV50(month);
 
   $('#payrollRows').innerHTML=rows.length?rows.map(x=>{
     const noSalary=Number(x.daily||0)<=0;
@@ -2433,10 +2447,8 @@ function renderPayroll(){
       </div>
 
       ${(()=>{
-        const att=payrollTodayAttendanceV49(x.emp.id);
         const paid=payrollPaidTodayV49(x.emp.id);
-        const complete=!!(att&&att.check_in&&att.check_out);
-        const canPay=!paid&&complete&&Number(x.daily)>0;
+        const canPay=!paid&&Number(x.daily)>0;
         return `<div class="pay49-daily-pay">
           <div class="pay49-daily-main">
             <div>
@@ -2445,13 +2457,13 @@ function renderPayroll(){
             </div>
             ${paid
               ? `<div class="pay49-paid"><strong>✓ Sudah Dibayar</strong><small>${esc(paid.payment_method)} • ${esc(new Date(paid.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}))}</small></div>`
-              : `<div class="pay49-unpaid"><strong>${complete?'Belum Dibayar':'Menunggu Pulang'}</strong><small>${complete?'Siap dibayarkan hari ini':'Absensi hari ini belum lengkap'}</small></div>`
+              : `<div class="pay49-unpaid"><strong>Belum Dibayar</strong><small>Ditandai manual oleh Bos</small></div>`
             }
           </div>
           <div class="pay49-daily-actions">
             ${paid
               ? `<button class="btn" onclick="undoDailySalaryV49('${x.emp.id}')">↶ Batalkan</button>`
-              : `<select class="input pay49-method" id="payMethod-${x.emp.id}" ${canPay?'':'disabled'}><option>Transfer</option><option>Cash</option><option>E-wallet</option></select><button class="btn primary" onclick="payDailySalaryV49('${x.emp.id}')" ${canPay?'':'disabled'}>💸 Bayar Hari Ini</button>`
+              : `<select class="input pay49-method" id="payMethod-${x.emp.id}" ${canPay?'':'disabled'}><option>Transfer</option><option>Cash</option><option>E-wallet</option></select><button class="btn primary" onclick="payDailySalaryV49('${x.emp.id}')" ${canPay?'':'disabled'}>💸 Tandai Dibayar</button>`
             }
           </div>
         </div>`;
