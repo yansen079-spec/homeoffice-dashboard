@@ -515,7 +515,13 @@ aside .userbox{
 .att44-emp{display:flex;align-items:center;gap:10px}.att44-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e8efff;color:#3157a6;font-weight:900;font-size:11px;flex:0 0 34px}.att44-emp b{font-size:13px;color:#0f172a}
 .att44-time{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:9px;font-size:12px;font-weight:800}.att44-time.in{background:#ecfdf5;color:#047857}.att44-time.out{background:#fff1f2;color:#be123c}.att44-time.empty{background:#f8fafc;color:#94a3b8}
 .att44-duration{font-size:12px;font-weight:700;color:#475569}
-.att44-note{max-width:220px;white-space:normal!important;color:#64748b;font-size:12px;line-height:1.35}
+.att44-note{width:130px;max-width:150px;white-space:normal!important;color:#64748b;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+.att44-table th:nth-child(8),.att44-table td:nth-child(8){width:145px;max-width:150px}
+#attendance #resetAttendanceEmployee{font-size:12px!important;padding:7px 10px!important;min-height:38px!important}
+.att44-table-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.att44-page-size{height:34px!important;min-height:34px!important;width:auto!important;padding:5px 8px!important;font-size:11px!important}
+.att44-page-btn{width:34px;height:34px;min-height:34px!important;padding:0!important;font-size:18px!important;display:grid;place-items:center}
+.att44-page-info{min-width:44px;text-align:center;font-size:11px;font-weight:800;color:#64748b}
 
 @media(max-width:1100px){
   .att44-stats{grid-template-columns:repeat(2,1fr)}
@@ -524,6 +530,7 @@ aside .userbox{
 }
 @media(max-width:768px){
   .att44-head{flex-direction:column}.att44-actions{width:100%;justify-content:flex-start}.att44-actions .btn{flex:1 1 180px}
+  .att44-table-head{align-items:flex-start;flex-direction:column}.att44-table-tools{width:100%;justify-content:flex-start}
   .att44-filter-card{grid-template-columns:1fr}.att44-search-field{grid-column:auto}
   .att44-table-wrap{max-height:none}
 }
@@ -775,7 +782,17 @@ aside .userbox{
             <h3>▣ Daftar Absensi</h3>
             <p>Riwayat kehadiran karyawan berdasarkan filter yang dipilih.</p>
           </div>
-          <div class="att44-count"><span id="attendanceCount">0</span> data</div>
+          <div class="att44-table-tools">
+            <div class="att44-count"><span id="attendanceCount">0</span></div>
+            <select class="input att44-page-size" id="attendancePageSize" title="Data per halaman">
+              <option value="25">25 / halaman</option>
+              <option value="50">50 / halaman</option>
+              <option value="100">100 / halaman</option>
+            </select>
+            <button class="btn att44-page-btn" id="attendancePrev" type="button">‹</button>
+            <span class="att44-page-info" id="attendancePageInfo">1 / 1</span>
+            <button class="btn att44-page-btn" id="attendanceNext" type="button">›</button>
+          </div>
         </div>
         <div class="table att44-table-wrap">
           <table class="att44-table">
@@ -1445,8 +1462,16 @@ async function boot(user){
 function go(id){
   if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
-  $$('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
-  $$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  $('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
+  $('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+
+  const bell=$('#bossBell');
+  if(bell)bell.classList.toggle('hidden',!(currentEmployee?.role==='admin'&&id==='dashboard'));
+  if(id!=='dashboard'){
+    $('#bossNotifyPanel')?.classList.add('hidden');
+    $('#v36NotifPanel')?.classList.remove('open');
+  }
+
   if(id==='profile')renderProfile();
   if(id==='businessfinance')loadBusinessFinance();
 }
@@ -1581,6 +1606,23 @@ function attendanceDurationV44(checkIn,checkOut){
 function attendanceInitialsV44(name){
   return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
 }
+let attendancePageV44=1;
+let attendancePageSizeV44=25;
+
+function resetAttendancePageV44(){
+  attendancePageV44=1;
+}
+function attendancePrevPageV44(){
+  attendancePageV44=Math.max(1,attendancePageV44-1);
+  renderAttendance();
+}
+function attendanceNextPageV44(){
+  attendancePageV44+=1;
+  renderAttendance();
+}
+window.attendancePrevPageV44=attendancePrevPageV44;
+window.attendanceNextPageV44=attendanceNextPageV44;
+
 function renderAttendance(){
   const d=$('#filterDate')?.value||'',s=$('#filterStatus')?.value||'',q=($('#attendanceSearch')?.value||'').trim().toLowerCase();
   const today=ymd(),todayRows=attendance.filter(x=>x.attendance_date===today);
@@ -1597,13 +1639,28 @@ function renderAttendance(){
   if($('#attTodayPresentSub'))$('#attTodayPresentSub').textContent=currentEmployee?.role==='admin'?('dari '+activeCount+' karyawan aktif'):'kehadiran kamu hari ini';
 
   const rows=attendance.filter(x=>(!d||x.attendance_date===d)&&(!s||x.status===s)&&(!q||String(x.name||'').toLowerCase().includes(q)));
-  if($('#attendanceCount'))$('#attendanceCount').textContent=rows.length;
+  const total=rows.length;
+  const pageSizeSel=$('#attendancePageSize');
+  if(pageSizeSel){
+    const selected=Number(pageSizeSel.value||attendancePageSizeV44);
+    attendancePageSizeV44=[25,50,100].includes(selected)?selected:25;
+  }
+  const totalPages=Math.max(1,Math.ceil(total/attendancePageSizeV44));
+  attendancePageV44=Math.min(Math.max(1,attendancePageV44),totalPages);
+  const start=(attendancePageV44-1)*attendancePageSizeV44;
+  const pageRows=rows.slice(start,start+attendancePageSizeV44);
+  const from=total?start+1:0,to=Math.min(start+attendancePageSizeV44,total);
 
-  $('#attendanceRows').innerHTML=rows.length?rows.map((x,i)=>{
+  if($('#attendanceCount'))$('#attendanceCount').textContent=(total?from+'–'+to+' dari ':'')+total+' data';
+  if($('#attendancePageInfo'))$('#attendancePageInfo').textContent=attendancePageV44+' / '+totalPages;
+  if($('#attendancePrev'))$('#attendancePrev').disabled=attendancePageV44<=1;
+  if($('#attendanceNext'))$('#attendanceNext').disabled=attendancePageV44>=totalPages;
+
+  $('#attendanceRows').innerHTML=pageRows.length?pageRows.map((x,i)=>{
     const ci=x.check_in||'',co=x.check_out||'';
     const note=x.note||'-';
     return `<tr>
-      <td>${i+1}</td>
+      <td>${start+i+1}</td>
       <td><div class="att44-emp"><div class="att44-avatar">${esc(attendanceInitialsV44(x.name))}</div><b>${esc(x.name)}</b></div></td>
       <td>${esc(x.attendance_date)}</td>
       <td><span class="att44-time ${ci?'in':'empty'}">${ci?'↳ '+esc(ci):'-'}</span></td>
@@ -2026,7 +2083,14 @@ function renderRecap(){
 }
 $('#recapMonth').onchange=renderRecap;$('#recapEmployee').onchange=renderRecap;
 
-$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;if($('#attendanceSearch'))$('#attendanceSearch').oninput=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
+$('#filterDate').value='';
+$('#filterDate').onchange=()=>{resetAttendancePageV44();renderAttendance()};
+$('#filterStatus').onchange=()=>{resetAttendancePageV44();renderAttendance()};
+if($('#attendanceSearch'))$('#attendanceSearch').oninput=()=>{resetAttendancePageV44();renderAttendance()};
+if($('#attendancePageSize'))$('#attendancePageSize').onchange=()=>{attendancePageSizeV44=Number($('#attendancePageSize').value||25);resetAttendancePageV44();renderAttendance()};
+if($('#attendancePrev'))$('#attendancePrev').onclick=attendancePrevPageV44;
+if($('#attendanceNext'))$('#attendanceNext').onclick=attendanceNextPageV44;
+$('#employeeSearch').oninput=renderEmployees;
 
 $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
