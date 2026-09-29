@@ -414,6 +414,45 @@ aside .userbox{
 /* V36 Smart Notification Center */
 .notify-item{position:relative}.notify-item.unread{background:#eff6ff;border:1px solid #bfdbfe}.notify-item.read{opacity:.72}.notify-item .notify-copy{flex:1}.notify-meta{font-size:10px;color:#94a3b8;margin-top:5px}.notify-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.notify-mini{border:0;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer;background:#e8efff;color:#1d4ed8}.notify-mini.gray{background:#f1f5f9;color:#475569}.notify-head-actions{display:flex;gap:6px}.notify-head-actions .btn{padding:7px 9px;font-size:11px}
 </style>
+<style>
+/* ===== V43 MODERN BOSS DASHBOARD ===== */
+#dashboard{padding-bottom:28px}
+#dashboard .dash43-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
+#dashboard .dash43-header h1{font-size:30px;line-height:1.05;margin:4px 0 7px;color:#0f172a;letter-spacing:-.7px}
+.dash43-eyebrow{font-size:11px;font-weight:900;letter-spacing:.11em;color:#2563eb}
+.dash43-welcome{font-size:14px;color:#64748b;margin-bottom:4px}
+.dash43-realtime{font-size:12px}
+.dash43-date-pill{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:10px 14px;box-shadow:0 5px 20px rgba(15,23,42,.04)}
+.dash43-date-icon{width:36px;height:36px;display:grid;place-items:center;background:#eff6ff;border-radius:10px;font-size:18px}
+.dash43-date-pill b{display:block;font-size:13px;color:#0f172a}.dash43-date-pill span:not(.dash43-date-icon){font-size:11px;color:#94a3b8}
+
+.dash43-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.dash43-kpi{min-width:0;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e4e9f1;border-radius:17px;padding:15px;box-shadow:0 8px 24px rgba(15,23,42,.035)}
+.dash43-kpi-icon{flex:0 0 44px;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:20px;font-weight:900}
+.dash43-kpi-icon.green{background:#dcfce7;color:#15803d}.dash43-kpi-icon.blue{background:#dbeafe;color:#1d4ed8}.dash43-kpi-icon.red{background:#fee2e2;color:#dc2626}.dash43-kpi-icon.purple{background:#f3e8ff;color:#7e22ce}.dash43-kpi-icon.amber{background:#fef3c7;color:#b45309}
+.dash43-kpi span{display:block;color:#64748b;font-size:12px}.dash43-kpi b{display:block;color:#0f172a;font-size:26px;line-height:1.05;margin:4px 0}.dash43-kpi small{display:block;color:#94a3b8;font-size:10px}
+
+.dash43-section,.dash43-panel{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 8px 28px rgba(15,23,42,.035)}
+.dash43-section-head,.dash43-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.dash43-section-head h3,.dash43-panel-head h3{margin:0;color:#0f172a;font-size:18px}.dash43-section-head p,.dash43-panel-head p{margin:4px 0 0;color:#94a3b8;font-size:12px}
+.dash43-warehouse-grid{display:grid;grid-template-columns:1fr 1fr 1.35fr 1fr;gap:12px}
+.dash43-warehouse-card{display:flex;align-items:center;gap:12px;border-radius:15px;padding:15px;border:1px solid transparent;min-height:96px}
+.dash43-warehouse-card.mint{background:#f0fdf4;border-color:#dcfce7}.dash43-warehouse-card.rose{background:#fff1f2;border-color:#ffe4e6}.dash43-warehouse-card.sky{background:#eff6ff;border-color:#dbeafe}.dash43-warehouse-card.gold{background:#fffbeb;border-color:#fef3c7}
+.dash43-warehouse-icon{flex:0 0 42px;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.72);display:grid;place-items:center;font-size:20px;font-weight:900}
+.dash43-warehouse-card small{display:block;color:#64748b;font-size:11px}.dash43-warehouse-card b{display:block;color:#0f172a;font-size:25px;margin:3px 0;line-height:1.05}.dash43-warehouse-card.featured b{font-size:15px;line-height:1.25;overflow-wrap:anywhere}.dash43-warehouse-card em{font-style:normal;color:#64748b;font-size:10px}
+
+.dash43-bottom-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
+.dash43-bottom-grid .dash43-panel{margin-top:0}
+.dash43-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dash43-mini{background:#f8fafc;border:1px solid #edf2f7;border-radius:13px;padding:13px}.dash43-mini.wide{grid-column:1/-1}
+.dash43-mini span{display:block;color:#64748b;font-size:11px}.dash43-mini b{display:block;color:#0f172a;font-size:22px;margin-top:5px;overflow-wrap:anywhere}
+.dash43-employee-list .bossrow{padding:11px 2px}.dash43-sales-kpis{margin-bottom:12px}
+
+@media(max-width:1180px){.dash43-kpis{grid-template-columns:repeat(3,1fr)}.dash43-warehouse-grid{grid-template-columns:1fr 1fr}.dash43-bottom-grid{grid-template-columns:1fr}}
+@media(max-width:768px){#dashboard .dash43-header{flex-direction:column}.dash43-date-pill{width:100%}.dash43-kpis{grid-template-columns:1fr 1fr}.dash43-warehouse-grid{grid-template-columns:1fr 1fr}.dash43-section-head,.dash43-panel-head{flex-direction:column}.dash43-section-head .btn,.dash43-panel-head .btn{width:100%}}
+@media(max-width:520px){.dash43-kpis,.dash43-warehouse-grid,.dash43-mini-grid{grid-template-columns:1fr}.dash43-mini.wide{grid-column:auto}.dash43-kpi{padding:13px}.dash43-section,.dash43-panel{padding:14px}.dash43-warehouse-card{min-height:84px}}
+/* ===== END V43 MODERN BOSS DASHBOARD ===== */
+</style>
 </head>
 <body>
 <section id="login" class="login">
@@ -461,46 +500,116 @@ aside .userbox{
 
   <main class="main">
     <section id="dashboard" class="page">
-      <div class="top"><div><h1>Dashboard</h1><div id="realtimeStatus" class="muted">● Menghubungkan realtime...</div><div class="muted" id="welcome"></div></div><div class="muted" id="today"></div></div>
-      <div class="stats">
-        <div class="card stat"><span class="muted">Hadir Hari Ini</span><b id="dH">0</b></div>
-        <div class="card stat"><span class="muted">Terlambat</span><b id="dT">0</b></div>
-        <div class="card stat"><span class="muted">Izin / Sakit</span><b id="dI">0</b></div>
-        <div class="card stat adminOnly"><span class="muted">Karyawan Aktif</span><b id="dE">0</b></div>
+      <div class="dash43-header">
+        <div>
+          <div class="dash43-eyebrow">HOME OFFICE • COMMAND CENTER</div>
+          <h1>Dashboard</h1>
+          <div id="welcome" class="dash43-welcome"></div>
+          <div id="realtimeStatus" class="muted dash43-realtime">● Menghubungkan realtime...</div>
+        </div>
+        <div class="dash43-date-pill">
+          <span class="dash43-date-icon">📅</span>
+          <div><b id="today"></b><span>Ringkasan operasional</span></div>
+        </div>
       </div>
+
+      <div class="dash43-kpis">
+        <div class="dash43-kpi adminOnly">
+          <div class="dash43-kpi-icon green">👥</div>
+          <div><span>Karyawan Aktif</span><b id="dE">0</b><small>Tim aktif saat ini</small></div>
+        </div>
+        <div class="dash43-kpi">
+          <div class="dash43-kpi-icon blue">✓</div>
+          <div><span>Hadir Hari Ini</span><b id="dH">0</b><small>Absensi tercatat</small></div>
+        </div>
+        <div class="dash43-kpi">
+          <div class="dash43-kpi-icon red">⏱</div>
+          <div><span>Terlambat Hari Ini</span><b id="dT">0</b><small>Perlu dipantau</small></div>
+        </div>
+        <div class="dash43-kpi">
+          <div class="dash43-kpi-icon purple">☂</div>
+          <div><span>Izin / Sakit</span><b id="dI">0</b><small>Tidak hadir hari ini</small></div>
+        </div>
+        <div class="dash43-kpi adminOnly">
+          <div class="dash43-kpi-icon amber">☑</div>
+          <div><span>Tugas Belum Selesai</span><b id="bOpenTasks">0</b><small>Masih berjalan</small></div>
+        </div>
+      </div>
+
       <div class="quick employeeOnly">
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
         <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
       </div>
-      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div><div id="salesDashboardBlock" class="salesOnly hidden" style="margin-top:18px">
-        <div class="card">
-          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Penjualan Hari Ini</h3><div class="muted">Gabungan rekap Excel + penjualan otomatis dari Gudang Digital.</div></div><button class="btn" onclick="go('salesrecap')">Buka Rekap</button></div>
-          <div class="sales-kpis" style="margin-bottom:12px">
-            <div class="sales-kpi"><span class="muted">Transaksi</span><b id="dashSalesCount">0</b></div>
-            <div class="sales-kpi"><span class="muted">Omzet</span><b id="dashSalesRevenue">Rp0</b></div>
-            <div class="sales-kpi"><span class="muted">Produk Terjual</span><b id="dashSalesProducts">0</b></div>
-            <div class="sales-kpi"><span class="muted">Buyer</span><b id="dashSalesBuyers">0</b></div>
+
+      <div id="dashNotice" class="notice hidden" style="margin-top:18px"></div>
+
+      <div class="dash43-section adminOnly" id="dashWarehouseToday">
+        <div class="dash43-section-head">
+          <div>
+            <h3>📊 Ringkasan Gudang Digital</h3>
+            <p>Informasi cepat kondisi stok YANSTORE saat ini.</p>
           </div>
-          <div class="sales-list" id="dashSalesRecent"></div>
+          <button class="btn" onclick="go('digitalstock')">Lihat Gudang Digital →</button>
         </div>
-      </div><div id="bossDashboardExtra" class="adminOnly" style="margin-top:18px">
-        <div class="bossdash">
-          <div class="bosscard"><span class="muted">Belum Absen</span><b id="bNotIn">0</b></div>
-          <div class="bosscard"><span class="muted">Belum Pulang</span><b id="bNotOut">0</b></div>
-          <div class="bosscard"><span class="muted">Pengajuan Menunggu</span><b id="bPendingLeave">0</b></div>
-          <div class="bosscard"><span class="muted">Tugas Belum Selesai</span><b id="bOpenTasks">0</b></div>
-          <div class="bosscard"><span class="muted">Stok Menipis</span><b id="bLowStock">0</b></div>
-          <div class="bosscard"><span class="muted">Stok Habis</span><b id="bOutStock">0</b></div>
-          <div class="bosscard"><span class="muted">Hari Kerja Dibayar</span><b id="bPaidDays">0</b></div>
-          <div class="bosscard"><span class="muted">Estimasi Gaji Berjalan</span><b id="bPayroll">Rp0</b></div>
+        <div class="dash43-warehouse-grid">
+          <div class="dash43-warehouse-card mint">
+            <span class="dash43-warehouse-icon">⬆</span>
+            <div><small>Stok Tersedia</small><b id="dashDigitalAvailable">0</b><em>akun siap digunakan</em></div>
+          </div>
+          <div class="dash43-warehouse-card rose">
+            <span class="dash43-warehouse-icon">⬇</span>
+            <div><small>Sudah Diambil</small><b id="dashDigitalClaimed">0</b><em>stok yang sudah keluar</em></div>
+          </div>
+          <div class="dash43-warehouse-card sky featured">
+            <span class="dash43-warehouse-icon">♛</span>
+            <div><small>Produk Terlaris</small><b id="dashDigitalBest">-</b><em id="dashDigitalBestCount">Belum ada data</em></div>
+          </div>
+          <div class="dash43-warehouse-card gold">
+            <span class="dash43-warehouse-icon">◇</span>
+            <div><small>Total Item</small><b id="dashDigitalTotal">0</b><em>seluruh data gudang</em></div>
+          </div>
         </div>
-        <div class="card">
-          <div class="top" style="margin-bottom:10px"><div><h3 style="margin:0">Ringkasan Karyawan Hari Ini</h3><div class="muted">Status absensi semua karyawan aktif.</div></div></div>
-          <div class="bosslist" id="bossEmployeeSummary"></div>
+      </div>
+
+      <div id="salesDashboardBlock" class="salesOnly hidden dash43-section">
+        <div class="dash43-section-head">
+          <div><h3>💰 Penjualan Hari Ini</h3><p>Gabungan rekap Excel + penjualan otomatis dari Gudang Digital.</p></div>
+          <button class="btn" onclick="go('salesrecap')">Buka Rekap →</button>
+        </div>
+        <div class="sales-kpis dash43-sales-kpis">
+          <div class="sales-kpi"><span class="muted">Transaksi</span><b id="dashSalesCount">0</b></div>
+          <div class="sales-kpi"><span class="muted">Omzet</span><b id="dashSalesRevenue">Rp0</b></div>
+          <div class="sales-kpi"><span class="muted">Produk Terjual</span><b id="dashSalesProducts">0</b></div>
+          <div class="sales-kpi"><span class="muted">Buyer</span><b id="dashSalesBuyers">0</b></div>
+        </div>
+        <div class="sales-list" id="dashSalesRecent"></div>
+      </div>
+
+      <div id="bossDashboardExtra" class="adminOnly dash43-bottom-grid">
+        <div class="dash43-panel">
+          <div class="dash43-panel-head">
+            <div><h3>👥 Karyawan Hari Ini</h3><p>Status absensi seluruh karyawan aktif.</p></div>
+            <button class="btn" onclick="go('attendance')">Lihat Absensi</button>
+          </div>
+          <div class="bosslist dash43-employee-list" id="bossEmployeeSummary"></div>
+        </div>
+
+        <div class="dash43-panel">
+          <div class="dash43-panel-head">
+            <div><h3>⚡ Ringkasan Operasional</h3><p>Hal yang perlu perhatian Bos.</p></div>
+          </div>
+          <div class="dash43-mini-grid">
+            <div class="dash43-mini"><span>Belum Absen</span><b id="bNotIn">0</b></div>
+            <div class="dash43-mini"><span>Belum Pulang</span><b id="bNotOut">0</b></div>
+            <div class="dash43-mini"><span>Pengajuan Menunggu</span><b id="bPendingLeave">0</b></div>
+            <div class="dash43-mini"><span>Stok Menipis</span><b id="bLowStock">0</b></div>
+            <div class="dash43-mini"><span>Stok Habis</span><b id="bOutStock">0</b></div>
+            <div class="dash43-mini"><span>Hari Kerja Dibayar</span><b id="bPaidDays">0</b></div>
+            <div class="dash43-mini wide"><span>Estimasi Gaji Berjalan</span><b id="bPayroll">Rp0</b></div>
+          </div>
         </div>
       </div>
     </section>
-
     <section id="attendance" class="page hidden">
       <div class="top">
         <div><h1>Absensi</h1><div class="muted" id="attendanceSubtitle">Riwayat absensi.</div></div>
@@ -1971,6 +2080,18 @@ $('#resetAttendanceAll').onclick=async()=>{
 
 
 
+function renderBossWarehouseSummaryV43(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const s=(typeof digitalStatsV34!=='undefined'&&digitalStatsV34)||{available:0,claimed:0,total:0};
+  const best=(typeof digitalBestSellersV1!=='undefined'&&digitalBestSellersV1?.[0])||null;
+  const a=$('#dashDigitalAvailable'),c=$('#dashDigitalClaimed'),t=$('#dashDigitalTotal'),b=$('#dashDigitalBest'),bc=$('#dashDigitalBestCount');
+  if(a)a.textContent=Number(s.available||0).toLocaleString('id-ID');
+  if(c)c.textContent=Number(s.claimed||0).toLocaleString('id-ID');
+  if(t)t.textContent=Number(s.total||0).toLocaleString('id-ID');
+  if(b)b.textContent=best?.product_name||'-';
+  if(bc)bc.textContent=best?Number(best.sold_count||0).toLocaleString('id-ID')+' akun diambil/dikirim':'Belum ada data';
+}
+
 function renderBossDashboard(){
   if(!currentEmployee || currentEmployee.role!=='admin') return;
 
@@ -1998,6 +2119,7 @@ function renderBossDashboard(){
   $('#bOutStock').textContent=outStock;
   $('#bPaidDays').textContent=paidDays;
   $('#bPayroll').textContent=rupiah(payroll);
+  renderBossWarehouseSummaryV43();
 
   const summary=$('#bossEmployeeSummary');
   summary.innerHTML=activeEmployees.length?activeEmployees.map(e=>{
@@ -2723,6 +2845,7 @@ async function loadDigitalSafe(){
 
     await loadDigitalBestSellersV1();
     renderDigital();
+    if(typeof renderBossWarehouseSummaryV43==='function')renderBossWarehouseSummaryV43();
   }catch(e){
     console.error('digital v34',e)
   }
