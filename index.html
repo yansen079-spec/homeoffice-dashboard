@@ -1729,6 +1729,7 @@ let attendanceArchive=[];
 let routineJobs=[],routineChecks=[],digitalItems=[],digitalSecrets={},digitalBatchPreview=[];
 let salesTransactions=[],salesPreviewData=[],salesPreviewFileName="";
 let bossNotifications=[];
+let bossNotificationReadKeys=new Set();
 let sellers=[],sellerOrders=[],marketplaceOrders=[],sellerLedger=[],withdrawalRequests=[];
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 let payrollDailyPayments=[];
@@ -1794,7 +1795,8 @@ async function boot(user){
   $('#digitalStockTitle').textContent=emp.role==='admin'?'Gudang Digital YANSTORE':'Ambil Stok untuk Buyer';
   $('#digitalStockSubtitle').textContent=emp.role==='admin'?'Kelola item digital satu-per-satu.':'Ambil satu item untuk buyer, lalu tandai setelah dikirim.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
-  $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
+  $('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
+  if(emp.role==='admin')await loadBossNotificationReadsSafe();
   go('dashboard'); await refreshData();
   await loadAttendanceArchiveSafe();
   await loadStockSafe();
@@ -1864,74 +1866,174 @@ function openBossNotification(page){
   $('#bossNotifyPanel')?.classList.add('hidden');
   go(page);
 }
-function bossNotifReadSet(){try{return new Set(JSON.parse(localStorage.getItem('yanstore_boss_notif_read_v36')||'[]'))}catch(e){return new Set()}}
-function saveBossNotifReadSet(set){localStorage.setItem('yanstore_boss_notif_read_v36',JSON.stringify([...set].slice(-500)))}
-function markBossNotificationRead(key){const r=bossNotifReadSet();r.add(key);saveBossNotifReadSet(r);renderBossNotifications()}
-function markAllBossNotificationsRead(){const r=bossNotifReadSet();bossNotifications.forEach(n=>r.add(n.key));saveBossNotifReadSet(r);renderBossNotifications()}
-function bossNotifAction(key,page){markBossNotificationRead(key);$('#bossNotifyPanel')?.classList.add('hidden');go(page)}
+function bossNotifLocalReadSet(){
+  try{return new Set(JSON.parse(localStorage.getItem('yanstore_boss_notif_read_v36')||'[]'))}
+  catch(e){return new Set()}
+}
+function saveBossNotifLocalReadSet(set){
+  try{localStorage.setItem('yanstore_boss_notif_read_v36',JSON.stringify([...set].slice(-1000)))}catch(e){}
+}
+function bossNotifReadSet(){
+  const out=new Set(bossNotificationReadKeys);
+  bossNotifLocalReadSet().forEach(k=>out.add(k));
+  return out;
+}
+async function loadBossNotificationReadsSafe(){
+  if(!currentEmployee||currentEmployee.role!=='admin'||!currentAuth?.id)return;
+  try{
+    const {data,error}=await sb.from('boss_notification_reads')
+      .select('notification_key')
+      .eq('user_id',currentAuth.id)
+      .limit(5000);
+    if(error)throw error;
+    bossNotificationReadKeys=new Set((data||[]).map(x=>x.notification_key));
+
+    // Migrasi read-state lama dari browser ke database sekali, supaya refresh/perangkat lain tetap konsisten.
+    const local=bossNotifLocalReadSet();
+    const missing=[...local].filter(k=>!bossNotificationReadKeys.has(k));
+    if(missing.length){
+      const rows=missing.map(k=>({user_id:currentAuth.id,notification_key:k}));
+      const up=await sb.from('boss_notification_reads').upsert(rows,{onConflict:'user_id,notification_key',ignoreDuplicates:true});
+      if(!up.error)missing.forEach(k=>bossNotificationReadKeys.add(k));
+    }
+  }catch(e){
+    console.error('load boss notification reads',e);
+    bossNotificationReadKeys=bossNotifLocalReadSet();
+  }
+}
+async function persistBossNotificationReadsV52(keys){
+  if(!currentAuth?.id||!keys?.length)return;
+  try{
+    const rows=keys.map(k=>({user_id:currentAuth.id,notification_key:k}));
+    const {error}=await sb.from('boss_notification_reads').upsert(rows,{onConflict:'user_id,notification_key',ignoreDuplicates:true});
+    if(error)throw error;
+  }catch(e){
+    console.error('save boss notification reads',e);
+  }
+}
+async function markBossNotificationRead(key){
+  if(!key)return;
+  bossNotificationReadKeys.add(key);
+  const local=bossNotifLocalReadSet();local.add(key);saveBossNotifLocalReadSet(local);
+  renderBossNotifications();
+  await persistBossNotificationReadsV52([key]);
+}
+async function markAllBossNotificationsRead(){
+  const keys=bossNotifications.map(n=>n.key);
+  keys.forEach(k=>bossNotificationReadKeys.add(k));
+  const local=bossNotifLocalReadSet();keys.forEach(k=>local.add(k));saveBossNotifLocalReadSet(local);
+  renderBossNotifications();
+  await persistBossNotificationReadsV52(keys);
+}
+function bossNotifAction(key,page){
+  markBossNotificationRead(key);
+  $('#bossNotifyPanel')?.classList.add('hidden');
+  go(page);
+}
+function bossNotifTimeV52(value){
+  if(!value)return 0;
+  if(Array.isArray(value))return value.reduce((m,x)=>Math.max(m,bossNotifTimeV52(x)),0);
+  if(typeof value==='object'){
+    const fields=['updated_at','created_at','paid_at','claimed_at','delivered_at','approved_at','attendance_date','transaction_date','expiry_date','due_date'];
+    return fields.reduce((m,k)=>Math.max(m,bossNotifTimeV52(value[k])),0);
+  }
+  if(typeof value==='number')return value;
+  const s=String(value);
+  const t=Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s)?s+'T00:00:00':s);
+  return Number.isFinite(t)?t:0;
+}
 function renderBossNotifications(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   const today=ymd(), active=employees.filter(e=>e.role==='employee'&&e.active), todayAtt=attendance.filter(a=>a.attendance_date===today), notes=[];
-  const add=(key,icon,title,desc,page,meta='')=>notes.push({key,icon,title,desc,page,meta});
+  const add=(key,icon,title,desc,page,meta='',sortSource=0)=>notes.push({key,icon,title,desc,page,meta,sortAt:bossNotifTimeV52(sortSource)});
+
   if(isTodayWorkday()){
-    const absent=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id)); if(absent.length)add('absent:'+today,'👤',absent.length+' karyawan belum absen',absent.map(x=>x.full_name).join(', '),'attendance','Absensi hari ini');
-    const late=todayAtt.filter(a=>a.status==='Terlambat'); if(late.length)add('late:'+today+':'+late.length,'⏰',late.length+' karyawan terlambat',late.map(x=>x.name||'-').join(', '),'attendance','Perlu dipantau');
-    const now=new Date();if(now.getHours()>20||(now.getHours()===20&&now.getMinutes()>=30)){const noOut=todayAtt.filter(a=>a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status));if(noOut.length)add('checkout:'+today,'🚪',noOut.length+' karyawan belum checkout',noOut.map(x=>x.name||'-').join(', '),'attendance','Menjelang jam pulang')}
+    const absent=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id));
+    if(absent.length)add('absent:'+today,'👤',absent.length+' karyawan belum absen',absent.map(x=>x.full_name).join(', '),'attendance','Absensi hari ini',today+'T09:00:00');
+    const late=todayAtt.filter(a=>a.status==='Terlambat');
+    if(late.length)add('late:'+today+':'+late.map(x=>x.id).join(','),'⏰',late.length+' karyawan terlambat',late.map(x=>x.name||'-').join(', '),'attendance','Perlu dipantau',late);
+    const now=new Date();
+    if(now.getHours()>20||(now.getHours()===20&&now.getMinutes()>=30)){
+      const noOut=todayAtt.filter(a=>a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status));
+      if(noOut.length)add('checkout:'+today,'🚪',noOut.length+' karyawan belum checkout',noOut.map(x=>x.name||'-').join(', '),'attendance','Menjelang jam pulang',today+'T20:30:00');
+    }
   }
-  const pending=leaveRequests.filter(x=>['pending','menunggu'].some(v=>String(x.status||'').toLowerCase().includes(v)));if(pending.length)add('leave:'+pending.map(x=>x.id).join(','),'📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave','Butuh keputusan Bos');
-  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);if(overdue.length)add('overdue:'+today+':'+overdue.length,'⚠️',overdue.length+' tugas lewat deadline','Ada tugas yang belum selesai melewati deadline.','tasks','Prioritas');
-  const out=productStocks.filter(p=>Number(p.stock)<=0),low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));if(out.length)add('stockout:'+out.map(x=>x.id).join(','),'📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock','Segera restock');if(low.length)add('stocklow:'+low.map(x=>x.id+':'+x.stock).join(','),'📉',low.length+' stok produk menipis',low.map(x=>x.product_name+' ('+x.stock+')').join(', '),'stock','Stok minimum');
-  if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined')digitalProductsV34.forEach(p=>{const av=digitalItems.filter(x=>x.product_id===p.id&&x.status==='available').length;if(av===0)add('dout:'+p.id,'🚨','Stok digital HABIS',p.product_name+' tidak punya stok tersedia.','digitalstock','Segera tambah stok');else if(av<=3)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun.','digitalstock','Gudang Digital')});
-  if(typeof digitalItems!=='undefined'){const soon=Date.now()+7*86400000;digitalItems.filter(x=>x.expiry_date&&new Date(x.expiry_date+'T23:59:59').getTime()>=Date.now()&&new Date(x.expiry_date+'T23:59:59').getTime()<=soon).slice(0,8).forEach(x=>{const d=Math.max(0,Math.ceil((new Date(x.expiry_date+'T23:59:59')-Date.now())/86400000));add('exp:'+x.id+':'+x.expiry_date,'⏳','Akun akan expired',x.product_name+' • '+(d===0?'hari ini':d+' hari lagi'),'digitalstock','Expired '+x.expiry_date)})}
-  if(typeof withdrawalRequests!=='undefined'){const w=withdrawalRequests.filter(x=>x.status==='pending');if(w.length)add('wd:'+w.map(x=>x.id).join(','),'💸',w.length+' withdrawal menunggu','Total '+rupiah(w.reduce((a,x)=>a+Number(x.amount||0),0))+' perlu diperiksa.','sellercenter','Butuh verifikasi')}
-  if(typeof marketplaceOrders!=='undefined'){const paid=marketplaceOrders.filter(x=>x.payment_status==='Dibayar'&&x.status!=='Selesai'&&x.status!=='Dibatalkan');if(paid.length)add('paid:'+paid.map(x=>x.id+':'+x.status).join(','),'🛒',paid.length+' order sudah dibayar',paid.slice(0,3).map(x=>x.order_code+' • '+rupiah(x.total_amount)).join(', '),'sellercenter','Pembayaran masuk')}
+
+  const pending=leaveRequests.filter(x=>['pending','menunggu'].some(v=>String(x.status||'').toLowerCase().includes(v)));
+  if(pending.length)add('leave:'+pending.map(x=>x.id).sort().join(','),'📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave','Butuh keputusan Bos',pending);
+
+  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);
+  if(overdue.length)add('overdue:'+today+':'+overdue.map(x=>x.id).sort().join(','),'⚠️',overdue.length+' tugas lewat deadline','Ada tugas yang belum selesai melewati deadline.','tasks','Prioritas',overdue);
+
+  const out=productStocks.filter(p=>Number(p.stock)<=0),low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));
+  if(out.length)add('stockout:'+out.map(x=>x.id).sort().join(','),'📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock','Segera restock',out);
+  if(low.length)add('stocklow:'+low.map(x=>x.id+':'+x.stock).sort().join(','),'📉',low.length+' stok produk menipis',low.map(x=>x.product_name+' ('+x.stock+')').join(', '),'stock','Stok minimum',low);
+
+  if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined')digitalProductsV34.forEach(p=>{
+    const units=digitalItems.filter(x=>x.product_id===p.id),av=units.filter(x=>x.status==='available').length;
+    if(av===0)add('dout:'+p.id,'🚨','Stok digital HABIS',p.product_name+' tidak punya stok tersedia.','digitalstock','Segera tambah stok',units);
+    else if(av<=3)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun.','digitalstock','Gudang Digital',units);
+  });
+
+  if(typeof digitalItems!=='undefined'){
+    const soon=Date.now()+7*86400000;
+    digitalItems.filter(x=>x.expiry_date&&new Date(x.expiry_date+'T23:59:59').getTime()>=Date.now()&&new Date(x.expiry_date+'T23:59:59').getTime()<=soon).slice(0,8).forEach(x=>{
+      const d=Math.max(0,Math.ceil((new Date(x.expiry_date+'T23:59:59')-Date.now())/86400000));
+      add('exp:'+x.id+':'+x.expiry_date,'⏳','Akun akan expired',x.product_name+' • '+(d===0?'hari ini':d+' hari lagi'),'digitalstock','Expired '+x.expiry_date,x);
+    });
+  }
+
+  if(typeof withdrawalRequests!=='undefined'){
+    const w=withdrawalRequests.filter(x=>x.status==='pending');
+    if(w.length)add('wd:'+w.map(x=>x.id).sort().join(','),'💸',w.length+' withdrawal menunggu','Total '+rupiah(w.reduce((a,x)=>a+Number(x.amount||0),0))+' perlu diperiksa.','sellercenter','Butuh verifikasi',w);
+  }
+
+  if(typeof marketplaceOrders!=='undefined'){
+    const paid=marketplaceOrders.filter(x=>x.payment_status==='Dibayar'&&x.status!=='Selesai'&&x.status!=='Dibatalkan');
+    if(paid.length)add('paid:'+paid.map(x=>x.id+':'+x.status).sort().join(','),'🛒',paid.length+' order sudah dibayar',paid.slice(0,3).map(x=>x.order_code+' • '+rupiah(x.total_amount)).join(', '),'sellercenter','Pembayaran masuk',paid);
+  }
+
   const salesToday=salesTransactions.filter(x=>x.transaction_date===today);
   if(salesToday.length){
     [...salesToday]
       .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))
       .slice(0,50)
       .forEach(x=>{
-        add(
-          'money:'+x.id,
-          '💵',
-          'Uang masuk '+rupiah(x.amount),
-          (x.product_name||'Produk')+' • '+(x.customer_name||'Buyer'),
-          'salesrecap',
-          x.source_file==='Gudang Digital Otomatis'?'Pesanan Gudang Digital':'Transaksi penjualan'
-        );
+        add('money:'+x.id,'💵','Uang masuk '+rupiah(x.amount),(x.product_name||'Produk')+' • '+(x.customer_name||'Buyer'),'salesrecap',x.source_file==='Gudang Digital Otomatis'?'Pesanan Gudang Digital':'Transaksi penjualan',x.created_at||x);
       });
 
     const latest=[...salesToday].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0];
-    add(
-      'sales:'+today+':'+salesToday.length+':'+latest?.id,
-      '💰',
-      'Penjualan hari ini '+rupiah(salesToday.reduce((a,x)=>a+Number(x.amount||0),0)),
-      salesToday.length+' transaksi tercatat hari ini.',
-      'salesrecap',
-      'Omzet hari ini'
-    );
+    add('sales:'+today+':'+salesToday.length+':'+latest?.id,'💰','Penjualan hari ini '+rupiah(salesToday.reduce((a,x)=>a+Number(x.amount||0),0)),salesToday.length+' transaksi tercatat hari ini.','salesrecap','Omzet hari ini',latest);
   }
+
+  // Satu timeline global: notifikasi paling baru SELALU di atas, tanpa dipisah per kategori.
+  notes.sort((a,b)=>b.sortAt-a.sortAt||String(b.key).localeCompare(String(a.key)));
   bossNotifications=notes;
 
   if(Array.isArray(window.v36Notifs)){
     const seen=new Set(window.v36Notifs.map(n=>String(n.k||n.key||'')));
     notes.forEach(n=>{
       if(seen.has(String(n.key)))return;
-      window.v36Notifs.push({
-        k:n.key,
-        ico:n.icon,
-        t:n.title,
-        m:n.desc+(n.meta?' • '+n.meta:'')
-      });
+      window.v36Notifs.push({k:n.key,ico:n.icon,t:n.title,m:n.desc+(n.meta?' • '+n.meta:'')});
       seen.add(String(n.key));
     });
   }
 
-  const read=bossNotifReadSet(),unread=notes.filter(n=>!read.has(n.key));const badge=$('#bossBellBadge'),list=$('#bossNotifyList');if(badge){badge.textContent=unread.length>99?'99+':unread.length;badge.classList.toggle('hidden',unread.length===0)}
-  if(list)list.innerHTML=notes.length?notes.map(n=>`<div class="notify-item ${read.has(n.key)?'read':'unread'}"><span class="notify-icon">${n.icon}</span><span class="notify-copy"><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div><div class="notify-meta">${esc(n.meta||'')}</div><div class="notify-actions"><button class="notify-mini" onclick="bossNotifAction('${n.key}','${n.page}')">Periksa</button>${read.has(n.key)?'':`<button class="notify-mini gray" onclick="markBossNotificationRead('${n.key}')">Tandai dibaca</button>`}</div></span></div>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua aman</b><div style="margin-top:5px">Belum ada hal penting yang perlu perhatian Bos.</div></div>`;
-}
-window.markBossNotificationRead=markBossNotificationRead;window.markAllBossNotificationsRead=markAllBossNotificationsRead;window.bossNotifAction=bossNotifAction;
+  const read=bossNotifReadSet();
+  const unread=notes.filter(n=>!read.has(n.key));
+  const badge=$('#bossBellBadge'),list=$('#bossNotifyList');
+  if(badge){
+    badge.textContent=unread.length>99?'99+':unread.length;
+    badge.classList.toggle('hidden',unread.length===0);
+  }
 
+  // Item yang sudah dibaca tidak dimunculkan lagi. Read-state disimpan di Supabase,
+  // jadi refresh/login ulang tidak membuat notifikasi lama muncul kembali.
+  if(list)list.innerHTML=unread.length?unread.map(n=>`<div class="notify-item unread"><span class="notify-icon">${n.icon}</span><span class="notify-copy"><div class="notify-title">${esc(n.title)}</div><div class="notify-desc">${esc(n.desc)}</div><div class="notify-meta">${esc(n.meta||'')}</div><div class="notify-actions"><button class="notify-mini" onclick="bossNotifAction('${n.key}','${n.page}')">Periksa</button><button class="notify-mini gray" onclick="markBossNotificationRead('${n.key}')">Tandai dibaca</button></div></span></div>`).join(''):`<div class="notify-empty"><div style="font-size:28px">✅</div><b>Semua sudah dibaca</b><div style="margin-top:5px">Notifikasi baru akan muncul otomatis di bagian paling atas.</div></div>`;
+}
+window.markBossNotificationRead=markBossNotificationRead;
+window.markAllBossNotificationsRead=markAllBossNotificationsRead;
+window.bossNotifAction=bossNotifAction;
 window.openBossNotification=openBossNotification;
 
 function renderAll(){
@@ -3576,6 +3678,9 @@ function setupFullRealtime(isRetry=false){
       .on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>scheduleRealtimeRefresh('digital_inventory'))
       .on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},()=>scheduleRealtimeRefresh('digital_products'))
       .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>scheduleRealtimeRefresh('sales_transactions'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>scheduleRealtimeRefresh('withdrawal_requests'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>scheduleRealtimeRefresh('marketplace_orders'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'boss_notification_reads'},async()=>{await loadBossNotificationReadsSafe();renderBossNotifications()})
       .subscribe((status)=>{
         // Abaikan callback dari channel lama yang sengaja kita tutup.
         if(myGeneration!==realtimeGeneration)return;
