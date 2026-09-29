@@ -409,6 +409,7 @@ aside .userbox{
 </style>
 <style>
 .digital-product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.digital-product-card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:18px}.digital-product-head{display:flex;justify-content:space-between;gap:12px}.digital-stock-number{font-size:34px;font-weight:900;margin:12px 0 2px}.digital-product-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.digital-unit{border:1px solid #e6eaf0;border-radius:12px;padding:12px;background:#f8fafc;margin:8px 0}.digital-unit-cred{font-family:monospace;white-space:pre-wrap;word-break:break-word;margin-top:7px}@media(max-width:600px){.digital-product-grid{grid-template-columns:1fr}}
+.digital-best-list{display:grid;gap:8px}.digital-best-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e6eaf0;border-radius:12px;background:#f8fafc}.digital-best-rank{font-size:18px;font-weight:900;text-align:center}.digital-best-name{font-weight:800}.digital-best-count{font-weight:900;white-space:nowrap}.digital-best-count span{font-size:12px;font-weight:700;color:#64748b}@media(max-width:600px){.digital-best-row{grid-template-columns:34px 1fr}.digital-best-count{grid-column:2}}
 
 /* V36 Smart Notification Center */
 .notify-item{position:relative}.notify-item.unread{background:#eff6ff;border:1px solid #bfdbfe}.notify-item.read{opacity:.72}.notify-item .notify-copy{flex:1}.notify-meta{font-size:10px;color:#94a3b8;margin-top:5px}.notify-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.notify-mini{border:0;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer;background:#e8efff;color:#1d4ed8}.notify-mini.gray{background:#f1f5f9;color:#475569}.notify-head-actions{display:flex;gap:6px}.notify-head-actions .btn{padding:7px 9px;font-size:11px}
@@ -558,6 +559,16 @@ aside .userbox{
         <div class="card stat"><span class="muted">Sudah Diambil</span><b id="dsClaimed">0</b></div>
         <div class="card stat"><span class="muted">Sudah Dikirim</span><b id="dsDelivered">0</b></div>
         <div class="card stat"><span class="muted">Total Item</span><b id="dsTotal">0</b></div>
+      </div>
+
+      <div class="card adminOnly" id="digitalBestSellerCard" style="margin-bottom:14px">
+        <div class="top" style="margin-bottom:10px">
+          <div>
+            <h3 style="margin:0">🏆 Produk Terlaris</h3>
+            <div class="muted">Berdasarkan jumlah stok yang sudah diambil / dikirim.</div>
+          </div>
+        </div>
+        <div id="digitalBestSellerList"><div class="muted">Memuat ranking...</div></div>
       </div>
 
       <div class="card" style="margin-bottom:14px">
@@ -2604,7 +2615,71 @@ document.addEventListener('click',(e)=>{
 /* ===== V34 GROUPED DIGITAL WAREHOUSE OVERRIDE ===== */
 let digitalProductsV34=[];
 let digitalStatsV34={available:0,claimed:0,delivered:0,total:0};
+let digitalBestSellersV1=[];
 function digitalUnitsV34(pid){return digitalItems.filter(x=>x.product_id===pid)}
+
+async function loadDigitalBestSellersV1(){
+  if(!currentEmployee||currentEmployee.role!=='admin'){
+    digitalBestSellersV1=[];
+    return;
+  }
+
+  const counts={};
+  const pageSize=1000;
+  let from=0;
+
+  while(true){
+    const r=await sb
+      .from('digital_inventory')
+      .select('product_id,status,created_at')
+      .order('created_at',{ascending:false})
+      .range(from,from+pageSize-1);
+
+    if(r.error)throw r.error;
+
+    (r.data||[]).forEach(x=>{
+      if(!x.product_id||x.status==='available')return;
+      counts[x.product_id]=(counts[x.product_id]||0)+1;
+    });
+
+    if((r.data||[]).length<pageSize)break;
+    from+=pageSize;
+    if(from>50000)break;
+  }
+
+  digitalBestSellersV1=Object.entries(counts)
+    .map(([product_id,sold_count])=>{
+      const p=digitalProductsV34.find(x=>x.id===product_id);
+      return p?{product_id,product_name:p.product_name,category:p.category,sold_count}:null;
+    })
+    .filter(Boolean)
+    .sort((a,b)=>b.sold_count-a.sold_count||a.product_name.localeCompare(b.product_name,'id'))
+    .slice(0,5);
+}
+
+function renderDigitalBestSellersV1(){
+  const el=$('#digitalBestSellerList');
+  if(!el)return;
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+
+  if(!digitalBestSellersV1.length){
+    el.innerHTML='<div class="muted">Belum ada produk yang pernah diambil.</div>';
+    return;
+  }
+
+  const medals=['🥇','🥈','🥉','4','5'];
+  el.innerHTML='<div class="digital-best-list">'+digitalBestSellersV1.map((x,i)=>`
+    <div class="digital-best-row">
+      <div class="digital-best-rank">${medals[i]||i+1}</div>
+      <div>
+        <div class="digital-best-name">${esc(x.product_name)}</div>
+        <div class="muted">${esc(x.category||'Lainnya')}</div>
+      </div>
+      <div class="digital-best-count">${x.sold_count} <span>diambil/dikirim</span></div>
+    </div>
+  `).join('')+'</div>';
+}
+
 async function loadDigitalSafe(){
   try{
     const pr=await sb.from('digital_products').select('*').eq('active',true).order('product_name');
@@ -2646,6 +2721,7 @@ async function loadDigitalSafe(){
       total:ct.count||0
     };
 
+    await loadDigitalBestSellersV1();
     renderDigital();
   }catch(e){
     console.error('digital v34',e)
@@ -2656,6 +2732,7 @@ function renderDigital(){
   if(!currentEmployee)return;const grid=ensureDigitalGridV34();if(!grid)return;
   const q=($('#digitalSearch')?.value||'').trim().toLowerCase(),cat=$('#digitalCategoryFilter')?.value||'',stf=$('#digitalStatusFilter')?.value||'';
   $('#dsAvailable').textContent=digitalStatsV34.available;$('#dsClaimed').textContent=digitalStatsV34.claimed;$('#dsDelivered').textContent=digitalStatsV34.delivered;$('#dsTotal').textContent=digitalStatsV34.total;
+  renderDigitalBestSellersV1();
   let ps=digitalProductsV34.filter(p=>{const u=digitalUnitsV34(p.id);if(cat&&p.category!==cat)return false;if(stf&&!u.some(x=>x.status===stf))return false;if(q&&!([p.product_name,p.category].join(' ').toLowerCase().includes(q)||u.some(x=>[x.note,x.buyer_ref].join(' ').toLowerCase().includes(q))))return false;return true});
   grid.innerHTML=ps.length?ps.map(p=>{const u=digitalUnitsV34(p.id),av=u.filter(x=>x.status==='available').length,cl=u.filter(x=>x.status==='claimed').length,de=u.filter(x=>x.status==='delivered').length;const stockLabel=av===0?'Habis':av<=3?'Menipis':'Tersedia',stockClass=av===0?'sakit':av<=3?'telat':'hadir',cardStyle=av>0&&av<=3?'border-color:#facc15;background:#fffdf2;':'';const a=(currentEmployee.role==='admin'||isPaqihDigitalManagerV344())?`<button class="btn" onclick="viewDigitalProductV34('${p.id}')">Lihat Stok</button><button class="btn primary" onclick="addDigitalStockV34('${p.id}')">+ Tambah Stok</button>${av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>'}`:(av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>');return `<div class="digital-product-card" style="${cardStyle}"><div class="digital-product-head"><div><b style="font-size:17px">${esc(p.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(p.category)}</span></div></div><span class="badge ${stockClass}">${stockLabel}</span></div><div style="margin-top:10px;font-weight:900">${Number(p.sale_price||0)>0?'Rp'+Number(p.sale_price||0).toLocaleString('id-ID'):'<span style="color:#b45309">Harga belum diisi</span>'}</div><div class="digital-stock-number">${av}</div><div class="muted">stok tersedia</div><div class="muted" style="margin-top:7px">Diambil ${cl} • Terkirim ${de} • Total ${u.length}</div><div class="digital-product-actions">${a}</div></div>`}).join(''):'<div class="card">Belum ada produk yang cocok.</div>';
 }
