@@ -2609,9 +2609,20 @@ async function loadDigitalSafe(){
     const pr=await sb.from('digital_products').select('*').eq('active',true).order('product_name');if(pr.error)throw pr.error;digitalProductsV34=pr.data||[];
     let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:false}).limit(10000);if(currentEmployee.role!=='admin')q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
     const r=await q;if(r.error)throw r.error;digitalItems=r.data||[];digitalSecrets={};
-    if(currentEmployee.role==='admin'||currentEmployee.username==='paqih'){const sr=await sb.from('digital_inventory_secrets').select('*').limit(10000);if(sr.error)throw sr.error;(sr.data||[]).forEach(x=>digitalSecrets[x.item_id]=x.secret_value)}
-    renderDigital();
-  }catch(e){console.error('digital v34',e)}
+  if(currentEmployee.role==='admin'||currentEmployee.username==='paqih'){
+  const ids=digitalItems.map(x=>x.id);
+  const sr=ids.length
+    ? await sb.from('digital_inventory_secrets').select('*').in('item_id',ids)
+    : {data:[],error:null};
+
+  if(sr.error)throw sr.error;
+  (sr.data||[]).forEach(x=>digitalSecrets[x.item_id]=x.secret_value);
+}
+
+renderDigital();
+}catch(e){
+  console.error('digital v34',e)
+}
 }
 function ensureDigitalGridV34(){let grid=$('#digitalProductGrid');if(grid)return grid;const wrap=$('#digitalRows')?.closest('.sheet-wrap');if(!wrap)return null;wrap.innerHTML='<div id="digitalProductGrid" class="digital-product-grid"></div>';wrap.className='';return $('#digitalProductGrid')}
 function renderDigital(){
