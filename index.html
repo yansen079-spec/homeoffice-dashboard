@@ -483,6 +483,61 @@ aside .userbox{
 }
 /* ===== END V43.2 ===== */
 </style>
+<style>
+/* ===== V44 PROFESSIONAL ATTENDANCE ===== */
+#attendance{padding-bottom:30px}
+.att44-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}
+.att44-head h1{margin:4px 0 7px;font-size:31px;letter-spacing:-.6px;color:#0f172a}
+.att44-eyebrow{font-size:11px;font-weight:900;letter-spacing:.11em;color:#2563eb}
+.att44-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.att44-actions .btn{min-height:44px}
+
+.att44-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.att44-stat{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:17px;box-shadow:0 8px 26px rgba(15,23,42,.035);min-width:0}
+.att44-stat-icon{width:52px;height:52px;flex:0 0 52px;border-radius:14px;display:grid;place-items:center;font-size:22px}
+.att44-stat.green .att44-stat-icon{background:#dcfce7}.att44-stat.red .att44-stat-icon{background:#fee2e2}.att44-stat.purple .att44-stat-icon{background:#f3e8ff}.att44-stat.amber .att44-stat-icon{background:#fef3c7}
+.att44-stat span{display:block;color:#64748b;font-size:12px}.att44-stat b{display:block;font-size:27px;line-height:1.05;color:#0f172a;margin:4px 0}.att44-stat small{display:block;color:#94a3b8;font-size:10px}
+
+.att44-filter-card{background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:16px;display:grid;grid-template-columns:220px 230px minmax(260px,1fr) auto;gap:12px;align-items:end;margin-bottom:16px;box-shadow:0 8px 26px rgba(15,23,42,.03)}
+.att44-field{display:grid;gap:6px}.att44-field label{font-size:11px;font-weight:800;color:#64748b}
+.att44-filter-card .input{height:44px;width:100%;border-radius:11px}
+.att44-search-wrap{position:relative}.att44-search-wrap>span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#64748b;font-size:20px;pointer-events:none}.att44-search-wrap .input{padding-left:40px}
+.att44-filter-btn{height:44px;padding-left:18px;padding-right:18px}
+
+.att44-table-card{background:#fff;border:1px solid #e3e8f0;border-radius:18px;padding:0;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,42,.035)}
+.att44-table-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px 13px}
+.att44-table-head h3{margin:0;font-size:18px;color:#0f172a}.att44-table-head p{margin:4px 0 0;color:#94a3b8;font-size:11px}.att44-count{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:999px;padding:6px 10px}.att44-count span{font-weight:900;color:#0f172a}
+.att44-table-wrap{overflow:auto;max-height:64vh;border-top:1px solid #edf2f7}
+.att44-table{min-width:980px}
+.att44-table thead th{position:sticky;top:0;z-index:2;background:#f8fafc;color:#64748b;font-size:11px;font-weight:800;padding:11px 12px}
+.att44-table td{padding:12px;border-bottom:1px solid #edf2f7;vertical-align:middle}
+.att44-table tbody tr:hover td{background:#fbfdff}
+.att44-emp{display:flex;align-items:center;gap:10px}.att44-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e8efff;color:#3157a6;font-weight:900;font-size:11px;flex:0 0 34px}.att44-emp b{font-size:13px;color:#0f172a}
+.att44-time{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:9px;font-size:12px;font-weight:800}.att44-time.in{background:#ecfdf5;color:#047857}.att44-time.out{background:#fff1f2;color:#be123c}.att44-time.empty{background:#f8fafc;color:#94a3b8}
+.att44-duration{font-size:12px;font-weight:700;color:#475569}
+.att44-note{max-width:220px;white-space:normal!important;color:#64748b;font-size:12px;line-height:1.35}
+
+@media(max-width:1100px){
+  .att44-stats{grid-template-columns:repeat(2,1fr)}
+  .att44-filter-card{grid-template-columns:1fr 1fr}
+  .att44-search-field{grid-column:1/-1}.att44-filter-btn{width:100%}
+}
+@media(max-width:768px){
+  .att44-head{flex-direction:column}.att44-actions{width:100%;justify-content:flex-start}.att44-actions .btn{flex:1 1 180px}
+  .att44-filter-card{grid-template-columns:1fr}.att44-search-field{grid-column:auto}
+  .att44-table-wrap{max-height:none}
+}
+@media(max-width:520px){
+  .att44-head h1{font-size:25px}.att44-stats{grid-template-columns:1fr}
+  .att44-actions .btn{width:100%;flex-basis:100%}
+  .att44-table-card{border:0;background:transparent;box-shadow:none;overflow:visible}.att44-table-head{background:#fff;border:1px solid #e3e8f0;border-radius:15px;margin-bottom:10px}
+  .att44-table-wrap{border:0;overflow:visible}.att44-table,.att44-table tbody,.att44-table tr,.att44-table td{display:block;width:100%;min-width:0!important}.att44-table thead{display:none}
+  .att44-table tr{background:#fff;border:1px solid #e3e8f0;border-radius:15px;padding:12px;margin-bottom:10px;box-shadow:0 6px 18px rgba(15,23,42,.03)}
+  .att44-table td{border:0;padding:6px 0;white-space:normal!important}.att44-table td:first-child{display:none}
+  .att44-table td:nth-child(3)::before{content:"Tanggal: ";font-weight:800}.att44-table td:nth-child(4)::before{content:"Masuk: ";font-weight:800}.att44-table td:nth-child(5)::before{content:"Pulang: ";font-weight:800}.att44-table td:nth-child(6)::before{content:"Durasi: ";font-weight:800}.att44-table td:nth-child(7)::before{content:"Status: ";font-weight:800}.att44-table td:nth-child(8)::before{content:"Catatan: ";font-weight:800}
+}
+/* ===== END V44 PROFESSIONAL ATTENDANCE ===== */
+</style>
 </head>
 <body>
 <section id="login" class="login">
@@ -644,20 +699,103 @@ aside .userbox{
       </div>
     </section>
     <section id="attendance" class="page hidden">
-      <div class="top">
-        <div><h1>Absensi</h1><div class="muted" id="attendanceSubtitle">Riwayat absensi.</div></div>
-        <div class="adminOnly" style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn primary" id="manualAttendance">+ Tambah Absensi</button>
-      <button class="btn" id="resetAttendanceEmployee">↻ Reset Absensi Karyawan</button>
-      <button class="btn danger" id="resetAttendanceAll">↻ Reset Semua Hari Ini</button>
-    </div>
+      <div class="att44-head">
+        <div>
+          <div class="att44-eyebrow">HOME OFFICE • ABSENSI</div>
+          <h1>◷ Absensi Karyawan</h1>
+          <div class="muted" id="attendanceSubtitle">Pantau kehadiran karyawan setiap hari.</div>
+        </div>
+        <div class="att44-actions adminOnly">
+          <button class="btn primary" id="manualAttendance">＋ Tambah Absensi</button>
+          <button class="btn" id="resetAttendanceEmployee">↻ Reset Absensi Karyawan</button>
+          <button class="btn danger" id="resetAttendanceAll">↻ Reset Semua Hari Ini</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="toolbar"><div><input class="input" type="date" id="filterDate"><select class="input" id="filterStatus"><option value="">Semua status</option><option>Hadir</option><option>Terlambat</option><option>Izin</option><option>Sakit</option></select></div></div>
-        <div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Catatan</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+
+      <div class="att44-stats">
+        <div class="att44-stat green">
+          <div class="att44-stat-icon">👥</div>
+          <div>
+            <span>Hadir Hari Ini</span>
+            <b id="attTodayPresent">0</b>
+            <small id="attTodayPresentSub">kehadiran tercatat</small>
+          </div>
+        </div>
+        <div class="att44-stat red">
+          <div class="att44-stat-icon">⏱</div>
+          <div>
+            <span>Terlambat Hari Ini</span>
+            <b id="attTodayLate">0</b>
+            <small>perlu dipantau</small>
+          </div>
+        </div>
+        <div class="att44-stat purple">
+          <div class="att44-stat-icon">☂</div>
+          <div>
+            <span>Izin / Sakit Hari Ini</span>
+            <b id="attTodayLeave">0</b>
+            <small>tidak hadir hari ini</small>
+          </div>
+        </div>
+        <div class="att44-stat amber">
+          <div class="att44-stat-icon">◷</div>
+          <div>
+            <span>Belum Pulang</span>
+            <b id="attTodayOpen">0</b>
+            <small>masih bekerja saat ini</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="att44-filter-card">
+        <div class="att44-field">
+          <label>Tanggal</label>
+          <input class="input" type="date" id="filterDate">
+        </div>
+        <div class="att44-field">
+          <label>Status</label>
+          <select class="input" id="filterStatus">
+            <option value="">Semua status</option>
+            <option>Hadir</option>
+            <option>Terlambat</option>
+            <option>Izin</option>
+            <option>Sakit</option>
+          </select>
+        </div>
+        <div class="att44-field att44-search-field">
+          <label>Cari Karyawan</label>
+          <div class="att44-search-wrap"><span>⌕</span><input class="input" id="attendanceSearch" placeholder="Cari nama karyawan..."></div>
+        </div>
+        <button class="btn primary att44-filter-btn" type="button" onclick="renderAttendance()">⌕ Filter</button>
+      </div>
+
+      <div class="att44-table-card">
+        <div class="att44-table-head">
+          <div>
+            <h3>▣ Daftar Absensi</h3>
+            <p>Riwayat kehadiran karyawan berdasarkan filter yang dipilih.</p>
+          </div>
+          <div class="att44-count"><span id="attendanceCount">0</span> data</div>
+        </div>
+        <div class="table att44-table-wrap">
+          <table class="att44-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Karyawan</th>
+                <th>Tanggal</th>
+                <th>Jam Masuk</th>
+                <th>Jam Pulang</th>
+                <th>Durasi Kerja</th>
+                <th>Status</th>
+                <th>Catatan</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceRows"></tbody>
+          </table>
+        </div>
       </div>
     </section>
-
     <section id="leave" class="page hidden">
       <div class="top">
         <div><h1 id="leaveTitle">Pengajuan</h1><div class="muted" id="leaveSubtitle"></div></div>
@@ -1430,10 +1568,51 @@ function renderAll(){
  renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();renderBossNotifications();
 }
 
+function attendanceDurationV44(checkIn,checkOut){
+  if(!checkIn||!checkOut)return '-';
+  const p=t=>String(t).split(':').map(Number);
+  const a=p(checkIn),b=p(checkOut);
+  if(a.length<2||b.length<2)return '-';
+  let start=(a[0]||0)*60+(a[1]||0),end=(b[0]||0)*60+(b[1]||0);
+  if(end<start)end+=24*60;
+  const diff=Math.max(0,end-start),h=Math.floor(diff/60),m=diff%60;
+  return (h?h+'j ':'')+m+'m';
+}
+function attendanceInitialsV44(name){
+  return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+}
 function renderAttendance(){
- let d=$('#filterDate').value,s=$('#filterStatus').value;
- let rows=attendance.filter(x=>(!d||x.attendance_date===d)&&(!s||x.status===s));
- $('#attendanceRows').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.attendance_date)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td>${esc(x.note||'-')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#8793a5;padding:28px">Belum ada data absensi.</td></tr>';
+  const d=$('#filterDate')?.value||'',s=$('#filterStatus')?.value||'',q=($('#attendanceSearch')?.value||'').trim().toLowerCase();
+  const today=ymd(),todayRows=attendance.filter(x=>x.attendance_date===today);
+  const activeCount=currentEmployee?.role==='admin'?employees.filter(x=>x.role==='employee'&&x.active).length:1;
+  const present=todayRows.filter(x=>x.check_in&&!['Izin','Sakit','Cuti'].includes(x.status)).length;
+  const late=todayRows.filter(x=>x.status==='Terlambat').length;
+  const leave=todayRows.filter(x=>['Izin','Sakit','Cuti'].includes(x.status)).length;
+  const open=todayRows.filter(x=>x.check_in&&!x.check_out&&!['Izin','Sakit','Cuti'].includes(x.status)).length;
+
+  if($('#attTodayPresent'))$('#attTodayPresent').textContent=present;
+  if($('#attTodayLate'))$('#attTodayLate').textContent=late;
+  if($('#attTodayLeave'))$('#attTodayLeave').textContent=leave;
+  if($('#attTodayOpen'))$('#attTodayOpen').textContent=open;
+  if($('#attTodayPresentSub'))$('#attTodayPresentSub').textContent=currentEmployee?.role==='admin'?('dari '+activeCount+' karyawan aktif'):'kehadiran kamu hari ini';
+
+  const rows=attendance.filter(x=>(!d||x.attendance_date===d)&&(!s||x.status===s)&&(!q||String(x.name||'').toLowerCase().includes(q)));
+  if($('#attendanceCount'))$('#attendanceCount').textContent=rows.length;
+
+  $('#attendanceRows').innerHTML=rows.length?rows.map((x,i)=>{
+    const ci=x.check_in||'',co=x.check_out||'';
+    const note=x.note||'-';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><div class="att44-emp"><div class="att44-avatar">${esc(attendanceInitialsV44(x.name))}</div><b>${esc(x.name)}</b></div></td>
+      <td>${esc(x.attendance_date)}</td>
+      <td><span class="att44-time ${ci?'in':'empty'}">${ci?'↳ '+esc(ci):'-'}</span></td>
+      <td><span class="att44-time ${co?'out':'empty'}">${co?'↳ '+esc(co):'-'}</span></td>
+      <td><span class="att44-duration">${esc(attendanceDurationV44(ci,co))}</span></td>
+      <td>${badge(x.status)}</td>
+      <td class="att44-note">${esc(note)}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:34px">Belum ada data absensi yang cocok.</td></tr>';
 }
 
 function renderEmployees(){
@@ -1847,7 +2026,7 @@ function renderRecap(){
 }
 $('#recapMonth').onchange=renderRecap;$('#recapEmployee').onchange=renderRecap;
 
-$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
+$('#filterDate').value='';$('#filterDate').onchange=renderAttendance;$('#filterStatus').onchange=renderAttendance;if($('#attendanceSearch'))$('#attendanceSearch').oninput=renderAttendance;$('#employeeSearch').oninput=renderEmployees;
 
 $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
