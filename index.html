@@ -581,7 +581,46 @@ aside .userbox{
 @media(max-width:520px){.emp45-head h1{font-size:25px}.emp45-stats{grid-template-columns:1fr}.emp45-table-card{border:0;background:transparent;box-shadow:none;overflow:visible}.emp45-table-head{background:#fff;border:1px solid #e3e8f0;border-radius:15px;margin-bottom:10px}.emp45-table-wrap{border:0;overflow:visible}.emp45-table,.emp45-table tbody,.emp45-table tr,.emp45-table td{display:block;width:100%;min-width:0!important}.emp45-table thead{display:none}.emp45-table tr{background:#fff;border:1px solid #e3e8f0;border-radius:15px;padding:12px;margin-bottom:10px}.emp45-table td{border:0;padding:6px 0;white-space:normal!important}.emp45-table td:first-child{display:none}.emp45-table td:nth-child(3)::before{content:"Username: ";font-weight:800}.emp45-table td:nth-child(4)::before{content:"Jabatan: ";font-weight:800}.emp45-table td:nth-child(5)::before{content:"HP: ";font-weight:800}.emp45-table td:nth-child(6)::before{content:"Masuk: ";font-weight:800}.emp45-table td:nth-child(7)::before{content:"Status: ";font-weight:800}}
 /* ===== END V45 PROFESSIONAL EMPLOYEES ===== */
 </style>
-</head>
+<style>
+/* ===== V46 PROFESSIONAL RECAP + PAYROLL ===== */
+.rec46-head,.pay46-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+.rec46-head h1,.pay46-head h1{margin:4px 0 7px;font-size:31px;letter-spacing:-.6px;color:#0f172a}
+.rec46-eyebrow,.pay46-eyebrow{font-size:11px;font-weight:900;letter-spacing:.11em;color:#2563eb}
+
+.rec46-filter-card,.pay46-filter-card{background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:16px;display:grid;grid-template-columns:240px minmax(280px,1fr);gap:12px;align-items:end;margin-bottom:16px;box-shadow:0 8px 26px rgba(15,23,42,.03)}
+.rec46-field,.pay46-field{display:grid;gap:6px}.rec46-field label,.pay46-field label{font-size:11px;font-weight:800;color:#64748b}
+.rec46-filter-card .input,.pay46-filter-card .input{height:44px;width:100%;border-radius:11px}
+
+.rec46-stats,.pay46-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.rec46-stat,.pay46-stat{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:17px;box-shadow:0 8px 26px rgba(15,23,42,.035);min-width:0}
+.rec46-icon,.pay46-icon{width:50px;height:50px;flex:0 0 50px;border-radius:14px;display:grid;place-items:center;font-size:20px;font-weight:900}
+.rec46-stat.green .rec46-icon,.pay46-stat.green .pay46-icon{background:#dcfce7;color:#15803d}
+.rec46-stat.amber .rec46-icon,.pay46-stat.amber .pay46-icon{background:#fef3c7;color:#b45309}
+.rec46-stat.purple .rec46-icon{background:#f3e8ff;color:#7e22ce}
+.rec46-stat.red .rec46-icon,.pay46-stat.red .pay46-icon{background:#fee2e2;color:#dc2626}
+.pay46-stat.blue .pay46-icon{background:#dbeafe;color:#1d4ed8}
+.rec46-stat span,.pay46-stat span{display:block;color:#64748b;font-size:12px}
+.rec46-stat b,.pay46-stat b{display:block;color:#0f172a;font-size:25px;line-height:1.05;margin:4px 0;overflow-wrap:anywhere}
+.rec46-stat small,.pay46-stat small{display:block;color:#94a3b8;font-size:10px}
+
+.rec46-table-card,.pay46-table-card{background:#fff;border:1px solid #e3e8f0;border-radius:18px;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,42,.035)}
+.rec46-table-head,.pay46-table-head{padding:17px 18px 13px}
+.rec46-table-head h3,.pay46-table-head h3{margin:0;font-size:18px;color:#0f172a}.rec46-table-head p,.pay46-table-head p{margin:4px 0 0;color:#94a3b8;font-size:11px}
+.rec46-table-wrap,.pay46-table-wrap{overflow:auto;max-height:64vh;border-top:1px solid #edf2f7}
+.rec46-table{min-width:1050px}.pay46-table{min-width:1350px}
+.rec46-table thead th,.pay46-table thead th{position:sticky;top:0;z-index:2;background:#f8fafc;color:#64748b;font-size:11px;font-weight:800;padding:11px 12px}
+.rec46-table td,.pay46-table td{padding:12px;border-bottom:1px solid #edf2f7;vertical-align:middle}.rec46-table tbody tr:hover td,.pay46-table tbody tr:hover td{background:#fbfdff}
+.rec46-person,.pay46-person{display:flex;align-items:center;gap:10px;min-width:220px}.rec46-avatar,.pay46-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e8efff;color:#3157a6;font-weight:900;font-size:11px;flex:0 0 34px}
+.rec46-time{display:inline-flex;padding:5px 8px;border-radius:9px;font-size:12px;font-weight:800}.rec46-time.in{background:#ecfdf5;color:#047857}.rec46-time.out{background:#fff1f2;color:#be123c}.rec46-time.empty{background:#f8fafc;color:#94a3b8}
+.rec46-archive td{background:#fffaf0!important}
+.pay46-net{font-weight:900;color:#15803d}.pay46-money{font-weight:800;color:#0f172a}.pay46-action .btn{padding:7px 9px!important;min-height:34px!important;font-size:11px!important}
+.pay46-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+@media(max-width:1050px){.rec46-stats,.pay46-stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.rec46-head,.pay46-head{flex-direction:column}.pay46-actions{width:100%;justify-content:flex-start}.pay46-actions .btn{flex:1 1 180px}.rec46-filter-card,.pay46-filter-card{grid-template-columns:1fr}.rec46-table-wrap,.pay46-table-wrap{max-height:none}}
+@media(max-width:520px){.rec46-head h1,.pay46-head h1{font-size:25px}.rec46-stats,.pay46-stats{grid-template-columns:1fr}.pay46-actions .btn{width:100%;flex-basis:100%}}
+/* ===== END V46 ===== */
+</style></head>
 <body>
 <section id="login" class="login">
   <div class="loginbox">
@@ -864,20 +903,44 @@ aside .userbox{
     </section>
 
     <section id="recap" class="page hidden">
-      <div class="top"><div><h1>Rekap Absensi</h1><div class="muted" id="recapRule"></div></div></div>
-      <div class="card" style="margin-bottom:15px"><div class="toolbar"><div>
-        <input class="input" id="recapMonth" type="month">
-        <select class="input" id="recapEmployee"><option value="">Semua karyawan</option></select>
-      </div></div></div>
-      <div class="stats">
-        <div class="card stat"><span class="muted">Hadir</span><b id="rHadir">0</b></div>
-        <div class="card stat"><span class="muted">Terlambat</span><b id="rLate">0</b></div>
-        <div class="card stat"><span class="muted">Izin / Sakit</span><b id="rLeave">0</b></div>
-        <div class="card stat"><span class="muted">Pulang Cepat</span><b id="rEarly">0</b></div>
+      <div class="rec46-head">
+        <div>
+          <div class="rec46-eyebrow">HOME OFFICE • REKAP ABSENSI</div>
+          <h1>▦ Rekap Absensi</h1>
+          <div class="muted" id="recapRule">Ringkasan absensi bulanan seluruh karyawan.</div>
+        </div>
       </div>
-      <div class="card"><div class="table"><table><thead><tr><th>Nama</th><th>Tanggal</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Keterangan</th></tr></thead><tbody id="recapRows"></tbody></table></div></div>
-    </section>
 
+      <div class="rec46-filter-card">
+        <div class="rec46-field">
+          <label>Periode Bulan</label>
+          <input class="input" id="recapMonth" type="month">
+        </div>
+        <div class="rec46-field rec46-employee">
+          <label>Karyawan</label>
+          <select class="input" id="recapEmployee"><option value="">Semua karyawan</option></select>
+        </div>
+      </div>
+
+      <div class="rec46-stats">
+        <div class="rec46-stat green"><div class="rec46-icon">✓</div><div><span>Hadir</span><b id="rHadir">0</b><small>kehadiran normal</small></div></div>
+        <div class="rec46-stat amber"><div class="rec46-icon">⏱</div><div><span>Terlambat</span><b id="rLate">0</b><small>melewati toleransi</small></div></div>
+        <div class="rec46-stat purple"><div class="rec46-icon">☂</div><div><span>Izin / Sakit</span><b id="rLeave">0</b><small>tidak masuk kerja</small></div></div>
+        <div class="rec46-stat red"><div class="rec46-icon">↙</div><div><span>Pulang Cepat</span><b id="rEarly">0</b><small>sebelum jam pulang</small></div></div>
+      </div>
+
+      <div class="rec46-table-card">
+        <div class="rec46-table-head">
+          <div><h3>▣ Detail Rekap</h3><p>Data absensi aktif dan arsip reset pada periode terpilih.</p></div>
+        </div>
+        <div class="table rec46-table-wrap">
+          <table class="rec46-table">
+            <thead><tr><th>No</th><th>Karyawan</th><th>Tanggal</th><th>Hari</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Status</th><th>Keterangan</th></tr></thead>
+            <tbody id="recapRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
     <section id="digitalstock" class="page hidden">
       <div class="top">
         <div><h1 id="digitalStockTitle">Gudang Digital</h1><div class="muted" id="digitalStockSubtitle"></div></div>
@@ -995,34 +1058,48 @@ aside .userbox{
     </section>
 
     <section id="payroll" class="page hidden">
-      <div class="top">
-        <div><h1>Penggajian</h1><div class="muted">Gaji harian berdasarkan absensi Masuk + Pulang lengkap, periode tanggal 1–30.</div></div>
-        <button class="btn primary" id="payrollSettingsBtn">⚙ Atur Potongan</button>
-        <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
+      <div class="pay46-head">
+        <div>
+          <div class="pay46-eyebrow">HOME OFFICE • PENGGAJIAN</div>
+          <h1>💰 Penggajian</h1>
+          <div class="muted">Gaji harian berdasarkan absensi lengkap, periode tanggal 1–30.</div>
+        </div>
+        <div class="pay46-actions">
+          <button class="btn" id="payrollSettingsBtn">⚙ Atur Potongan</button>
+          <button class="btn primary" id="openSlip">🧾 Buat Slip Gaji</button>
+        </div>
       </div>
 
-      <div class="card" style="margin-bottom:15px">
-        <div class="toolbar"><div>
+      <div class="pay46-filter-card">
+        <div class="pay46-field">
+          <label>Periode Bulan</label>
           <input class="input" id="payrollMonth" type="month">
+        </div>
+        <div class="pay46-field">
+          <label>Karyawan</label>
           <select class="input" id="payrollEmployee"><option value="">Semua karyawan</option></select>
-        </div></div>
+        </div>
       </div>
 
-      <div class="stats">
-        <div class="card stat"><span class="muted">Total Gaji Kotor</span><b id="pBase">Rp0</b></div>
-        <div class="card stat"><span class="muted">Total Terlambat</span><b id="pLate">0</b></div>
-        <div class="card stat"><span class="muted">Total Potongan</span><b id="pPenalty">Rp0</b></div>
-        <div class="card stat"><span class="muted">Total Gaji Bersih</span><b id="pNet">Rp0</b></div>
+      <div class="pay46-stats">
+        <div class="pay46-stat blue"><div class="pay46-icon">💼</div><div><span>Total Gaji Kotor</span><b id="pBase">Rp0</b><small>sebelum potongan</small></div></div>
+        <div class="pay46-stat amber"><div class="pay46-icon">⏱</div><div><span>Total Terlambat</span><b id="pLate">0</b><small>kejadian terlambat</small></div></div>
+        <div class="pay46-stat red"><div class="pay46-icon">−</div><div><span>Total Potongan</span><b id="pPenalty">Rp0</b><small>potongan periode ini</small></div></div>
+        <div class="pay46-stat green"><div class="pay46-icon">✓</div><div><span>Total Gaji Bersih</span><b id="pNet">Rp0</b><small>estimasi dibayarkan</small></div></div>
       </div>
 
-      <div class="card">
-        <div class="table"><table>
-          <thead><tr><th>Nama</th><th>Gaji / Hari</th><th>Hari Dibayar</th><th>Gaji Kotor</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
-          <tbody id="payrollRows"></tbody>
-        </table></div>
+      <div class="pay46-table-card">
+        <div class="pay46-table-head">
+          <div><h3>▣ Rincian Penggajian</h3><p>Perhitungan gaji tiap karyawan sesuai absensi dan aturan potongan.</p></div>
+        </div>
+        <div class="table pay46-table-wrap">
+          <table class="pay46-table">
+            <thead><tr><th>No</th><th>Karyawan</th><th>Gaji / Hari</th><th>Hari Dibayar</th><th>Gaji Kotor</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Total Potongan</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead>
+            <tbody id="payrollRows"></tbody>
+          </table>
+        </div>
       </div>
     </section>
-
     <section id="reports" class="page hidden">
       <div class="top">
         <div><h1>Laporan Absensi Bulanan</h1><div class="muted">Rekap bulanan khusus Bos. Bisa difilter dan diekspor ke Excel.</div></div>
@@ -2082,6 +2159,9 @@ function getPayrollRows(){
   });
 }
 
+function payrollInitialsV46(name){
+  return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+}
 function renderPayroll(){
   if(!currentEmployee || currentEmployee.role!=='admin') return;
   let rows=getPayrollRows();
@@ -2091,21 +2171,21 @@ function renderPayroll(){
   $('#pPenalty').textContent=rupiah(rows.reduce((s,x)=>s+x.penalty,0));
   $('#pNet').textContent=rupiah(rows.reduce((s,x)=>s+x.net,0));
 
-  $('#payrollRows').innerHTML=rows.length?rows.map(x=>`<tr>
-    <td><b>${esc(x.emp.full_name)}</b></td>
-    <td>${rupiah(x.daily)}</td>
+  $('#payrollRows').innerHTML=rows.length?rows.map((x,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><div class="pay46-person"><div class="pay46-avatar">${esc(payrollInitialsV46(x.emp.full_name))}</div><div><b>${esc(x.emp.full_name)}</b><div class="muted">${esc(x.emp.job_title||'Karyawan')}</div></div></div></td>
+    <td class="pay46-money">${rupiah(x.daily)}</td>
     <td><b>${x.paidDays} hari</b></td>
-    <td>${rupiah(x.gross)}</td>
+    <td class="pay46-money">${rupiah(x.gross)}</td>
     <td>${x.late} × ${rupiah(payrollSettings?.late_penalty||0)}</td>
     <td>${x.izin} × ${rupiah(payrollSettings?.izin_penalty||0)}</td>
     <td>${x.sakit} × ${rupiah(payrollSettings?.sakit_penalty||0)}</td>
     <td>${x.cuti} × ${rupiah(payrollSettings?.cuti_penalty||0)}</td>
-    <td>${rupiah(x.penalty)}</td>
-    <td><b>${rupiah(x.net)}</b></td>
-    <td><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji Harian</button></td>
-  </tr>`).join(''):'<tr><td colspan="11" style="text-align:center;color:#8793a5;padding:28px">Belum ada data karyawan.</td></tr>';
+    <td class="pay46-money">${rupiah(x.penalty)}</td>
+    <td class="pay46-net">${rupiah(x.net)}</td>
+    <td class="pay46-action"><button class="btn" onclick="editSalary('${x.emp.id}')">Edit Gaji</button></td>
+  </tr>`).join(''):'<tr><td colspan="12" style="text-align:center;color:#8793a5;padding:32px">Belum ada data karyawan.</td></tr>';
 }
-
 $('#payrollMonth').onchange=renderPayroll;
 $('#payrollEmployee').onchange=renderPayroll;
 
@@ -2194,6 +2274,9 @@ $('#exportReport').onclick=()=>{
   XLSX.writeFile(wb,`Laporan_Absensi_${safe}_${month}.xlsx`);
 };
 
+function recapInitialsV46(name){
+  return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+}
 function renderRecap(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   if(!$('#recapMonth').value)$('#recapMonth').value=ymd().slice(0,7);
@@ -2208,15 +2291,35 @@ function renderRecap(){
   $('#rEarly').textContent=rows.filter(early).length;
   let archived=attendanceArchive.filter(x=>x.attendance_date&&x.attendance_date.startsWith($('#recapMonth').value));
   if(chosen)archived=archived.filter(x=>x.employee_id===chosen);
+
+  let no=0;
   const liveHtml=rows.map(x=>{
+    no++;
     let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
-    return `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.attendance_date)}</td><td>${esc(day)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td>${early(x)?'<span class="badge telat">Pulang Cepat</span>':esc(x.note||'-')}</td></tr>`;
+    const ci=x.check_in||'',co=x.check_out||'';
+    return `<tr>
+      <td>${no}</td>
+      <td><div class="rec46-person"><div class="rec46-avatar">${esc(recapInitialsV46(x.name))}</div><b>${esc(x.name)}</b></div></td>
+      <td>${esc(x.attendance_date)}</td><td>${esc(day)}</td>
+      <td><span class="rec46-time ${ci?'in':'empty'}">${ci?esc(ci):'-'}</span></td>
+      <td><span class="rec46-time ${co?'out':'empty'}">${co?esc(co):'-'}</span></td>
+      <td>${badge(x.status)}</td>
+      <td>${early(x)?'<span class="badge telat">Pulang Cepat</span>':esc(x.note||'-')}</td>
+    </tr>`;
   }).join('');
   const archiveHtml=archived.map(x=>{
+    no++;
     let day=new Date(x.attendance_date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long'});
-    return `<tr style="background:#fff8e6"><td><b>${esc(x.name)}</b><div class="muted">ARSIP RESET</div></td><td>${esc(x.attendance_date)}</td><td>${esc(day)}</td><td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td><td>${badge(x.status)}</td><td><span class="badge telat">ARSIP RESET</span> ${esc(x.reset_reason||'')}</td></tr>`;
+    return `<tr class="rec46-archive">
+      <td>${no}</td>
+      <td><div class="rec46-person"><div class="rec46-avatar">${esc(recapInitialsV46(x.name))}</div><div><b>${esc(x.name)}</b><div class="muted">ARSIP RESET</div></div></div></td>
+      <td>${esc(x.attendance_date)}</td><td>${esc(day)}</td>
+      <td>${esc(x.check_in||'-')}</td><td>${esc(x.check_out||'-')}</td>
+      <td>${badge(x.status)}</td>
+      <td><span class="badge telat">ARSIP RESET</span> ${esc(x.reset_reason||'')}</td>
+    </tr>`;
   }).join('');
-  $('#recapRows').innerHTML=(liveHtml+archiveHtml)||'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada data bulan ini.</td></tr>';
+  $('#recapRows').innerHTML=(liveHtml+archiveHtml)||'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:32px">Belum ada data bulan ini.</td></tr>';
 }
 $('#recapMonth').onchange=renderRecap;$('#recapEmployee').onchange=renderRecap;
 
