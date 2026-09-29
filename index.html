@@ -545,6 +545,42 @@ aside .userbox{
 }
 /* ===== END V44 PROFESSIONAL ATTENDANCE ===== */
 </style>
+<style>
+/* ===== V45 PROFESSIONAL EMPLOYEES ===== */
+#employees{padding-bottom:30px}
+.emp45-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+.emp45-head h1{margin:4px 0 7px;font-size:31px;letter-spacing:-.6px;color:#0f172a}
+.emp45-eyebrow{font-size:11px;font-weight:900;letter-spacing:.11em;color:#2563eb}
+.emp45-add{min-height:44px;padding-left:18px!important;padding-right:18px!important}
+
+.emp45-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.emp45-stat{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:17px;box-shadow:0 8px 26px rgba(15,23,42,.035)}
+.emp45-stat-icon{width:52px;height:52px;flex:0 0 52px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:900}
+.emp45-stat.blue .emp45-stat-icon{background:#dbeafe;color:#1d4ed8}.emp45-stat.green .emp45-stat-icon{background:#dcfce7;color:#15803d}.emp45-stat.gray .emp45-stat-icon{background:#f1f5f9;color:#64748b}.emp45-stat.purple .emp45-stat-icon{background:#f3e8ff;color:#7e22ce}
+.emp45-stat span{display:block;color:#64748b;font-size:12px}.emp45-stat b{display:block;color:#0f172a;font-size:27px;line-height:1.05;margin:4px 0}.emp45-stat small{display:block;color:#94a3b8;font-size:10px}
+
+.emp45-filter-card{background:#fff;border:1px solid #e3e8f0;border-radius:17px;padding:16px;display:grid;grid-template-columns:minmax(300px,1fr) 220px auto;gap:12px;align-items:end;margin-bottom:16px;box-shadow:0 8px 26px rgba(15,23,42,.03)}
+.emp45-field{display:grid;gap:6px}.emp45-field label{font-size:11px;font-weight:800;color:#64748b}
+.emp45-filter-card .input{height:44px;width:100%;border-radius:11px}
+.emp45-search-wrap{position:relative}.emp45-search-wrap>span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#64748b;font-size:20px;pointer-events:none}.emp45-search-wrap .input{padding-left:40px}
+.emp45-filter-btn{height:44px;padding-left:18px!important;padding-right:18px!important}
+
+.emp45-table-card{background:#fff;border:1px solid #e3e8f0;border-radius:18px;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,42,.035)}
+.emp45-table-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px 13px}
+.emp45-table-head h3{margin:0;font-size:18px;color:#0f172a}.emp45-table-head p{margin:4px 0 0;color:#94a3b8;font-size:11px}
+.emp45-count{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:999px;padding:6px 10px}.emp45-count span{font-weight:900;color:#0f172a}
+.emp45-table-wrap{overflow:auto;max-height:64vh;border-top:1px solid #edf2f7}
+.emp45-table{min-width:1080px}
+.emp45-table thead th{position:sticky;top:0;z-index:2;background:#f8fafc;color:#64748b;font-size:11px;font-weight:800;padding:11px 12px}
+.emp45-table td{padding:12px;border-bottom:1px solid #edf2f7;vertical-align:middle}.emp45-table tbody tr:hover td{background:#fbfdff}
+.emp45-person{display:flex;align-items:center;gap:10px;min-width:230px}.emp45-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e8efff;color:#3157a6;font-weight:900;font-size:11px;flex:0 0 38px}.emp45-person b{display:block;font-size:13px;color:#0f172a}.emp45-person small{display:block;color:#94a3b8;font-size:10px;margin-top:2px}
+.emp45-actions{display:flex;gap:6px;flex-wrap:wrap}.emp45-actions .btn{padding:7px 9px!important;min-height:34px!important;font-size:11px!important}
+
+@media(max-width:1050px){.emp45-stats{grid-template-columns:repeat(2,1fr)}.emp45-filter-card{grid-template-columns:1fr 1fr}.emp45-search-field{grid-column:1/-1}.emp45-filter-btn{width:100%}}
+@media(max-width:768px){.emp45-head{flex-direction:column}.emp45-add{width:100%}.emp45-filter-card{grid-template-columns:1fr}.emp45-search-field{grid-column:auto}.emp45-table-wrap{max-height:none}.emp45-table-head{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.emp45-head h1{font-size:25px}.emp45-stats{grid-template-columns:1fr}.emp45-table-card{border:0;background:transparent;box-shadow:none;overflow:visible}.emp45-table-head{background:#fff;border:1px solid #e3e8f0;border-radius:15px;margin-bottom:10px}.emp45-table-wrap{border:0;overflow:visible}.emp45-table,.emp45-table tbody,.emp45-table tr,.emp45-table td{display:block;width:100%;min-width:0!important}.emp45-table thead{display:none}.emp45-table tr{background:#fff;border:1px solid #e3e8f0;border-radius:15px;padding:12px;margin-bottom:10px}.emp45-table td{border:0;padding:6px 0;white-space:normal!important}.emp45-table td:first-child{display:none}.emp45-table td:nth-child(3)::before{content:"Username: ";font-weight:800}.emp45-table td:nth-child(4)::before{content:"Jabatan: ";font-weight:800}.emp45-table td:nth-child(5)::before{content:"HP: ";font-weight:800}.emp45-table td:nth-child(6)::before{content:"Masuk: ";font-weight:800}.emp45-table td:nth-child(7)::before{content:"Status: ";font-weight:800}}
+/* ===== END V45 PROFESSIONAL EMPLOYEES ===== */
+</style>
 </head>
 <body>
 <section id="login" class="login">
@@ -1033,13 +1069,77 @@ aside .userbox{
     </section>
 
     <section id="employees" class="page hidden">
-      <div class="top"><div><h1>Data Karyawan</h1><div class="muted">Hanya Bos/Admin yang dapat mengakses halaman ini.</div></div><button class="btn primary" id="addEmployee">+ Tambah Karyawan</button></div>
-      <div class="card">
-        <div class="toolbar"><div><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username"></div></div>
-        <div class="table"><table><thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>HP</th><th>Tanggal Masuk</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="employeeRows"></tbody></table></div>
+      <div class="emp45-head">
+        <div>
+          <div class="emp45-eyebrow">HOME OFFICE • KARYAWAN</div>
+          <h1>♙ Data Karyawan</h1>
+          <div class="muted">Kelola data, status, dan informasi karyawan HomeOffice.</div>
+        </div>
+        <button class="btn primary emp45-add" id="addEmployee">＋ Tambah Karyawan</button>
+      </div>
+
+      <div class="emp45-stats">
+        <div class="emp45-stat blue">
+          <div class="emp45-stat-icon">👥</div>
+          <div><span>Total Karyawan</span><b id="emp45Total">0</b><small>seluruh data karyawan</small></div>
+        </div>
+        <div class="emp45-stat green">
+          <div class="emp45-stat-icon">✓</div>
+          <div><span>Karyawan Aktif</span><b id="emp45Active">0</b><small>masih aktif bekerja</small></div>
+        </div>
+        <div class="emp45-stat gray">
+          <div class="emp45-stat-icon">○</div>
+          <div><span>Nonaktif</span><b id="emp45Inactive">0</b><small>akun tidak aktif</small></div>
+        </div>
+        <div class="emp45-stat purple">
+          <div class="emp45-stat-icon">⌂</div>
+          <div><span>Jabatan Terdaftar</span><b id="emp45Roles">0</b><small>jenis posisi berbeda</small></div>
+        </div>
+      </div>
+
+      <div class="emp45-filter-card">
+        <div class="emp45-field emp45-search-field">
+          <label>Cari Karyawan</label>
+          <div class="emp45-search-wrap"><span>⌕</span><input class="input" id="employeeSearch" placeholder="Cari nama / jabatan / username / HP..."></div>
+        </div>
+        <div class="emp45-field">
+          <label>Status</label>
+          <select class="input" id="employeeStatusFilter">
+            <option value="">Semua status</option>
+            <option value="active">Aktif</option>
+            <option value="inactive">Nonaktif</option>
+          </select>
+        </div>
+        <button class="btn primary emp45-filter-btn" type="button" onclick="renderEmployees()">⌕ Filter</button>
+      </div>
+
+      <div class="emp45-table-card">
+        <div class="emp45-table-head">
+          <div>
+            <h3>▣ Daftar Karyawan</h3>
+            <p>Informasi akun dan status seluruh karyawan.</p>
+          </div>
+          <div class="emp45-count"><span id="employeeCount">0</span> data</div>
+        </div>
+        <div class="table emp45-table-wrap">
+          <table class="emp45-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Karyawan</th>
+                <th>Username</th>
+                <th>Jabatan</th>
+                <th>Nomor HP</th>
+                <th>Tanggal Masuk</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="employeeRows"></tbody>
+          </table>
+        </div>
       </div>
     </section>
-
     <section id="salesrecap" class="page hidden">
       <div class="top">
         <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Rekap penjualan harian, termasuk transaksi otomatis dari Gudang Digital.</div></div>
@@ -1673,16 +1773,52 @@ function renderAttendance(){
   }).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:34px">Belum ada data absensi yang cocok.</td></tr>';
 }
 
+function employeeInitialsV45(name){
+  return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+}
 function renderEmployees(){
- if(!currentEmployee||currentEmployee.role!=='admin')return;
- let q=$('#employeeSearch').value.toLowerCase().trim();
- let es=employees.filter(x=>x.role==='employee'&&(!q||[x.full_name,x.username,x.job_title,x.phone].some(v=>String(v||'').toLowerCase().includes(q))));
- $('#employeeRows').innerHTML=es.length?es.map(x=>`<tr>
- <td><div class="empname"><div class="avatar">${esc((x.full_name||'?')[0].toUpperCase())}</div><b>${esc(x.full_name)}</b></div></td>
- <td>${esc(x.username)}</td><td>${esc(x.job_title||'-')}</td><td>${esc(x.phone||'-')}</td><td>${esc(x.join_date||'-')}</td>
- <td><span class="badge ${x.active?'aktif':'nonaktif'}">${x.active?'Aktif':'Nonaktif'}</span></td>
- <td><div class="rowactions"><button class="btn" onclick="viewEmployee('${x.id}')">Detail</button><button class="btn" onclick="editEmployee('${x.id}')">Edit</button><button class="btn ${x.active?'danger':''}" onclick="toggleEmployee('${x.id}')">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></td>
- </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#8793a5;padding:28px">Belum ada karyawan.</td></tr>';
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+
+  const all=employees.filter(x=>x.role==='employee');
+  const active=all.filter(x=>x.active);
+  const inactive=all.filter(x=>!x.active);
+  const roles=new Set(all.map(x=>String(x.job_title||'').trim().toLowerCase()).filter(Boolean));
+
+  if($('#emp45Total'))$('#emp45Total').textContent=all.length;
+  if($('#emp45Active'))$('#emp45Active').textContent=active.length;
+  if($('#emp45Inactive'))$('#emp45Inactive').textContent=inactive.length;
+  if($('#emp45Roles'))$('#emp45Roles').textContent=roles.size;
+
+  const q=($('#employeeSearch')?.value||'').toLowerCase().trim();
+  const sf=$('#employeeStatusFilter')?.value||'';
+  const es=all.filter(x=>{
+    if(sf==='active'&&!x.active)return false;
+    if(sf==='inactive'&&x.active)return false;
+    if(q&&![x.full_name,x.username,x.job_title,x.phone,x.email].some(v=>String(v||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+
+  if($('#employeeCount'))$('#employeeCount').textContent=es.length;
+
+  $('#employeeRows').innerHTML=es.length?es.map((x,i)=>`<tr>
+    <td>${i+1}</td>
+    <td>
+      <div class="emp45-person">
+        <div class="emp45-avatar">${esc(employeeInitialsV45(x.full_name))}</div>
+        <div><b>${esc(x.full_name)}</b><small>${esc(x.email||'Email belum diisi')}</small></div>
+      </div>
+    </td>
+    <td><b>${esc(x.username||'-')}</b></td>
+    <td>${esc(x.job_title||'-')}</td>
+    <td>${esc(x.phone||'-')}</td>
+    <td>${esc(x.join_date||'-')}</td>
+    <td><span class="badge ${x.active?'aktif':'nonaktif'}">${x.active?'Aktif':'Nonaktif'}</span></td>
+    <td><div class="emp45-actions">
+      <button class="btn" onclick="viewEmployee('${x.id}')">Detail</button>
+      <button class="btn" onclick="editEmployee('${x.id}')">Edit</button>
+      <button class="btn ${x.active?'danger':''}" onclick="toggleEmployee('${x.id}')">${x.active?'Nonaktifkan':'Aktifkan'}</button>
+    </div></td>
+  </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#8793a5;padding:32px">Belum ada karyawan yang cocok.</td></tr>';
 }
 
 function renderNotice(){
@@ -2091,7 +2227,7 @@ if($('#attendanceSearch'))$('#attendanceSearch').oninput=()=>{resetAttendancePag
 if($('#attendancePageSize'))$('#attendancePageSize').onchange=()=>{attendancePageSizeV44=Number($('#attendancePageSize').value||25);resetAttendancePageV44();renderAttendance()};
 if($('#attendancePrev'))$('#attendancePrev').onclick=attendancePrevPageV44;
 if($('#attendanceNext'))$('#attendanceNext').onclick=attendanceNextPageV44;
-$('#employeeSearch').oninput=renderEmployees;
+$('#employeeSearch').oninput=renderEmployees;if($('#employeeStatusFilter'))$('#employeeStatusFilter').onchange=renderEmployees;
 
 $('#clockIn').onclick=async()=>{
  let x=attendance.find(a=>a.attendance_date===ymd());
