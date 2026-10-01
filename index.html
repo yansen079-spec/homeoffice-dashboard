@@ -1464,6 +1464,18 @@ aside .userbox{
     <div class="hl54-stat"><span>Aktivitas</span><b id="hlExercise">-</b><small>menit olahraga</small></div>
   </div>
 
+  <div class="hl55-advice-card">
+    <div class="hl55-advice-head">
+      <div>
+        <div class="hl55-kicker">SMART DAILY COACH</div>
+        <h3>💡 Saran Hari Ini</h3>
+        <p id="hl55AdviceSummary">Isi check-in hari ini untuk mendapatkan saran sederhana.</p>
+      </div>
+      <span class="hl55-safe">Kebiasaan • bukan diagnosis</span>
+    </div>
+    <div class="hl55-advice-grid" id="hl55AdviceList"></div>
+  </div>
+
   <div class="hl54-grid">
     <div class="hl54-card">
       <div class="hl54-card-head"><div><h3>Check-in Hari Ini</h3><p>Satu catatan per hari, bisa diedit kapan saja.</p></div><span class="hl54-private">🔒 Khusus Bos</span></div>
@@ -2127,6 +2139,63 @@ function healthTrendTextV54(current,previous,unit){
   if(diff===0)return 'Stabil dari catatan sebelumnya';
   return (diff>0?'Naik ':'Turun ')+Math.abs(diff).toLocaleString('id-ID')+' '+unit;
 }
+function healthAdviceV55(today,rows){
+  const tips=[];
+  const add=(status,icon,title,text)=>tips.push({status,icon,title,text});
+
+  if(!today){
+    add('info','📝','Belum check-in hari ini','Isi data hari ini dulu supaya saran bisa menyesuaikan kebiasaan kamu.');
+    return tips;
+  }
+
+  const sleep=healthNumV54(today.sleep_hours);
+  if(sleep===null)add('info','🌙','Tidur belum diisi','Tambahkan jam tidur agar pola istirahat bisa dipantau.');
+  else if(sleep<7)add('improve','🌙','Tidur bisa ditingkatkan','Coba prioritaskan waktu tidur lebih panjang dan jam tidur yang lebih konsisten malam ini.');
+  else if(sleep<=9)add('good','🌙','Tidur sudah bagus','Durasi tidur hari ini terlihat cukup. Pertahankan jadwal tidur yang konsisten.');
+  else add('info','🌙','Tidur lebih panjang dari biasanya','Kalau ini tidak biasa untuk kamu, cukup pantau pola energi dan tidur beberapa hari ke depan.');
+
+  const water=healthNumV54(today.water_liters);
+  if(water===null)add('info','💧','Air minum belum dicatat','Catat air minum supaya kamu lebih mudah melihat pola hidrasi.');
+  else if(water<1.5)add('improve','💧','Hidrasi masih bisa ditambah','Tambahkan minum secara bertahap sepanjang hari, terutama setelah aktivitas.');
+  else add('good','💧','Hidrasi sudah lumayan','Asupan air yang tercatat hari ini sudah cukup baik. Lanjutkan minum secara berkala.');
+
+  const exercise=healthNumV54(today.exercise_minutes,0);
+  const steps=healthNumV54(today.steps,0);
+  if((exercise===null||exercise===0)&&(steps===null||steps===0)){
+    add('improve','🚶','Aktivitas masih rendah','Coba tambahkan aktivitas ringan 15–30 menit, misalnya jalan santai atau peregangan.');
+  }else if((exercise||0)<15 && (steps||0)<4000){
+    add('improve','🚶','Masih bisa lebih aktif','Sedikit tambahan jalan kaki atau peregangan hari ini sudah membantu membangun kebiasaan aktif.');
+  }else{
+    add('good','🏃','Sudah ada aktivitas','Bagus, kamu sudah bergerak hari ini. Fokus ke konsistensi daripada memaksakan intensitas.');
+  }
+
+  if(today.waist_cm==null){
+    add('info','📏','Lingkar perut belum ada','Tidak perlu diukur setiap hari. Cukup ukur berkala dengan cara dan posisi yang sama agar tren lebih mudah dibandingkan.');
+  }else{
+    const waistRows=rows.filter(x=>x.waist_cm!=null).slice(0,2);
+    if(waistRows.length>=2){
+      const d=Number(waistRows[0].waist_cm)-Number(waistRows[1].waist_cm);
+      if(Math.abs(d)>=1)add('info','📏','Pantau tren lingkar perut',(d<0?'Turun ':'Naik ')+Math.abs(d).toLocaleString('id-ID')+' cm dari catatan sebelumnya. Lihat tren beberapa minggu, bukan satu hari saja.');
+      else add('good','📏','Lingkar perut relatif stabil','Perubahan kecil antar pengukuran itu wajar. Fokus pada tren jangka lebih panjang.');
+    }
+  }
+
+  const mood=String(today.mood||'');
+  const energy=Number(today.energy||0);
+  if(['Sangat Baik','Baik'].includes(mood)&&energy>=3)add('good','🙂','Mood cukup baik','Mood dan energi kamu terlihat baik hari ini. Pertahankan rutinitas yang terasa membantu.');
+  else if(energy>0&&energy<=2)add('improve','🔋','Energi sedang rendah','Pilih aktivitas yang lebih ringan hari ini dan beri ruang untuk istirahat yang cukup.');
+  else if(['Kurang','Buruk'].includes(mood))add('improve','🙂','Mood sedang kurang baik','Kurangi beban yang tidak mendesak, lakukan aktivitas ringan yang biasanya membantu, dan pantau beberapa hari ke depan.');
+
+  const weightRows=rows.filter(x=>x.weight_kg!=null).slice(0,3);
+  if(weightRows.length<2)add('info','⚖️','Berat baru mulai dicatat','Belum perlu menilai naik atau turun dari satu data. Kumpulkan beberapa check-in dulu untuk melihat tren.');
+  else{
+    const d=Number(weightRows[0].weight_kg)-Number(weightRows[1].weight_kg);
+    if(Math.abs(d)>=1)add('info','⚖️','Berat berubah dari catatan terakhir','Berat harian bisa berubah karena banyak hal. Gunakan tren beberapa hari atau minggu, bukan satu angka saja.');
+  }
+
+  return tips.slice(0,6);
+}
+
 function renderHealthV54(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   const rows=[...healthCheckins].sort((a,b)=>String(b.check_date).localeCompare(String(a.check_date)));
@@ -2139,6 +2208,25 @@ function renderHealthV54(){
   if($('#hlExercise'))$('#hlExercise').textContent=today?.exercise_minutes!=null?Number(today.exercise_minutes).toLocaleString('id-ID'):'-';
   if($('#hlWeightTrend'))$('#hlWeightTrend').textContent=healthTrendTextV54(healthNumV54(latest?.weight_kg),healthNumV54(prev?.weight_kg),'kg');
   if($('#hlWaistTrend'))$('#hlWaistTrend').textContent=healthTrendTextV54(healthNumV54(latest?.waist_cm),healthNumV54(prev?.waist_cm),'cm');
+
+  const advice=healthAdviceV55(today,rows);
+  const goodCount=advice.filter(x=>x.status==='good').length;
+  const improveCount=advice.filter(x=>x.status==='improve').length;
+  if($('#hl55AdviceSummary')){
+    $('#hl55AdviceSummary').textContent=!today
+      ?'Isi check-in hari ini untuk mendapatkan saran sederhana.'
+      :improveCount
+        ?'Ada '+improveCount+' hal kecil yang bisa kamu tingkatkan hari ini. Tidak perlu semuanya sekaligus.'
+        :goodCount
+          ?'Kebiasaan hari ini terlihat cukup baik. Fokus mempertahankan konsistensi.'
+          :'Data hari ini sudah tersimpan. Tambahkan beberapa hari lagi agar sarannya makin berguna.';
+  }
+  if($('#hl55AdviceList')){
+    $('#hl55AdviceList').innerHTML=advice.map(x=>`<div class="hl55-tip ${x.status}">
+      <span class="hl55-tip-icon">${x.icon}</span>
+      <div><div class="hl55-tip-label">${x.status==='good'?'✓ Sudah Bagus':x.status==='improve'?'Bisa Ditingkatkan':'Belum Ada / Pantau'}</div><b>${esc(x.title)}</b><p>${esc(x.text)}</p></div>
+    </div>`).join('');
+  }
 
   if($('#hlDate')&&!$('#hlDate').value)$('#hlDate').value=ymd();
 
@@ -4442,6 +4530,12 @@ setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==
 @media(max-width:1050px){.hl54-summary{grid-template-columns:repeat(3,1fr)}.hl54-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.hl54-summary{grid-template-columns:repeat(2,1fr)}.hl54-form{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.hl54-summary{grid-template-columns:1fr}.hl54-form{grid-template-columns:1fr}.hl54-day>div{grid-template-columns:repeat(2,1fr)}.hl54-head{flex-direction:column}}
+/* ===== V55 DAILY HEALTH ADVICE ===== */
+.hl55-advice-card{background:linear-gradient(135deg,#fff 0%,#f8fbff 100%);border:1px solid #dfe7f2;border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 8px 26px rgba(15,23,42,.035)}
+.hl55-advice-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:13px}.hl55-kicker{font-size:9px;font-weight:900;letter-spacing:.12em;color:#2563eb}.hl55-advice-head h3{margin:4px 0 3px;font-size:18px;color:#0f172a}.hl55-advice-head p{margin:0;color:#64748b;font-size:10px}.hl55-safe{font-size:9px;font-weight:800;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.hl55-advice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.hl55-tip{display:flex;gap:9px;align-items:flex-start;border:1px solid #e8edf4;border-radius:13px;padding:11px;background:#fff}.hl55-tip-icon{width:31px;height:31px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;font-size:15px}.hl55-tip.good .hl55-tip-icon{background:#dcfce7}.hl55-tip.improve .hl55-tip-icon{background:#fef3c7}.hl55-tip.info .hl55-tip-icon{background:#dbeafe}.hl55-tip-label{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.hl55-tip.good .hl55-tip-label{color:#15803d}.hl55-tip.improve .hl55-tip-label{color:#b45309}.hl55-tip.info .hl55-tip-label{color:#1d4ed8}.hl55-tip b{display:block;color:#0f172a;font-size:11px}.hl55-tip p{margin:4px 0 0;color:#64748b;font-size:9px;line-height:1.4}
+@media(max-width:1000px){.hl55-advice-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.hl55-advice-grid{grid-template-columns:1fr}.hl55-advice-head{flex-direction:column}}
+/* ===== END V55 ===== */
 /* ===== END V54 ===== */
 </style>
 
