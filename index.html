@@ -721,6 +721,7 @@ aside .userbox{
       <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
 <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
       <button data-page="businessfinance" class="adminOnly">💰 Keuangan Usaha</button>
+      <button data-page="health" class="adminOnly">❤️ Kesehatan Saya</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
@@ -1445,6 +1446,54 @@ aside .userbox{
     </section>
 
     
+<section id="health" class="page hidden">
+  <div class="hl54-head">
+    <div>
+      <div class="hl54-eyebrow">BOS PRIVATE • HEALTH TRACKER</div>
+      <h1>❤️ Kesehatan Saya</h1>
+      <div class="muted">Check-in harian pribadi untuk melihat kebiasaan dan progres tubuh. Bukan alat diagnosis medis.</div>
+    </div>
+    <button class="btn" type="button" onclick="loadHealthSafe()">↻ Refresh</button>
+  </div>
+
+  <div class="hl54-summary">
+    <div class="hl54-stat"><span>Berat Terakhir</span><b id="hlWeight">-</b><small id="hlWeightTrend">Belum ada data</small></div>
+    <div class="hl54-stat"><span>Lingkar Perut</span><b id="hlWaist">-</b><small id="hlWaistTrend">Belum ada data</small></div>
+    <div class="hl54-stat"><span>Tidur Terakhir</span><b id="hlSleep">-</b><small>jam</small></div>
+    <div class="hl54-stat"><span>Air Minum</span><b id="hlWater">-</b><small>liter hari ini</small></div>
+    <div class="hl54-stat"><span>Aktivitas</span><b id="hlExercise">-</b><small>menit olahraga</small></div>
+  </div>
+
+  <div class="hl54-grid">
+    <div class="hl54-card">
+      <div class="hl54-card-head"><div><h3>Check-in Hari Ini</h3><p>Satu catatan per hari, bisa diedit kapan saja.</p></div><span class="hl54-private">🔒 Khusus Bos</span></div>
+      <div class="hl54-form">
+        <label>Tanggal<input class="input" id="hlDate" type="date"></label>
+        <label>Berat badan (kg)<input class="input" id="hlWeightInput" type="number" min="20" max="300" step="0.1" placeholder="contoh 69.5"></label>
+        <label>Lingkar perut (cm)<input class="input" id="hlWaistInput" type="number" min="30" max="250" step="0.1" placeholder="contoh 88"></label>
+        <label>Tidur (jam)<input class="input" id="hlSleepInput" type="number" min="0" max="24" step="0.1" placeholder="contoh 7.5"></label>
+        <label>Air minum (liter)<input class="input" id="hlWaterInput" type="number" min="0" max="15" step="0.1" placeholder="contoh 2"></label>
+        <label>Olahraga (menit)<input class="input" id="hlExerciseInput" type="number" min="0" max="1440" step="1" placeholder="contoh 30"></label>
+        <label>Langkah<input class="input" id="hlStepsInput" type="number" min="0" max="200000" step="1" placeholder="contoh 6000"></label>
+        <label>Mood<select class="input" id="hlMoodInput"><option value="">Pilih mood</option><option>Sangat Baik</option><option>Baik</option><option>Biasa</option><option>Kurang</option><option>Buruk</option></select></label>
+        <label>Energi (1–5)<select class="input" id="hlEnergyInput"><option value="">Pilih</option><option value="1">1 — Sangat lelah</option><option value="2">2</option><option value="3">3 — Normal</option><option value="4">4</option><option value="5">5 — Sangat bertenaga</option></select></label>
+        <label class="full">Catatan<textarea class="input" id="hlNoteInput" rows="3" placeholder="Makan, aktivitas, atau hal lain yang ingin dicatat..."></textarea></label>
+      </div>
+      <button class="btn primary hl54-save" id="hlSaveBtn" type="button">✓ Simpan Check-in</button>
+    </div>
+
+    <div class="hl54-card">
+      <div class="hl54-card-head"><div><h3>Progress 7 Hari</h3><p>Ringkasan tren dari check-in terbaru.</p></div></div>
+      <div id="hlTrend" class="hl54-trend"></div>
+    </div>
+  </div>
+
+  <div class="hl54-card hl54-history">
+    <div class="hl54-card-head"><div><h3>Riwayat Check-in</h3><p>Data terbaru tampil paling atas.</p></div><div class="hl54-count"><span id="hlCount">0</span> catatan</div></div>
+    <div class="table"><table><thead><tr><th>Tanggal</th><th>Berat</th><th>Perut</th><th>Tidur</th><th>Air</th><th>Olahraga</th><th>Langkah</th><th>Mood</th><th>Energi</th><th>Aksi</th></tr></thead><tbody id="hlRows"></tbody></table></div>
+  </div>
+</section>
+
 <section id="businessfinance" class="page hidden">
   <div class="top">
     <div><h1>💰 Keuangan Usaha</h1><div class="muted">Pantau modal, omzet, pengeluaran, dan keuntungan YANSTORE.</div></div>
@@ -1745,6 +1794,7 @@ let bossNotificationReadKeys=new Set();
 let sellers=[],sellerOrders=[],marketplaceOrders=[],sellerLedger=[],withdrawalRequests=[];
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 let payrollDailyPayments=[];
+let healthCheckins=[];
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -1823,7 +1873,7 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance'||id==='health')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
 
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
@@ -1839,6 +1889,7 @@ function go(id){
   if(id==='profile')renderProfile();
   if(id==='businessfinance')loadBusinessFinance();
   if(id==='payroll')loadPayrollDailyPaymentsSafe();
+  if(id==='health')loadHealthSafe();
 }
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
@@ -2048,6 +2099,122 @@ window.markBossNotificationRead=markBossNotificationRead;
 window.markAllBossNotificationsRead=markAllBossNotificationsRead;
 window.bossNotifAction=bossNotifAction;
 window.openBossNotification=openBossNotification;
+
+async function loadHealthSafe(){
+  if(!currentEmployee||currentEmployee.role!=='admin'||!currentAuth?.id)return;
+  try{
+    const {data,error}=await sb.from('health_daily_checkins')
+      .select('*')
+      .eq('user_id',currentAuth.id)
+      .order('check_date',{ascending:false})
+      .limit(180);
+    if(error)throw error;
+    healthCheckins=data||[];
+    renderHealthV54();
+  }catch(e){
+    console.error('health tracker',e);
+  }
+}
+
+function healthNumV54(v,d=1){
+  if(v===null||v===undefined||v==='')return null;
+  const n=Number(v);
+  return Number.isFinite(n)?Number(n.toFixed(d)):null;
+}
+function healthTrendTextV54(current,previous,unit){
+  if(current===null||previous===null)return 'Belum cukup data';
+  const diff=Number((current-previous).toFixed(1));
+  if(diff===0)return 'Stabil dari catatan sebelumnya';
+  return (diff>0?'Naik ':'Turun ')+Math.abs(diff).toLocaleString('id-ID')+' '+unit;
+}
+function renderHealthV54(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const rows=[...healthCheckins].sort((a,b)=>String(b.check_date).localeCompare(String(a.check_date)));
+  const latest=rows[0]||null,prev=rows[1]||null,today=rows.find(x=>x.check_date===ymd())||null;
+  if($('#hlCount'))$('#hlCount').textContent=rows.length;
+  if($('#hlWeight'))$('#hlWeight').textContent=latest?.weight_kg!=null?Number(latest.weight_kg).toLocaleString('id-ID')+' kg':'-';
+  if($('#hlWaist'))$('#hlWaist').textContent=latest?.waist_cm!=null?Number(latest.waist_cm).toLocaleString('id-ID')+' cm':'-';
+  if($('#hlSleep'))$('#hlSleep').textContent=latest?.sleep_hours!=null?Number(latest.sleep_hours).toLocaleString('id-ID'):'-';
+  if($('#hlWater'))$('#hlWater').textContent=today?.water_liters!=null?Number(today.water_liters).toLocaleString('id-ID'):'-';
+  if($('#hlExercise'))$('#hlExercise').textContent=today?.exercise_minutes!=null?Number(today.exercise_minutes).toLocaleString('id-ID'):'-';
+  if($('#hlWeightTrend'))$('#hlWeightTrend').textContent=healthTrendTextV54(healthNumV54(latest?.weight_kg),healthNumV54(prev?.weight_kg),'kg');
+  if($('#hlWaistTrend'))$('#hlWaistTrend').textContent=healthTrendTextV54(healthNumV54(latest?.waist_cm),healthNumV54(prev?.waist_cm),'cm');
+
+  if($('#hlDate')&&!$('#hlDate').value)$('#hlDate').value=ymd();
+
+  const trend=[...rows].slice(0,7).reverse();
+  if($('#hlTrend')){
+    $('#hlTrend').innerHTML=trend.length?trend.map(x=>{
+      const label=new Date(x.check_date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+      const metrics=[
+        ['Berat',x.weight_kg!=null?Number(x.weight_kg).toLocaleString('id-ID')+' kg':'-'],
+        ['Tidur',x.sleep_hours!=null?Number(x.sleep_hours).toLocaleString('id-ID')+'j':'-'],
+        ['Air',x.water_liters!=null?Number(x.water_liters).toLocaleString('id-ID')+'L':'-'],
+        ['Gerak',x.exercise_minutes!=null?x.exercise_minutes+'m':'-']
+      ];
+      return `<div class="hl54-day"><b>${esc(label)}</b><div>${metrics.map(m=>`<span><small>${m[0]}</small><strong>${esc(m[1])}</strong></span>`).join('')}</div></div>`;
+    }).join(''):'<div class="hl54-empty">Belum ada data. Isi check-in pertama kamu hari ini.</div>';
+  }
+
+  if($('#hlRows'))$('#hlRows').innerHTML=rows.length?rows.map(x=>`<tr>
+    <td><b>${esc(new Date(x.check_date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}))}</b></td>
+    <td>${x.weight_kg!=null?esc(Number(x.weight_kg).toLocaleString('id-ID')+' kg'):'-'}</td>
+    <td>${x.waist_cm!=null?esc(Number(x.waist_cm).toLocaleString('id-ID')+' cm'):'-'}</td>
+    <td>${x.sleep_hours!=null?esc(Number(x.sleep_hours).toLocaleString('id-ID')+' j'):'-'}</td>
+    <td>${x.water_liters!=null?esc(Number(x.water_liters).toLocaleString('id-ID')+' L'):'-'}</td>
+    <td>${x.exercise_minutes!=null?esc(x.exercise_minutes+' mnt'):'-'}</td>
+    <td>${x.steps!=null?esc(Number(x.steps).toLocaleString('id-ID')):'-'}</td>
+    <td>${esc(x.mood||'-')}</td>
+    <td>${x.energy!=null?esc(x.energy+'/5'):'-'}</td>
+    <td><button class="btn" type="button" onclick="editHealthV54('${x.id}')">Edit</button></td>
+  </tr>`).join(''):'<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:28px">Belum ada check-in kesehatan.</td></tr>';
+}
+
+window.editHealthV54=id=>{
+  const x=healthCheckins.find(r=>r.id===id);if(!x)return;
+  $('#hlDate').value=x.check_date||ymd();
+  $('#hlWeightInput').value=x.weight_kg??'';
+  $('#hlWaistInput').value=x.waist_cm??'';
+  $('#hlSleepInput').value=x.sleep_hours??'';
+  $('#hlWaterInput').value=x.water_liters??'';
+  $('#hlExerciseInput').value=x.exercise_minutes??'';
+  $('#hlStepsInput').value=x.steps??'';
+  $('#hlMoodInput').value=x.mood??'';
+  $('#hlEnergyInput').value=x.energy??'';
+  $('#hlNoteInput').value=x.note??'';
+  $('#hlSaveBtn').scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+$('#hlDate').onchange=()=>{
+  const x=healthCheckins.find(r=>r.check_date===$('#hlDate').value);
+  if(x)editHealthV54(x.id);
+  else{
+    ['hlWeightInput','hlWaistInput','hlSleepInput','hlWaterInput','hlExerciseInput','hlStepsInput','hlMoodInput','hlEnergyInput','hlNoteInput'].forEach(id=>{if($('#'+id))$('#'+id).value=''});
+  }
+};
+
+$('#hlSaveBtn').onclick=async()=>{
+  if(!currentEmployee||currentEmployee.role!=='admin'||!currentAuth?.id)return;
+  const date=$('#hlDate').value||ymd();
+  const val=id=>{const v=$('#'+id).value;return v===''?null:Number(v)};
+  const payload={
+    user_id:currentAuth.id,
+    check_date:date,
+    weight_kg:val('hlWeightInput'),
+    waist_cm:val('hlWaistInput'),
+    sleep_hours:val('hlSleepInput'),
+    water_liters:val('hlWaterInput'),
+    exercise_minutes:val('hlExerciseInput'),
+    steps:val('hlStepsInput'),
+    mood:$('#hlMoodInput').value||null,
+    energy:val('hlEnergyInput'),
+    note:$('#hlNoteInput').value.trim()||null,
+    updated_at:new Date().toISOString()
+  };
+  const {error}=await sb.from('health_daily_checkins').upsert(payload,{onConflict:'user_id,check_date'});
+  if(error){alert('Gagal menyimpan check-in: '+error.message);return}
+  await loadHealthSafe();
+};
 
 function renderAll(){
  let td=attendance.filter(x=>x.attendance_date===ymd());
@@ -3772,6 +3939,7 @@ function setupFullRealtime(isRetry=false){
       .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>scheduleRealtimeRefresh('withdrawal_requests'))
       .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>scheduleRealtimeRefresh('marketplace_orders'))
       .on('postgres_changes',{event:'*',schema:'public',table:'boss_notification_reads'},async()=>{await loadBossNotificationReadsSafe();renderBossNotifications()})
+      .on('postgres_changes',{event:'*',schema:'public',table:'health_daily_checkins'},()=>loadHealthSafe())
       .subscribe((status)=>{
         // Abaikan callback dari channel lama yang sengaja kita tutup.
         if(myGeneration!==realtimeGeneration)return;
@@ -4263,6 +4431,18 @@ setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==
 @media(max-width:820px){.act53-grid{grid-template-columns:1fr}.act53-head{flex-direction:column}.act53-badge{align-self:flex-start}}
 @media(max-width:520px){.act53-item{grid-template-columns:28px 1fr auto}.act53-num{display:none}.act53-go{font-size:0}.act53-go::after{content:'→';font-size:16px}}
 /* ===== END V53 ===== */
+
+/* ===== V54 PRIVATE HEALTH TRACKER ===== */
+#health{padding-bottom:30px}.hl54-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.hl54-eyebrow{font-size:10px;font-weight:900;letter-spacing:.13em;color:#e11d48}.hl54-head h1{margin:4px 0 6px;font-size:29px;color:#0f172a}
+.hl54-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}.hl54-stat{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 7px 22px rgba(15,23,42,.035)}.hl54-stat span,.hl54-stat small{display:block;color:#94a3b8;font-size:10px}.hl54-stat b{display:block;font-size:21px;color:#0f172a;margin:5px 0 3px}
+.hl54-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.hl54-card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:17px;box-shadow:0 8px 26px rgba(15,23,42,.035)}.hl54-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.hl54-card-head h3{margin:0;font-size:17px;color:#0f172a}.hl54-card-head p{margin:4px 0 0;color:#94a3b8;font-size:10px}.hl54-private{font-size:9px;font-weight:800;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;border-radius:999px;padding:5px 8px}
+.hl54-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.hl54-form label{font-size:10px;color:#64748b;font-weight:700}.hl54-form .input{width:100%;margin-top:5px}.hl54-form .full{grid-column:1/-1}.hl54-save{width:100%;margin-top:12px}
+.hl54-trend{display:grid;gap:8px}.hl54-day{border:1px solid #edf2f7;border-radius:12px;padding:9px 10px;background:#fbfdff}.hl54-day>b{display:block;font-size:10px;color:#475569;margin-bottom:6px}.hl54-day>div{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hl54-day span{background:#f8fafc;border-radius:8px;padding:6px}.hl54-day small{display:block;color:#94a3b8;font-size:8px}.hl54-day strong{display:block;font-size:10px;color:#0f172a;margin-top:2px}.hl54-empty{text-align:center;color:#94a3b8;padding:30px 10px;font-size:11px}
+.hl54-history{margin-top:14px}.hl54-count{font-size:10px;color:#64748b;background:#f8fafc;border:1px solid #edf2f7;border-radius:999px;padding:6px 9px}.hl54-count span{font-weight:900;color:#0f172a}
+@media(max-width:1050px){.hl54-summary{grid-template-columns:repeat(3,1fr)}.hl54-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.hl54-summary{grid-template-columns:repeat(2,1fr)}.hl54-form{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.hl54-summary{grid-template-columns:1fr}.hl54-form{grid-template-columns:1fr}.hl54-day>div{grid-template-columns:repeat(2,1fr)}.hl54-head{flex-direction:column}}
+/* ===== END V54 ===== */
 </style>
 
 <script>
