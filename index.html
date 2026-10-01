@@ -774,6 +774,18 @@ aside .userbox{
         </div>
       </div>
 
+      <div class="act53-wrap adminOnly" id="bossActionCenter">
+        <div class="act53-head">
+          <div>
+            <div class="act53-kicker">ACTION CENTER</div>
+            <h3>⚡ Prioritas Hari Ini</h3>
+            <p>Yang perlu ditindak Bos sekarang — klik untuk langsung buka halaman terkait.</p>
+          </div>
+          <div class="act53-badge"><span id="act53Count">0</span> perhatian</div>
+        </div>
+        <div class="act53-grid" id="act53List"></div>
+      </div>
+
       <div class="quick employeeOnly">
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
         <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
@@ -1804,6 +1816,7 @@ async function boot(user){
   await loadDigitalSafe();
   await loadSalesSafe();
   await loadSellerCenterSafe();
+  if(emp.role==='admin')await loadPayrollDailyPaymentsSafe();
   renderBossNotifications();
   setupSalesRealtime();
   setupFullRealtime();
@@ -3166,6 +3179,83 @@ function renderBossWarehouseSummaryV43(){
   if(bc)bc.textContent=best?Number(best.sold_count||0).toLocaleString('id-ID')+' akun diambil/dikirim':'Belum ada data';
 }
 
+function renderBossActionCenterV53(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const list=$('#act53List'),count=$('#act53Count');
+  if(!list||!count)return;
+
+  const today=ymd();
+  const active=employees.filter(x=>x.role==='employee'&&x.active);
+  const todayAtt=attendance.filter(x=>x.attendance_date===today);
+  const actions=[];
+
+  const notIn=active.filter(e=>!todayAtt.some(a=>a.employee_id===e.id&&a.check_in)&&!todayAtt.some(a=>a.employee_id===e.id&&['Izin','Sakit','Cuti'].includes(a.status)));
+  if(notIn.length)actions.push({
+    icon:'◷',tone:'blue',title:notIn.length+' belum absen',
+    desc:notIn.slice(0,3).map(x=>x.full_name).join(', ')+(notIn.length>3?' +'+(notIn.length-3)+' lainnya':''),
+    page:'attendance',cta:'Buka Absensi'
+  });
+
+  const notOut=active.filter(e=>todayAtt.some(a=>a.employee_id===e.id&&a.check_in&&!a.check_out&&!['Izin','Sakit','Cuti'].includes(a.status)));
+  if(notOut.length)actions.push({
+    icon:'↙',tone:'amber',title:notOut.length+' belum checkout',
+    desc:notOut.slice(0,3).map(x=>x.full_name).join(', ')+(notOut.length>3?' +'+(notOut.length-3)+' lainnya':''),
+    page:'attendance',cta:'Periksa'
+  });
+
+  const pending=leaveRequests.filter(x=>['menunggu','pending'].some(v=>String(x.status||'').toLowerCase().includes(v)));
+  if(pending.length)actions.push({
+    icon:'☂',tone:'purple',title:pending.length+' pengajuan menunggu',
+    desc:'Izin, sakit, atau cuti membutuhkan keputusan Bos.',
+    page:'leave',cta:'Tinjau Pengajuan'
+  });
+
+  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);
+  if(overdue.length)actions.push({
+    icon:'!',tone:'red',title:overdue.length+' tugas lewat deadline',
+    desc:'Ada pekerjaan yang melewati batas waktu dan belum selesai.',
+    page:'tasks',cta:'Buka Tugas'
+  });
+
+  let digitalCritical=[];
+  if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined'){
+    digitalCritical=digitalProductsV34.map(p=>{
+      const av=digitalItems.filter(x=>x.product_id===p.id&&x.status==='available').length;
+      return {p,av};
+    }).filter(x=>x.av<=3);
+  }
+  if(digitalCritical.length){
+    const habis=digitalCritical.filter(x=>x.av===0).length;
+    actions.push({
+      icon:'⬡',tone:habis?'red':'amber',
+      title:habis?(habis+' produk digital habis'):(digitalCritical.length+' stok digital menipis'),
+      desc:digitalCritical.slice(0,2).map(x=>x.p.product_name+' ('+x.av+')').join(', ')+(digitalCritical.length>2?' +'+(digitalCritical.length-2)+' lainnya':''),
+      page:'digitalstock',cta:'Buka Gudang'
+    });
+  }
+
+  const salaryStaff=active.filter(e=>Number(e.daily_salary||0)>0);
+  const unpaidSalary=salaryStaff.filter(e=>!payrollPaidTodayV49(e.id));
+  if(unpaidSalary.length)actions.push({
+    icon:'Rp',tone:'green',title:unpaidSalary.length+' gaji harian belum ditandai',
+    desc:unpaidSalary.slice(0,3).map(x=>x.full_name).join(', ')+(unpaidSalary.length>3?' +'+(unpaidSalary.length-3)+' lainnya':''),
+    page:'payroll',cta:'Buka Penggajian'
+  });
+
+  count.textContent=actions.length;
+  list.innerHTML=actions.length?actions.map((a,i)=>`
+    <button class="act53-item ${a.tone}" onclick="go('${a.page}')">
+      <span class="act53-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="act53-icon">${a.icon}</span>
+      <span class="act53-copy"><b>${esc(a.title)}</b><small>${esc(a.desc)}</small></span>
+      <span class="act53-go">${esc(a.cta)} →</span>
+    </button>`).join(''):`
+      <div class="act53-clear">
+        <span>✓</span>
+        <div><b>Tidak ada prioritas mendesak</b><small>Semua operasional utama terlihat aman untuk saat ini.</small></div>
+      </div>`;
+}
+
 function renderBossDashboard(){
   if(!currentEmployee || currentEmployee.role!=='admin') return;
 
@@ -3194,6 +3284,7 @@ function renderBossDashboard(){
   $('#bPaidDays').textContent=paidDays;
   $('#bPayroll').textContent=rupiah(payroll);
   renderBossWarehouseSummaryV43();
+  renderBossActionCenterV53();
 
   const summary=$('#bossEmployeeSummary');
   summary.innerHTML=activeEmployees.length?activeEmployees.map(e=>{
@@ -4155,6 +4246,23 @@ setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==
 .v364-tag{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:9px;font-weight:900}
 #v364SoundBtn{border:1px solid #dbe3ee;background:#fff;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
 #v364SoundBtn.on{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+
+/* ===== V53 BOSS ACTION CENTER ===== */
+.act53-wrap{margin:18px 0;background:linear-gradient(135deg,#0f172a 0%,#172554 100%);border-radius:20px;padding:18px;color:#fff;box-shadow:0 16px 38px rgba(15,23,42,.12)}
+.act53-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:14px}
+.act53-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;color:#93c5fd}.act53-head h3{margin:4px 0 3px;font-size:19px}.act53-head p{margin:0;color:#b8c4d8;font-size:11px}
+.act53-badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 11px;font-size:10px;white-space:nowrap}.act53-badge span{font-weight:900;font-size:14px;margin-right:3px}
+.act53-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.act53-item{appearance:none;width:100%;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:11px 12px;display:grid;grid-template-columns:26px 36px 1fr auto;gap:9px;align-items:center;text-align:left;cursor:pointer;transition:.18s ease}
+.act53-item:hover{transform:translateY(-1px);background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.22)}
+.act53-num{font-size:9px;color:#8492ad;font-weight:800}.act53-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.1);font-weight:900}
+.act53-item.blue .act53-icon{background:#dbeafe;color:#1d4ed8}.act53-item.amber .act53-icon{background:#fef3c7;color:#b45309}.act53-item.purple .act53-icon{background:#f3e8ff;color:#7e22ce}.act53-item.red .act53-icon{background:#fee2e2;color:#b91c1c}.act53-item.green .act53-icon{background:#dcfce7;color:#15803d}
+.act53-copy{min-width:0}.act53-copy b{display:block;font-size:12px;line-height:1.25}.act53-copy small{display:block;color:#aebbd0;font-size:9px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act53-go{font-size:9px;font-weight:800;color:#dbeafe;white-space:nowrap}
+.act53-clear{grid-column:1/-1;display:flex;gap:11px;align-items:center;background:rgba(22,163,74,.14);border:1px solid rgba(134,239,172,.22);border-radius:14px;padding:12px}.act53-clear>span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#dcfce7;color:#15803d;font-weight:900}.act53-clear b{display:block;font-size:12px}.act53-clear small{display:block;color:#b9d8c3;font-size:9px;margin-top:2px}
+@media(max-width:820px){.act53-grid{grid-template-columns:1fr}.act53-head{flex-direction:column}.act53-badge{align-self:flex-start}}
+@media(max-width:520px){.act53-item{grid-template-columns:28px 1fr auto}.act53-num{display:none}.act53-go{font-size:0}.act53-go::after{content:'→';font-size:16px}}
+/* ===== END V53 ===== */
 </style>
 
 <script>
