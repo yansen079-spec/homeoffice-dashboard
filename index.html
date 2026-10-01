@@ -721,6 +721,7 @@ aside .userbox{
       <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
 <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
       <button data-page="businessfinance" class="adminOnly">💰 Keuangan Usaha</button>
+      <button data-page="bossmode" class="adminOnly">👑 BOS MODE</button>
       <button data-page="health" class="adminOnly">❤️ Kesehatan Saya</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
       <button data-page="tasks" id="taskNav">Tugas</button>
@@ -1446,6 +1447,26 @@ aside .userbox{
     </section>
 
     
+<section id="bossmode" class="page hidden">
+  <div class="bm56-hero">
+    <div><div class="bm56-eyebrow">PRIVATE LIFE OS • BOSS ONLY</div><h1>👑 BOS MODE</h1><p>Goal, habit, daily mission, XP, dan achievement pribadi.</p></div>
+    <div class="bm56-levelbox"><span>LEVEL</span><b id="bmLevel">1</b><small id="bmLevelTitle">Boss Starter</small></div>
+  </div>
+  <div class="bm56-xp-card"><div class="bm56-xp-top"><div><span>Total XP</span><b id="bmXP">0 XP</b></div><span id="bmNextXP">250 XP menuju level berikutnya</span></div><div class="bm56-xpbar"><span id="bmXPBar"></span></div></div>
+  <div class="bm56-stats">
+    <div><span>🔥 Streak Habit</span><b id="bmStreak">0 hari</b><small>hari aktif berturut-turut</small></div>
+    <div><span>🎯 Goal Aktif</span><b id="bmGoalCount">0</b><small>target yang sedang dikejar</small></div>
+    <div><span>✅ Misi Hari Ini</span><b id="bmMissionDone">0/0</b><small>daily mission</small></div>
+    <div><span>⚡ Habit Hari Ini</span><b id="bmHabitDone">0/0</b><small>kebiasaan selesai</small></div>
+  </div>
+  <div class="bm56-grid">
+    <div class="bm56-card"><div class="bm56-card-head"><div><div class="bm56-kicker">DAILY QUEST</div><h3>⚡ Misi Hari Ini</h3><p>Selesaikan misi untuk menambah XP.</p></div><button class="btn" id="bmAddMissionBtn">+ Misi</button></div><div id="bmMissionList" class="bm56-list"></div></div>
+    <div class="bm56-card"><div class="bm56-card-head"><div><div class="bm56-kicker">HABIT STREAK</div><h3>🔥 Habit Saya</h3><p>Centang kebiasaan yang selesai hari ini.</p></div><button class="btn" id="bmAddHabitBtn">+ Habit</button></div><div id="bmHabitList" class="bm56-list"></div></div>
+  </div>
+  <div class="bm56-card bm56-goals"><div class="bm56-card-head"><div><div class="bm56-kicker">LONG GAME</div><h3>🎯 Goal & Target</h3><p>Target pribadi, skill, uang, project, atau apa pun yang mau dikejar.</p></div><button class="btn primary" id="bmAddGoalBtn">+ Goal Baru</button></div><div id="bmGoalList" class="bm56-goal-grid"></div></div>
+  <div class="bm56-card bm56-achievements"><div class="bm56-card-head"><div><div class="bm56-kicker">ACHIEVEMENTS</div><h3>🏆 Pencapaian</h3><p>Terbuka otomatis dari aktivitas BOS MODE.</p></div></div><div id="bmAchievements" class="bm56-achievement-grid"></div></div>
+</section>
+
 <section id="health" class="page hidden">
   <div class="hl54-head">
     <div>
@@ -1807,6 +1828,7 @@ let sellers=[],sellerOrders=[],marketplaceOrders=[],sellerLedger=[],withdrawalRe
 let payrollSettings={late_penalty:5000,izin_penalty:0,sakit_penalty:0,cuti_penalty:0};
 let payrollDailyPayments=[];
 let healthCheckins=[];
+let bossGoals=[],bossHabits=[],bossHabitLogs=[],bossDailyMissions=[];
 
 const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
@@ -1885,7 +1907,7 @@ async function boot(user){
 }
 
 function go(id){
-  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance'||id==='health')&&currentEmployee.role!=='admin')id='dashboard';
+  if((id==='employees'||id==='recap'||id==='settings'||id==='reports'||id==='payroll'||id==='sellercenter'||id==='businessfinance'||id==='health'||id==='bossmode')&&currentEmployee.role!=='admin')id='dashboard';
   if(id==='profile'&&currentEmployee.role==='admin')id='dashboard';
 
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));
@@ -1902,6 +1924,7 @@ function go(id){
   if(id==='businessfinance')loadBusinessFinance();
   if(id==='payroll')loadPayrollDailyPaymentsSafe();
   if(id==='health')loadHealthSafe();
+  if(id==='bossmode')loadBossModeV56();
 }
 $$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 
@@ -2111,6 +2134,139 @@ window.markBossNotificationRead=markBossNotificationRead;
 window.markAllBossNotificationsRead=markAllBossNotificationsRead;
 window.bossNotifAction=bossNotifAction;
 window.openBossNotification=openBossNotification;
+
+function bossModeDateMinusV56(days){
+  const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-days);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function bossModeTitleV56(level){
+  if(level>=10)return 'Elite Boss';
+  if(level>=7)return 'Growth Boss';
+  if(level>=4)return 'Focused Boss';
+  if(level>=2)return 'Rising Boss';
+  return 'Boss Starter';
+}
+async function bossModeSeedV56(){
+  if(!bossHabits.length){
+    await sb.from('boss_habits').insert([
+      {user_id:currentAuth.id,title:'Olahraga / Jalan',icon:'🏃'},
+      {user_id:currentAuth.id,title:'Belajar / Upgrade Skill',icon:'📚'},
+      {user_id:currentAuth.id,title:'Tidur Teratur',icon:'🌙'}
+    ]);
+  }
+  if(!bossDailyMissions.some(x=>x.mission_date===ymd())){
+    await sb.from('boss_daily_missions').insert([
+      {user_id:currentAuth.id,mission_date:ymd(),title:'Selesaikan 1 hal penting hari ini',xp:50},
+      {user_id:currentAuth.id,mission_date:ymd(),title:'Luangkan 30 menit untuk upgrade diri',xp:40},
+      {user_id:currentAuth.id,mission_date:ymd(),title:'Rapikan satu hal yang tertunda',xp:30}
+    ]);
+  }
+}
+async function loadBossModeV56(seed){
+  if(seed===undefined)seed=true;
+  if(!currentEmployee||currentEmployee.role!=='admin'||!currentAuth?.id)return;
+  try{
+    const r=await Promise.all([
+      sb.from('boss_goals').select('*').eq('user_id',currentAuth.id).order('created_at',{ascending:false}),
+      sb.from('boss_habits').select('*').eq('user_id',currentAuth.id).eq('active',true).order('created_at'),
+      sb.from('boss_habit_logs').select('*').eq('user_id',currentAuth.id).gte('log_date',bossModeDateMinusV56(90)).order('log_date',{ascending:false}),
+      sb.from('boss_daily_missions').select('*').eq('user_id',currentAuth.id).gte('mission_date',bossModeDateMinusV56(90)).order('mission_date',{ascending:false})
+    ]);
+    if(r.some(x=>x.error))throw (r.find(x=>x.error).error);
+    bossGoals=r[0].data||[]; bossHabits=r[1].data||[]; bossHabitLogs=r[2].data||[]; bossDailyMissions=r[3].data||[];
+    if(seed&&(!bossHabits.length||!bossDailyMissions.some(x=>x.mission_date===ymd()))){
+      await bossModeSeedV56(); return loadBossModeV56(false);
+    }
+    renderBossModeV56();
+  }catch(e){console.error('boss mode',e)}
+}
+function bossModeStreakV56(){
+  const dates=new Set(bossHabitLogs.map(x=>x.log_date)); let streak=0;
+  for(let i=0;i<365;i++){ if(dates.has(bossModeDateMinusV56(i)))streak++; else if(i===0)continue; else break; }
+  return streak;
+}
+function bossModeXPV56(){
+  return bossHabitLogs.length*20+
+    bossDailyMissions.filter(x=>x.completed).reduce((s,x)=>s+Number(x.xp||0),0)+
+    bossGoals.filter(x=>x.status==='completed').length*200+
+    healthCheckins.length*10;
+}
+function renderBossModeV56(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const today=ymd(),xp=bossModeXPV56(),level=Math.floor(xp/250)+1,inLevel=xp%250;
+  const todayM=bossDailyMissions.filter(x=>x.mission_date===today);
+  const todayLogs=new Set(bossHabitLogs.filter(x=>x.log_date===today).map(x=>x.habit_id));
+  const activeGoals=bossGoals.filter(x=>x.status==='active');
+  $('#bmLevel').textContent=level; $('#bmLevelTitle').textContent=bossModeTitleV56(level);
+  $('#bmXP').textContent=xp.toLocaleString('id-ID')+' XP'; $('#bmNextXP').textContent=(250-inLevel)+' XP menuju Level '+(level+1);
+  $('#bmXPBar').style.width=Math.round(inLevel/250*100)+'%'; $('#bmStreak').textContent=bossModeStreakV56()+' hari';
+  $('#bmGoalCount').textContent=activeGoals.length; $('#bmMissionDone').textContent=todayM.filter(x=>x.completed).length+'/'+todayM.length;
+  $('#bmHabitDone').textContent=todayLogs.size+'/'+bossHabits.length;
+
+  $('#bmMissionList').innerHTML=todayM.length?todayM.map(function(x){
+    return '<button class="bm56-checkrow '+(x.completed?'done':'')+'" onclick="toggleBossMissionV56(\''+x.id+'\','+x.completed+')"><span class="bm56-check">'+(x.completed?'✓':'○')+'</span><span><b>'+esc(x.title)+'</b><small>+'+x.xp+' XP</small></span></button>';
+  }).join(''):'<div class="bm56-empty">Belum ada misi hari ini.</div>';
+
+  $('#bmHabitList').innerHTML=bossHabits.length?bossHabits.map(function(x){
+    const done=todayLogs.has(x.id);
+    return '<button class="bm56-checkrow '+(done?'done':'')+'" onclick="toggleBossHabitV56(\''+x.id+'\','+done+')"><span class="bm56-habit-icon">'+esc(x.icon||'✓')+'</span><span><b>'+esc(x.title)+'</b><small>'+(done?'Selesai hari ini • +20 XP':'Belum dicentang hari ini')+'</small></span><span class="bm56-check">'+(done?'✓':'○')+'</span></button>';
+  }).join(''):'<div class="bm56-empty">Belum ada habit.</div>';
+
+  $('#bmGoalList').innerHTML=bossGoals.length?bossGoals.map(function(x){
+    const done=x.status==='completed';
+    return '<div class="bm56-goal '+x.status+'"><div class="bm56-goal-top"><span>'+esc(x.category||'Personal')+'</span><em>'+(done?'SELESAI':x.status==='paused'?'PAUSE':'AKTIF')+'</em></div><b>'+esc(x.title)+'</b><div class="bm56-progress"><span style="width:'+Number(x.progress||0)+'%"></span></div><div class="bm56-goal-bottom"><small>'+Number(x.progress||0)+'%'+(x.target_date?' • '+esc(x.target_date):'')+'</small><div><button class="bm56-mini" onclick="editBossGoalV56(\''+x.id+'\')">Update</button>'+(done?'':'<button class="bm56-mini green" onclick="completeBossGoalV56(\''+x.id+'\')">✓ Selesai</button>')+'</div></div></div>';
+  }).join(''):'<div class="bm56-empty">Belum ada goal. Buat target pertama kamu.</div>';
+
+  const ach=[
+    ['🌱','First Step',xp>0,'Dapatkan XP pertama'],
+    ['🔥','On Fire',bossModeStreakV56()>=3,'Streak 3 hari'],
+    ['⚡','Habit Machine',bossHabitLogs.length>=10,'10 habit selesai'],
+    ['🎯','Goal Getter',bossGoals.some(x=>x.status==='completed'),'Selesaikan 1 goal'],
+    ['👑','Level 5 Boss',level>=5,'Capai level 5'],
+    ['💎','1000 XP Club',xp>=1000,'Kumpulkan 1.000 XP']
+  ];
+  $('#bmAchievements').innerHTML=ach.map(function(a){return '<div class="bm56-achievement '+(a[2]?'open':'locked')+'"><span>'+(a[2]?a[0]:'🔒')+'</span><b>'+esc(a[1])+'</b><small>'+esc(a[3])+'</small></div>';}).join('');
+}
+window.toggleBossMissionV56=async function(id,done){
+  const r=await sb.from('boss_daily_missions').update({completed:!done,completed_at:!done?new Date().toISOString():null}).eq('id',id);
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+window.toggleBossHabitV56=async function(id,done){
+  let r;
+  if(done)r=await sb.from('boss_habit_logs').delete().eq('habit_id',id).eq('log_date',ymd());
+  else r=await sb.from('boss_habit_logs').insert({user_id:currentAuth.id,habit_id:id,log_date:ymd()});
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+window.editBossGoalV56=async function(id){
+  const x=bossGoals.find(g=>g.id===id); if(!x)return;
+  const raw=prompt('Progress goal (0–100):',String(x.progress||0)); if(raw===null)return;
+  const progress=Math.max(0,Math.min(100,Number(raw)||0));
+  const r=await sb.from('boss_goals').update({progress:progress,status:progress>=100?'completed':'active',updated_at:new Date().toISOString()}).eq('id',id);
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+window.completeBossGoalV56=async function(id){
+  const r=await sb.from('boss_goals').update({progress:100,status:'completed',updated_at:new Date().toISOString()}).eq('id',id);
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+$('#bmAddGoalBtn').onclick=async function(){
+  const title=prompt('Goal baru kamu apa?',''); if(!title||!title.trim())return;
+  const category=prompt('Kategori? Contoh: Personal, Skill, Uang, Project','Personal')||'Personal';
+  const target=prompt('Target tanggal (YYYY-MM-DD), boleh kosong','')||null;
+  const r=await sb.from('boss_goals').insert({user_id:currentAuth.id,title:title.trim(),category:category.trim(),target_date:target});
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+$('#bmAddHabitBtn').onclick=async function(){
+  const title=prompt('Habit yang mau dilacak?',''); if(!title||!title.trim())return;
+  const icon=(prompt('Emoji/icon habit?','✓')||'✓').slice(0,8);
+  const r=await sb.from('boss_habits').insert({user_id:currentAuth.id,title:title.trim(),icon:icon});
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
+$('#bmAddMissionBtn').onclick=async function(){
+  const title=prompt('Misi tambahan hari ini?',''); if(!title||!title.trim())return;
+  const xp=Math.max(5,Math.min(500,Number(prompt('XP misi ini?','40'))||40));
+  const r=await sb.from('boss_daily_missions').insert({user_id:currentAuth.id,mission_date:ymd(),title:title.trim(),xp:xp});
+  if(r.error){alert(r.error.message);return} await loadBossModeV56(false);
+};
 
 async function loadHealthSafe(){
   if(!currentEmployee||currentEmployee.role!=='admin'||!currentAuth?.id)return;
@@ -4027,7 +4183,11 @@ function setupFullRealtime(isRetry=false){
       .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>scheduleRealtimeRefresh('withdrawal_requests'))
       .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>scheduleRealtimeRefresh('marketplace_orders'))
       .on('postgres_changes',{event:'*',schema:'public',table:'boss_notification_reads'},async()=>{await loadBossNotificationReadsSafe();renderBossNotifications()})
-      .on('postgres_changes',{event:'*',schema:'public',table:'health_daily_checkins'},()=>loadHealthSafe())
+      .on('postgres_changes',{event:'*',schema:'public',table:'health_daily_checkins'},()=>{loadHealthSafe();if(currentEmployee?.role==='admin')loadBossModeV56(false)})
+      .on('postgres_changes',{event:'*',schema:'public',table:'boss_goals'},()=>loadBossModeV56(false))
+      .on('postgres_changes',{event:'*',schema:'public',table:'boss_habits'},()=>loadBossModeV56(false))
+      .on('postgres_changes',{event:'*',schema:'public',table:'boss_habit_logs'},()=>loadBossModeV56(false))
+      .on('postgres_changes',{event:'*',schema:'public',table:'boss_daily_missions'},()=>loadBossModeV56(false))
       .subscribe((status)=>{
         // Abaikan callback dari channel lama yang sengaja kita tutup.
         if(myGeneration!==realtimeGeneration)return;
@@ -4537,6 +4697,14 @@ setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==
 @media(max-width:1000px){.hl55-advice-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.hl55-advice-grid{grid-template-columns:1fr}.hl55-advice-head{flex-direction:column}}
 /* ===== END V55 ===== */
 /* ===== END V54 ===== */
+/* ===== V56 BOS MODE ===== */
+#bossmode{padding-bottom:32px}.bm56-hero{display:flex;justify-content:space-between;align-items:center;gap:18px;background:linear-gradient(135deg,#111827,#1e1b4b 58%,#312e81);color:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 16px 40px rgba(15,23,42,.16)}.bm56-eyebrow,.bm56-kicker{font-size:9px;font-weight:900;letter-spacing:.15em;color:#a5b4fc}.bm56-hero h1{font-size:32px;margin:5px 0}.bm56-hero p{margin:0;color:#c7d2fe;font-size:12px}.bm56-levelbox{text-align:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:17px;padding:12px 20px;min-width:130px}.bm56-levelbox span,.bm56-levelbox small{display:block}.bm56-levelbox span{font-size:9px}.bm56-levelbox b{display:block;font-size:34px;line-height:1;margin:5px 0}.bm56-levelbox small{font-size:9px}
+.bm56-xp-card,.bm56-card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,.035)}.bm56-xp-card{margin:12px 0}.bm56-xp-top,.bm56-card-head,.bm56-goal-top,.bm56-goal-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center}.bm56-xp-top span{font-size:9px;color:#94a3b8}.bm56-xp-top b{display:block;font-size:18px;margin-top:2px}.bm56-xpbar{height:8px;background:#eef2ff;border-radius:999px;overflow:hidden;margin-top:9px}.bm56-xpbar span{display:block;height:100%;background:linear-gradient(90deg,#4f46e5,#8b5cf6)}
+.bm56-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.bm56-stats>div{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:13px}.bm56-stats span,.bm56-stats small{display:block;font-size:9px;color:#94a3b8}.bm56-stats b{display:block;font-size:20px;margin:5px 0 2px}.bm56-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.bm56-card-head{align-items:flex-start}.bm56-card-head h3{margin:3px 0;font-size:17px}.bm56-card-head p{margin:0;color:#94a3b8;font-size:9px}.bm56-list{display:grid;gap:7px}.bm56-checkrow{border:1px solid #edf2f7;background:#fbfdff;border-radius:12px;padding:10px;display:flex;align-items:center;gap:10px;text-align:left;width:100%;cursor:pointer}.bm56-checkrow.done{background:#f0fdf4;border-color:#bbf7d0}.bm56-checkrow b{display:block;font-size:11px}.bm56-checkrow small{display:block;font-size:8px;color:#94a3b8}.bm56-check{margin-left:auto;font-size:18px;font-weight:900;color:#4f46e5}.bm56-habit-icon{width:31px;height:31px;border-radius:9px;display:grid;place-items:center;background:#eef2ff}.bm56-empty{text-align:center;color:#94a3b8;padding:24px;font-size:10px}
+.bm56-goals,.bm56-achievements{margin-top:12px}.bm56-goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.bm56-goal{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fbfdff}.bm56-goal.completed{background:#f0fdf4;border-color:#bbf7d0}.bm56-goal-top span,.bm56-goal-top em,.bm56-goal-bottom small{font-size:8px;color:#94a3b8}.bm56-goal-top em{font-style:normal;font-weight:900}.bm56-goal>b{display:block;font-size:12px;margin:7px 0}.bm56-progress{height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-bottom:7px}.bm56-progress span{height:100%;display:block;background:#4f46e5}.bm56-mini{border:0;border-radius:7px;padding:5px 7px;font-size:8px;font-weight:800;cursor:pointer;background:#eef2ff;color:#4338ca;margin-left:4px}.bm56-mini.green{background:#dcfce7;color:#15803d}
+.bm56-achievement-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.bm56-achievement{border-radius:12px;border:1px solid #e5e7eb;padding:11px;text-align:center}.bm56-achievement span{display:block;font-size:22px}.bm56-achievement b{display:block;font-size:10px;margin:5px 0}.bm56-achievement small{font-size:8px;color:#94a3b8}.bm56-achievement.locked{opacity:.45}.bm56-achievement.open{background:#fffbeb;border-color:#fde68a}
+@media(max-width:1000px){.bm56-stats{grid-template-columns:repeat(2,1fr)}.bm56-goal-grid{grid-template-columns:repeat(2,1fr)}.bm56-achievement-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:720px){.bm56-grid{grid-template-columns:1fr}.bm56-goal-grid{grid-template-columns:1fr}.bm56-achievement-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:500px){.bm56-hero{flex-direction:column;align-items:flex-start}.bm56-stats{grid-template-columns:1fr 1fr}}
+/* ===== END V56 ===== */
 </style>
 
 <script>
