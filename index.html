@@ -724,7 +724,6 @@ aside .userbox{
       <button data-page="bossmode" class="adminOnly">👑 BOS MODE</button>
       <button data-page="health" class="adminOnly">❤️ Kesehatan Saya</button>
       <button data-page="routine" id="routineNav">☑ Job Harian</button>
-      <button data-page="tasks" id="taskNav">Tugas</button>
       <button data-page="profile" class="employeeOnly">☺ Profil Saya</button>
     </nav>
     <div class="user">
@@ -769,10 +768,6 @@ aside .userbox{
         <div class="dash43-kpi">
           <div class="dash43-kpi-icon purple">☂</div>
           <div><span>Izin / Sakit</span><b id="dI">0</b><small>Tidak hadir hari ini</small></div>
-        </div>
-        <div class="dash43-kpi adminOnly">
-          <div class="dash43-kpi-icon amber">☑</div>
-          <div><span>Tugas Belum Selesai</span><b id="bOpenTasks">0</b><small>Masih berjalan</small></div>
         </div>
       </div>
 
@@ -1591,13 +1586,6 @@ aside .userbox{
       <div class="routinegrid" id="routineRows"></div>
     </section>
 
-    <section id="tasks" class="page hidden">
-      <div class="top"><div><h1 id="taskPageTitle">Tugas</h1><div class="muted" id="taskSubtitle"></div></div><button class="btn primary adminOnly" id="addTask">+ Tambah Tugas</button></div>
-      <div class="stats"><div class="card stat"><span class="muted">Belum Dikerjakan</span><b id="tTodo">0</b></div><div class="card stat"><span class="muted">Dikerjakan</span><b id="tDoing">0</b></div><div class="card stat"><span class="muted">Selesai</span><b id="tDone">0</b></div><div class="card stat"><span class="muted">Lewat Deadline</span><b id="tLate">0</b></div></div>
-      <div class="card adminOnly" style="margin-bottom:15px"><div class="toolbar"><div><select class="input" id="taskEmployeeFilter"><option value="">Semua karyawan</option></select><select class="input" id="taskStatusFilter"><option value="">Semua status</option><option>Belum Dikerjakan</option><option>Dikerjakan</option><option>Selesai</option></select></div></div></div>
-      <div class="taskcards" id="taskRows"></div>
-    </section>
-
     <section id="profile" class="page hidden">
       <div class="top"><div><h1>Profil Saya</h1><div class="muted">Informasi akun karyawan.</div></div></div>
       <div class="card"><div id="profileContent"></div></div>
@@ -1642,7 +1630,6 @@ aside .userbox{
   </div>
 </div>
 
-<div class="modal" id="taskModal"><div class="box"><h3 id="taskModalTitle">Tambah Tugas</h3><input type="hidden" id="tId"><div class="grid"><label class="field">Judul Tugas<input id="tTitle"></label><label class="field">Karyawan<select id="tEmployee"></select></label><label class="field">Deadline<input id="tDue" type="date"></label><label class="field">Prioritas<select id="tPriority"><option>Rendah</option><option selected>Normal</option><option>Tinggi</option></select></label><label class="field" style="grid-column:1/-1">Keterangan<textarea id="tDescription"></textarea></label></div><div class="actions"><button class="btn modalCancel">Batal</button><button class="btn primary" id="saveTask">Simpan Tugas</button></div></div></div>
 <div class="modal" id="leaveModal">
   <div class="box">
     <h3>Ajukan Izin / Sakit / Cuti</h3>
@@ -1867,9 +1854,6 @@ async function boot(user){
   $('#sideName').textContent=emp.full_name;
   $('#sideRole').textContent=emp.role==='admin'?'Bos / Administrator':emp.job_title||'Karyawan';
   $('#roleBadge').textContent=emp.role==='admin'?'AKSES BOS':'AKSES KARYAWAN';
-  $('#taskNav').textContent=emp.role==='admin'?'Tugas Karyawan':'Tugas Saya';
-  $('#taskPageTitle').textContent=emp.role==='admin'?'Tugas Karyawan':'Tugas Saya';
-  $('#taskSubtitle').textContent=emp.role==='admin'?'Buat dan pantau pekerjaan seluruh karyawan.':'Lihat pekerjaan yang diberikan Bos dan update progresnya.';
   $('#welcome').textContent=emp.role==='admin'?'Selamat datang, Bos.':'Selamat bekerja, '+emp.full_name+'.';
   const canSales = emp.role==='admin' || emp.can_manage_sales===true || emp.username==='aping';
   $$('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
@@ -2060,9 +2044,6 @@ function renderBossNotifications(){
 
   const pending=leaveRequests.filter(x=>['pending','menunggu'].some(v=>String(x.status||'').toLowerCase().includes(v)));
   if(pending.length)add('leave:'+pending.map(x=>x.id).sort().join(','),'📝',pending.length+' pengajuan menunggu','Izin / sakit / cuti perlu diperiksa.','leave','Butuh keputusan Bos',pending);
-
-  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);
-  if(overdue.length)add('overdue:'+today+':'+overdue.map(x=>x.id).sort().join(','),'⚠️',overdue.length+' tugas lewat deadline','Ada tugas yang belum selesai melewati deadline.','tasks','Prioritas',overdue);
 
   const out=productStocks.filter(p=>Number(p.stock)<=0),low=productStocks.filter(p=>Number(p.stock)>0&&Number(p.stock)<=Number(p.minimum_stock));
   if(out.length)add('stockout:'+out.map(x=>x.id).sort().join(','),'📦',out.length+' stok produk habis',out.map(x=>x.product_name).join(', '),'stock','Segera restock',out);
@@ -2466,7 +2447,7 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderTasks();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();renderBossNotifications();
+ renderAttendance();renderEmployees();renderNotice();renderProfile();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();renderBossNotifications();
 }
 
 function attendanceDurationV44(checkIn,checkOut){
@@ -2615,17 +2596,6 @@ function renderProfile(){
  <div class="detailitem" style="grid-column:1/-1"><span class="muted">Alamat</span><b>${esc(currentEmployee.address||'-')}</b></div>
  </div>`;
 }
-
-function taskStatusClass(s){return s==='Selesai'?'status-Selesai':s==='Dikerjakan'?'status-Dikerjakan':'status-Belum'}
-function renderTasks(){if(!currentEmployee)return;let list=[...tasks],ef='',sf='';if(currentEmployee.role==='admin'){ef=$('#taskEmployeeFilter').value;sf=$('#taskStatusFilter').value;if(ef)list=list.filter(x=>x.assigned_to===ef);if(sf)list=list.filter(x=>x.status===sf);$('#taskEmployeeFilter').innerHTML='<option value="">Semua karyawan</option>'+employees.filter(x=>x.role==='employee').map(x=>`<option value="${x.id}" ${x.id===ef?'selected':''}>${esc(x.full_name)}</option>`).join('');}$('#tTodo').textContent=tasks.filter(x=>x.status==='Belum Dikerjakan').length;$('#tDoing').textContent=tasks.filter(x=>x.status==='Dikerjakan').length;$('#tDone').textContent=tasks.filter(x=>x.status==='Selesai').length;$('#tLate').textContent=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<ymd()).length;$('#taskRows').innerHTML=list.length?list.map(x=>{let late=x.status!=='Selesai'&&x.due_date&&x.due_date<ymd();let controls=currentEmployee.role==='admin'?`<div class="rowactions"><button class="btn" onclick="editTask('${x.id}')">Edit</button><button class="btn danger" onclick="deleteTask('${x.id}')">Hapus</button></div>`:`<div class="rowactions">${x.status==='Belum Dikerjakan'?`<button class="btn" onclick="setTaskStatus('${x.id}','Dikerjakan')">Mulai Kerjakan</button>`:''}${x.status!=='Selesai'?`<button class="btn primary" onclick="setTaskStatus('${x.id}','Selesai')">Tandai Selesai</button>`:`<button class="btn" onclick="setTaskStatus('${x.id}','Dikerjakan')">Buka Lagi</button>`}</div>`;return `<div class="taskcard"><div class="taskhead"><div><div class="tasktitle">${esc(x.title)}</div><div class="taskmeta">${currentEmployee.role==='admin'?`<span class="badge aktif">${esc(x.assignee_name)}</span>`:''}<span class="badge prio-${esc(x.priority)}">${esc(x.priority)}</span><span class="badge ${taskStatusClass(x.status)}">${esc(x.status)}</span>${x.due_date?`<span class="badge ${late?'sakit':'nonaktif'}">Deadline: ${esc(x.due_date)}${late?' - Terlambat':''}</span>`:''}</div></div>${controls}</div>${x.description?`<div class="taskdesc">${esc(x.description)}</div>`:''}</div>`;}).join(''):'<div class="card" style="text-align:center;color:#8793a5">Belum ada tugas.</div>'}
-$('#taskEmployeeFilter').onchange=renderTasks;$('#taskStatusFilter').onchange=renderTasks;
-function resetTaskForm(){$('#tId').value='';$('#tTitle').value='';$('#tDescription').value='';$('#tDue').value=ymd();$('#tPriority').value='Normal';$('#tEmployee').innerHTML=employees.filter(x=>x.role==='employee'&&x.active).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('')}
-$('#addTask').onclick=()=>{resetTaskForm();$('#taskModalTitle').textContent='Tambah Tugas';openModal('#taskModal')};
-window.editTask=id=>{let x=tasks.find(t=>t.id===id);if(!x)return;resetTaskForm();$('#taskModalTitle').textContent='Edit Tugas';$('#tId').value=x.id;$('#tTitle').value=x.title||'';$('#tDescription').value=x.description||'';$('#tDue').value=x.due_date||'';$('#tPriority').value=x.priority||'Normal';$('#tEmployee').value=x.assigned_to;openModal('#taskModal')};
-$('#saveTask').onclick=async()=>{let id=$('#tId').value,title=$('#tTitle').value.trim(),assigned=$('#tEmployee').value;if(!title||!assigned){alert('Judul tugas dan karyawan wajib diisi.');return}let payload={title,description:$('#tDescription').value.trim()||null,assigned_to:assigned,due_date:$('#tDue').value||null,priority:$('#tPriority').value};if(!id)payload.created_by=currentEmployee.id;let res=id?await sb.from('tasks').update(payload).eq('id',id):await sb.from('tasks').insert(payload);if(res.error){alert(res.error.message);return}$('#taskModal').classList.remove('open');await refreshData()};
-window.deleteTask=async id=>{if(!confirm('Hapus tugas ini?'))return;let {error}=await sb.from('tasks').delete().eq('id',id);if(error)alert(error.message);else await refreshData()};
-window.setTaskStatus=async(id,status)=>{let {error}=await sb.from('tasks').update({status,completed_at:status==='Selesai'?new Date().toISOString():null}).eq('id',id);if(error){alert(error.message);return}await refreshData()};
-
 
 function sellerStatusClass(s){return s==='approved'?'seller-status-approved':s==='suspended'?'seller-status-suspended':'seller-status-pending'}
 function sellerStatusLabel(s){return s==='approved'?'Aktif':s==='suspended'?'Ditolak / Suspend':'Menunggu Approval'}
@@ -3621,13 +3591,6 @@ function renderBossActionCenterV53(){
     page:'leave',cta:'Tinjau Pengajuan'
   });
 
-  const overdue=tasks.filter(x=>x.status!=='Selesai'&&x.due_date&&x.due_date<today);
-  if(overdue.length)actions.push({
-    icon:'!',tone:'red',title:overdue.length+' tugas lewat deadline',
-    desc:'Ada pekerjaan yang melewati batas waktu dan belum selesai.',
-    page:'tasks',cta:'Buka Tugas'
-  });
-
   let digitalCritical=[];
   if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined'){
     digitalCritical=digitalProductsV34.map(p=>{
@@ -3677,7 +3640,6 @@ function renderBossDashboard(){
   const notIn=activeEmployees.filter(e=>!todayAtt.some(a=>a.employee_id===e.id&&a.check_in));
   const notOut=activeEmployees.filter(e=>todayAtt.some(a=>a.employee_id===e.id&&a.check_in&&!a.check_out));
   const pendingLeave=leaveRequests.filter(x=>x.status==='Menunggu').length;
-  const openTasks=tasks.filter(x=>x.status!=='Selesai').length;
   const lowStock=productStocks.filter(x=>Number(x.stock)>0&&Number(x.stock)<=Number(x.minimum_stock)).length;
   const outStock=productStocks.filter(x=>Number(x.stock)<=0).length;
 
@@ -3689,7 +3651,6 @@ function renderBossDashboard(){
   $('#bNotIn').textContent=notIn.length;
   $('#bNotOut').textContent=notOut.length;
   $('#bPendingLeave').textContent=pendingLeave;
-  $('#bOpenTasks').textContent=openTasks;
   $('#bLowStock').textContent=lowStock;
   $('#bOutStock').textContent=outStock;
   $('#bPaidDays').textContent=paidDays;
@@ -4173,7 +4134,6 @@ function setupFullRealtime(isRetry=false){
       .on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>scheduleRealtimeRefresh('attendance'))
       .on('postgres_changes',{event:'*',schema:'public',table:'employees'},()=>scheduleRealtimeRefresh('employees'))
       .on('postgres_changes',{event:'*',schema:'public',table:'leave_requests'},()=>scheduleRealtimeRefresh('leave_requests'))
-      .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>scheduleRealtimeRefresh('tasks'))
       .on('postgres_changes',{event:'*',schema:'public',table:'routine_jobs'},()=>scheduleRealtimeRefresh('routine_jobs'))
       .on('postgres_changes',{event:'*',schema:'public',table:'routine_job_checks'},()=>scheduleRealtimeRefresh('routine_job_checks'))
       .on('postgres_changes',{event:'*',schema:'public',table:'product_stock'},()=>scheduleRealtimeRefresh('product_stock'))
