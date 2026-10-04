@@ -4252,6 +4252,7 @@ function scheduleRealtimeRefresh(source){
       if(typeof loadDigitalSafe==='function') await loadDigitalSafe();
       if(typeof loadSalesSafe==='function') await loadSalesSafe();
       if(typeof loadSellerCenterSafe==='function') await loadSellerCenterSafe();
+      if(currentEmployee?.role==='admin' && typeof v36Load==='function') await v36Load();
 
       if(typeof renderBossDashboard==='function') renderBossDashboard();
       if(typeof renderSalesDashboard==='function') renderSalesDashboard();
@@ -4314,6 +4315,7 @@ function setupFullRealtime(isRetry=false){
       .on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>scheduleRealtimeRefresh('sales_transactions'))
       .on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>scheduleRealtimeRefresh('withdrawal_requests'))
       .on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>scheduleRealtimeRefresh('marketplace_orders'))
+      .on('postgres_changes',{event:'*',schema:'public',table:'seller_orders'},()=>scheduleRealtimeRefresh('seller_orders'))
       .on('postgres_changes',{event:'*',schema:'public',table:'boss_notification_reads'},async()=>{await loadBossNotificationReadsSafe();renderBossNotifications()})
       .on('postgres_changes',{event:'*',schema:'public',table:'health_daily_checkins'},()=>{loadHealthSafe();if(currentEmployee?.role==='admin')loadBossModeV56(false)})
       .on('postgres_changes',{event:'*',schema:'public',table:'boss_goals'},()=>loadBossModeV56(false))
@@ -4780,7 +4782,7 @@ const v36LoadOriginal=v36Load;v36Load=async function(){if(v361Busy)return;v361Bu
 function v361Opened(){const now=Date.now();v361LastSeen=now;localStorage.setItem('yan_v361_last_seen',String(now));setTimeout(v361Render,50)}
 setTimeout(()=>{const b=v36Bell();if(b&&!b.dataset.v361){b.dataset.v361='1';b.addEventListener('click',()=>{if($('#v36NotifPanel')?.classList.contains('open'))v361Opened()})}},3000);
 function v361Realtime(){if(v361Channel)try{sb.removeChannel(v361Channel)}catch{};v361Channel=sb.channel('boss-smart-notif-v361').on('postgres_changes',{event:'*',schema:'public',table:'digital_inventory'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'digital_products'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'sales_transactions'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'marketplace_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'seller_orders'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'withdrawal_requests'},()=>v36Load()).on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>v36Load()).subscribe();}
-setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){v361Realtime();v36Load()}},3500);
+setTimeout(()=>{if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){v36Load()}},3500);
 </script>
 
 
@@ -5059,7 +5061,7 @@ function v364Realtime(){
 setTimeout(()=>{
   try{
     if(typeof currentEmployee!=='undefined'&&currentEmployee?.role==='admin'){
-      v364Refresh();v364Realtime();
+      v364Refresh();
     }
   }catch(e){}
 },3000);
