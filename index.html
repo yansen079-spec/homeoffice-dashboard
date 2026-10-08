@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HomeOffice">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./embedded-market-logo.png">
 <title>HomeOffice V6 Role Access</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -5554,5 +5561,12 @@ document.addEventListener('click', async function(e){
 
 </script>
 <!-- v42.24.7: Paqih Staff Gudang - add stock permission handled securely by Supabase RPC -->
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA service worker:',err));
+  });
+}
+</script>
 </body>
 </html>
