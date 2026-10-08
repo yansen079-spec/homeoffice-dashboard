@@ -1,12 +1,14 @@
-const CACHE_NAME='homeoffice-pwa-v1';
+const CACHE_NAME='homeoffice-pwa-v2';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache=>cache.addAll(APP_SHELL))
-      .then(()=>self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL))
   );
+});
+
+self.addEventListener('message',event=>{
+  if(event.data?.type==='SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate',event=>{
