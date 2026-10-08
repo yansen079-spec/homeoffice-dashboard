@@ -1,0 +1,20 @@
+{
+  "name": "HomeOffice",
+  "short_name": "HomeOffice",
+  "description": "Dashboard HomeOffice untuk operasional, absensi, gudang digital, penjualan, dan seller center.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f7fb",
+  "theme_color": "#2563eb",
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "./embedded-market-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
