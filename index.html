@@ -255,6 +255,107 @@ aside .userbox{
 .rt-warn{color:#b45309!important;font-weight:700}
 .rt-off{color:#b91c1c!important;font-weight:700}
 
+/* ===== V59 SEASONAL EVENT THEME ===== */
+:root{
+  --seasonal-accent:#2563eb;
+  --seasonal-soft:#eff6ff;
+  --seasonal-border:#dbeafe;
+  --seasonal-ink:#1e3a8a;
+}
+body.seasonal-active{
+  background:
+    radial-gradient(circle at 88% 2%,color-mix(in srgb,var(--seasonal-soft) 80%,transparent),transparent 24%),
+    #f5f7fb;
+}
+.seasonal-strip{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 16px;
+  padding:10px 14px;
+  border:1px solid var(--seasonal-border);
+  background:linear-gradient(90deg,#fff,var(--seasonal-soft));
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(15,23,42,.04);
+  color:var(--seasonal-ink);
+}
+body.seasonal-active .seasonal-strip{display:flex}
+.seasonal-strip-left{display:flex;align-items:center;gap:10px;min-width:0}
+.seasonal-strip-icon{font-size:22px;line-height:1}
+.seasonal-strip-copy{min-width:0}
+.seasonal-strip-copy b{display:block;font-size:12px}
+.seasonal-strip-copy span{display:block;font-size:10px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seasonal-strip-badge{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:999px;background:#fff;border:1px solid var(--seasonal-border);white-space:nowrap}
+.seasonal-corner{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:8;
+  pointer-events:none;
+  display:none;
+  align-items:flex-end;
+  gap:2px;
+  opacity:.92;
+  filter:drop-shadow(0 8px 18px rgba(15,23,42,.14));
+}
+body.seasonal-active .seasonal-corner{display:flex}
+.seasonal-corner .s-main{font-size:48px;line-height:1}
+.seasonal-corner .s-mini{font-size:23px;line-height:1;transform:translate(-8px,-30px) rotate(-12deg)}
+body.seasonal-active .brand{position:relative}
+body.seasonal-active .brand:after{
+  content:attr(data-seasonal-mark);
+  position:absolute;
+  top:-17px;
+  right:-3px;
+  font-size:20px;
+  transform:rotate(9deg);
+  pointer-events:none;
+}
+body.seasonal-active .card,
+body.seasonal-active .seller-kpi,
+body.seasonal-active .bosscard,
+body.seasonal-active .stockcard{
+  border-color:color-mix(in srgb,var(--seasonal-border) 58%,#e6eaf0);
+}
+body.seasonal-active .nav button.active{
+  background:color-mix(in srgb,var(--seasonal-soft) 80%,#eaf1ff);
+  color:var(--seasonal-ink);
+}
+body.seasonal-christmas{
+  --seasonal-accent:#15803d;--seasonal-soft:#f0fdf4;--seasonal-border:#bbf7d0;--seasonal-ink:#166534;
+}
+body.seasonal-halloween{
+  --seasonal-accent:#c2410c;--seasonal-soft:#fff7ed;--seasonal-border:#fed7aa;--seasonal-ink:#9a3412;
+}
+body.seasonal-maulid{
+  --seasonal-accent:#0f766e;--seasonal-soft:#f0fdfa;--seasonal-border:#99f6e4;--seasonal-ink:#115e59;
+}
+body.seasonal-ramadan{
+  --seasonal-accent:#7c3aed;--seasonal-soft:#f5f3ff;--seasonal-border:#ddd6fe;--seasonal-ink:#5b21b6;
+}
+body.seasonal-eid{
+  --seasonal-accent:#15803d;--seasonal-soft:#f0fdf4;--seasonal-border:#bbf7d0;--seasonal-ink:#166534;
+}
+body.seasonal-independence{
+  --seasonal-accent:#dc2626;--seasonal-soft:#fff1f2;--seasonal-border:#fecdd3;--seasonal-ink:#b91c1c;
+}
+body.seasonal-newyear{
+  --seasonal-accent:#4338ca;--seasonal-soft:#eef2ff;--seasonal-border:#c7d2fe;--seasonal-ink:#3730a3;
+}
+@media(max-width:768px){
+  .seasonal-strip{margin:0 0 12px;padding:9px 11px}
+  .seasonal-corner{right:10px;bottom:10px}
+  .seasonal-corner .s-main{font-size:38px}
+  .seasonal-corner .s-mini{font-size:18px;transform:translate(-7px,-23px) rotate(-12deg)}
+}
+@media(max-width:520px){
+  .seasonal-strip-badge{display:none}
+  .seasonal-strip-copy span{white-space:normal}
+  body.seasonal-active .brand:after{right:3px}
+}
+/* ===== END V59 SEASONAL EVENT THEME ===== */
+
 .digital-tools{display:flex;gap:8px;flex-wrap:wrap}
 .batchpreview{max-height:320px;overflow:auto;border:1px solid #e6eaf0;border-radius:12px;margin-top:12px}
 .batchpreview table{min-width:720px}
@@ -1924,6 +2025,61 @@ function updateDashLiveClockV431(){
 setInterval(updateDashLiveClockV431,1000);
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+/* ===== V59 SEASONAL EVENT THEME ===== */
+function seasonalHijriPartsV59(date=new Date()){
+  try{
+    const parts=new Intl.DateTimeFormat('en-u-ca-islamic',{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(date);
+    return {
+      day:Number(parts.find(x=>x.type==='day')?.value||0),
+      month:Number(parts.find(x=>x.type==='month')?.value||0),
+      year:Number(parts.find(x=>x.type==='year')?.value||0)
+    };
+  }catch(_){return {day:0,month:0,year:0}}
+}
+function seasonalEventV59(date=new Date()){
+  const m=date.getMonth()+1,d=date.getDate(),h=seasonalHijriPartsV59(date);
+  const inRange=(m1,d1,m2,d2)=>{
+    const a=m*100+d,b=m1*100+d1,c=m2*100+d2;
+    return b<=c?(a>=b&&a<=c):(a>=b||a<=c);
+  };
+
+  if(inRange(12,18,12,27))return {key:'christmas',name:'Nuansa Natal',icon:'🎄',mini:'🎅',mark:'🎅',badge:'Seasonal',copy:'Sedikit nuansa Natal untuk suasana kerja yang lebih hangat.'};
+  if(inRange(10,20,11,1))return {key:'halloween',name:'Halloween Week',icon:'🎃',mini:'👻',mark:'🎃',badge:'Seasonal',copy:'Tema Halloween ringan — tetap profesional, cuma sedikit spooky.'};
+  if(inRange(12,30,1,2))return {key:'newyear',name:'Tahun Baru',icon:'🎆',mini:'✨',mark:'✨',badge:'New Year',copy:'Semangat baru, target baru, tetap gas bareng HomeOffice.'};
+  if(inRange(8,14,8,18))return {key:'independence',name:'Kemerdekaan Indonesia',icon:'🇮🇩',mini:'✨',mark:'🇮🇩',badge:'17 Agustus',copy:'Nuansa merah putih untuk menyambut Hari Kemerdekaan.'};
+
+  if(h.month===9)return {key:'ramadan',name:'Ramadan',icon:'🌙',mini:'✨',mark:'🌙',badge:'Ramadan',copy:'Nuansa Ramadan yang tenang untuk menemani aktivitas harian.'};
+  if(h.month===10&&h.day>=1&&h.day<=7)return {key:'eid',name:'Idulfitri',icon:'🕌',mini:'✨',mark:'🌙',badge:'Lebaran',copy:'Selamat Idulfitri — nuansa hijau lembut untuk suasana yang lebih hangat.'};
+  if(h.month===3&&h.day>=9&&h.day<=15)return {key:'maulid',name:'Maulid Nabi',icon:'🕌',mini:'🌙',mark:'🌙',badge:'Maulid',copy:'Nuansa hijau lembut untuk memperingati Maulid Nabi dengan tetap sederhana.'};
+
+  return null;
+}
+function applySeasonalThemeV59(){
+  const ev=seasonalEventV59(new Date());
+  const body=document.body;
+  [...body.classList].filter(x=>x.startsWith('seasonal-')).forEach(x=>body.classList.remove(x));
+  document.querySelectorAll('.seasonal-strip,.seasonal-corner').forEach(x=>x.remove());
+  document.querySelector('.brand')?.removeAttribute('data-seasonal-mark');
+  if(!ev)return;
+
+  body.classList.add('seasonal-active','seasonal-'+ev.key);
+  const brand=document.querySelector('.brand');
+  if(brand)brand.dataset.seasonalMark=ev.mark;
+
+  const strip=document.createElement('div');
+  strip.className='seasonal-strip';
+  strip.innerHTML=`<div class="seasonal-strip-left"><span class="seasonal-strip-icon">${ev.icon}</span><div class="seasonal-strip-copy"><b>${esc(ev.name)}</b><span>${esc(ev.copy)}</span></div></div><span class="seasonal-strip-badge">${esc(ev.badge)}</span>`;
+  const main=document.querySelector('.main');
+  if(main)main.prepend(strip);
+
+  const corner=document.createElement('div');
+  corner.className='seasonal-corner';
+  corner.innerHTML=`<span class="s-main">${ev.icon}</span><span class="s-mini">${ev.mini}</span>`;
+  body.appendChild(corner);
+}
+document.addEventListener('DOMContentLoaded',applySeasonalThemeV59);
+/* ===== END V59 SEASONAL EVENT THEME ===== */
 
 let loginBusy=false;
 async function login(){
