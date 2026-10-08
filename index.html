@@ -1925,29 +1925,73 @@ setInterval(updateDashLiveClockV431,1000);
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
+let loginBusy=false;
 async function login(){
-  $('#loginMsg').textContent='Memproses...';
-  const {data,error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPass').value});
-  if(error){$('#loginMsg').textContent=error.message;return}
-  await boot(data.user);
+  if(loginBusy)return;
+  const email=$('#loginEmail').value.trim();
+  const password=$('#loginPass').value;
+  if(!email||!password){
+    $('#loginMsg').textContent='Email dan password wajib diisi.';
+    return;
+  }
+
+  loginBusy=true;
+  const btn=$('#loginBtn');
+  const oldText=btn.textContent;
+  btn.disabled=true;
+  btn.textContent='Memproses...';
+  $('#loginMsg').textContent='Memeriksa akun...';
+
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){
+      $('#loginMsg').textContent='Email atau password tidak valid.';
+      return;
+    }
+    await boot(data.user);
+  }catch(err){
+    console.error('Login gagal:',err);
+    $('#loginMsg').textContent='Tidak dapat masuk sekarang. Coba lagi sebentar.';
+  }finally{
+    loginBusy=false;
+    btn.disabled=false;
+    btn.textContent=oldText;
+  }
 }
 $('#loginBtn').onclick=login;
-$('#loginPass').onkeydown=e=>{if(e.key==='Enter')login()};
-$('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('#loginPass').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();login()}};
+$('#logout').onclick=async()=>{
+  try{await sb.auth.signOut()}
+  finally{location.reload()}
+};
 
 async function boot(user){
   currentAuth=user;
-  const {data:emp,error}=await sb.from('employees').select('*').eq('auth_user_id',user.id).single();
-  if(error||!emp){$('#loginMsg').textContent='Akun ini belum dihubungkan ke data karyawan.';await sb.auth.signOut();return}
+  const {data:emp,error}=await sb.from('employees')
+    .select('*')
+    .eq('auth_user_id',user.id)
+    .eq('active',true)
+    .maybeSingle();
+  if(error){
+    console.error('Gagal memuat profil karyawan:',error);
+    $('#loginMsg').textContent='Profil karyawan gagal dimuat. Coba lagi.';
+    await sb.auth.signOut();
+    return;
+  }
+  if(!emp){
+    $('#loginMsg').textContent='Akun tidak aktif atau belum dihubungkan ke data karyawan.';
+    await sb.auth.signOut();
+    return;
+  }
   currentEmployee=emp;
   $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
   $('#sideName').textContent=emp.full_name;
   $('#sideRole').textContent=emp.role==='admin'?'Bos / Administrator':emp.job_title||'Karyawan';
   $('#roleBadge').textContent=emp.role==='admin'?'AKSES BOS':'AKSES KARYAWAN';
   $('#welcome').textContent=emp.role==='admin'?'Selamat datang, Bos.':'Selamat bekerja, '+emp.full_name+'.';
-  const canSales = emp.role==='admin' || emp.can_manage_sales===true || emp.username==='aping';
-  $$('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
-  $$('.salesUploaderOnly').forEach(x=>x.classList.toggle('hidden',!(emp.role==='admin'||emp.can_manage_sales===true||emp.username==='aping')));
+  const canSales = emp.role==='admin' || emp.can_manage_sales===true;
+  $('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
+  $('.salesUploaderOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
   if(canSales){
     $('#salesRecapSubtitle').textContent=emp.role==='admin'?'Pantau seluruh rekap penjualan YANSTORE.':'Upload Excel rekap harian dan pantau hasilnya.';
   }
