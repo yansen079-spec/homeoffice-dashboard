@@ -687,9 +687,41 @@ aside .userbox{
 .pay51-history-list{max-height:360px;overflow:auto;border:1px solid #edf2f7;border-radius:12px}.pay51-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 12px;border-bottom:1px solid #edf2f7}.pay51-history-row:last-child{border-bottom:0}.pay51-history-row b{font-size:12px}.pay51-history-row small{display:block;color:#94a3b8;font-size:9px;margin-top:2px}.pay51-history-row>strong{font-size:12px;color:#15803d}.pay51-history-empty{text-align:center;color:#94a3b8;padding:24px;font-size:11px}
 @media(max-width:820px){.pay51-today-head{flex-direction:column}.pay51-today-summary{width:100%;grid-template-columns:repeat(3,1fr)}.pay51-today-summary>div{min-width:0}.pay51-today-list{grid-template-columns:1fr}}
 @media(max-width:520px){.pay51-today-summary{grid-template-columns:1fr}.pay51-history-top{flex-direction:column}.pay51-history-total{text-align:left;width:100%}}
+/* ===== V59 SEASONAL EVENT THEMES ===== */
+:root{--event-accent:#2563eb;--event-accent-soft:#eaf1ff;--event-glow:rgba(37,99,235,.10)}
+body.event-active{background:radial-gradient(circle at 88% 6%,var(--event-glow),transparent 20%),radial-gradient(circle at 14% 92%,var(--event-glow),transparent 22%),#f5f7fb}
+body.event-active .nav button.active,body.event-active .nav button:hover{background:var(--event-accent-soft);color:var(--event-accent)}
+body.event-active .rolebox{background:var(--event-accent-soft);color:var(--event-accent)}
+body.event-active .dash43-eyebrow{color:var(--event-accent)!important}
+body.event-active .card,body.event-active .dash43-kpi,body.event-active .dash43-section,body.event-active .seller-kpi,body.event-active .stockcard{box-shadow:0 10px 30px var(--event-glow)}
+#eventThemeDecor{position:fixed;inset:0;pointer-events:none;z-index:12;overflow:hidden}
+.event-theme-item{position:absolute;filter:drop-shadow(0 7px 12px rgba(15,23,42,.10));opacity:.9;user-select:none}
+.event-theme-item.e1{top:10px;left:245px;font-size:28px;transform:rotate(-10deg)}
+.event-theme-item.e2{top:18px;right:28px;font-size:30px;transform:rotate(8deg)}
+.event-theme-item.e3{bottom:18px;right:24px;font-size:26px;opacity:.55}
+.event-theme-item.e4{bottom:16px;left:248px;font-size:24px;opacity:.5}
+#eventThemeChip{display:none;align-items:center;gap:7px;margin-top:7px;width:max-content;max-width:100%;padding:5px 9px;border:1px solid color-mix(in srgb,var(--event-accent) 25%,#fff);background:color-mix(in srgb,var(--event-accent-soft) 85%,#fff);color:var(--event-accent);border-radius:999px;font-size:10px;font-weight:800}
+body.event-active #eventThemeChip{display:inline-flex}
+#eventThemeChip .event-dot{width:6px;height:6px;border-radius:50%;background:var(--event-accent);box-shadow:0 0 0 4px var(--event-glow)}
+#eventThemeChip .event-sub{font-weight:600;opacity:.78}
+body.event-halloween{--event-accent:#c2410c;--event-accent-soft:#fff1e7;--event-glow:rgba(234,88,12,.09)}
+body.event-christmas{--event-accent:#15803d;--event-accent-soft:#edf9f0;--event-glow:rgba(22,163,74,.09)}
+body.event-maulid{--event-accent:#0f766e;--event-accent-soft:#edfafa;--event-glow:rgba(13,148,136,.09)}
+body.event-ramadan{--event-accent:#7c3aed;--event-accent-soft:#f5f0ff;--event-glow:rgba(124,58,237,.08)}
+body.event-eid{--event-accent:#15803d;--event-accent-soft:#f0fdf4;--event-glow:rgba(34,197,94,.08)}
+body.event-independence{--event-accent:#dc2626;--event-accent-soft:#fff1f2;--event-glow:rgba(220,38,38,.08)}
+body.event-newyear{--event-accent:#4f46e5;--event-accent-soft:#eef2ff;--event-glow:rgba(79,70,229,.08)}
+body.event-active .side:after{content:attr(data-event-mark);position:absolute;right:13px;top:18px;font-size:19px;opacity:.75;pointer-events:none}
+@media(max-width:768px){.event-theme-item.e1{left:12px;top:70px}.event-theme-item.e2{right:12px;top:70px}.event-theme-item.e3,.event-theme-item.e4{display:none}body.event-active .side:after{display:none}}
+@media(prefers-reduced-motion:no-preference){body.event-active .event-theme-item.e1{animation:eventFloatA 5.2s ease-in-out infinite}body.event-active .event-theme-item.e2{animation:eventFloatB 6.1s ease-in-out infinite}}
+@keyframes eventFloatA{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(5px) rotate(-6deg)}}
+@keyframes eventFloatB{0%,100%{transform:translateY(0) rotate(8deg)}50%{transform:translateY(-5px) rotate(4deg)}}
+/* ===== END V59 SEASONAL EVENT THEMES ===== */
+
 /* ===== END V48 ===== */
 </style></head>
 <body>
+<div id="eventThemeDecor" aria-hidden="true"><span class="event-theme-item e1"></span><span class="event-theme-item e2"></span><span class="event-theme-item e3"></span><span class="event-theme-item e4"></span></div>
 <section id="login" class="login">
   <div class="loginbox">
     <div class="logo">🏠 HomeOffice</div>
@@ -742,6 +774,7 @@ aside .userbox{
           <h1>Dashboard</h1>
           <div id="welcome" class="dash43-welcome"></div>
           <div id="realtimeStatus" class="muted dash43-realtime">● Menghubungkan realtime...</div>
+          <div id="eventThemeChip"><span class="event-dot"></span><span id="eventThemeName"></span><span class="event-sub" id="eventThemeSub"></span></div>
         </div>
         <div class="dash43-date-pill">
           <span class="dash43-date-icon">📅</span>
@@ -1924,6 +1957,40 @@ function updateDashLiveClockV431(){
 setInterval(updateDashLiveClockV431,1000);
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+const EVENT_THEME_CONFIG={
+  halloween:{name:'Halloween',sub:'Tema musiman aktif',className:'event-halloween',mark:'🎃',decor:['🦇','🎃','🕸️','👻']},
+  christmas:{name:'Natal',sub:'Suasana Desember',className:'event-christmas',mark:'🎄',decor:['🎄','🎅','❄️','🎁']},
+  maulid:{name:'Maulid Nabi',sub:'Tema bernuansa islami',className:'event-maulid',mark:'☪️',decor:['🌙','🏮','✨','⭐']},
+  ramadan:{name:'Ramadan',sub:'Tema bulan suci',className:'event-ramadan',mark:'🌙',decor:['🌙','🏮','✨','⭐']},
+  eid:{name:'Idul Fitri',sub:'Selamat merayakan',className:'event-eid',mark:'🌙',decor:['🌙','✨','🎊','💚']},
+  independence:{name:'Kemerdekaan RI',sub:'Semangat merah putih',className:'event-independence',mark:'🇮🇩',decor:['🇮🇩','🎉','⭐','🇮🇩']},
+  newyear:{name:'Tahun Baru',sub:'Semangat baru',className:'event-newyear',mark:'✨',decor:['✨','🎆','🎉','⭐']}
+};
+function jakartaDateParts(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));return {year:Number(p.year),month:Number(p.month),day:Number(p.day),md:Number(p.month)*100+Number(p.day)}}
+function currentEventTheme(){
+  const d=jakartaDateParts(),n=d.year*10000+d.month*100+d.day;
+  if(d.md>=1001&&d.md<=1031)return 'halloween';
+  if(d.md>=1212&&d.md<=1226)return 'christmas';
+  if(d.md>=1227||d.md<=102)return 'newyear';
+  if(d.md>=810&&d.md<=818)return 'independence';
+  const movable={2026:{ramadan:[20260218,20260319],eid:[20260320,20260324],maulid:[20260821,20260827]},2027:{ramadan:[20270208,20270309],eid:[20270310,20270313],maulid:[20270810,20270816]}};
+  const y=movable[d.year];if(y){for(const key of ['eid','maulid','ramadan']){const r=y[key];if(r&&n>=r[0]&&n<=r[1])return key}}
+  return null;
+}
+function applyEventTheme(){
+  const key=currentEventTheme(),all=Object.values(EVENT_THEME_CONFIG).map(x=>x.className);
+  document.body.classList.remove('event-active',...all);
+  const side=document.querySelector('.side');if(side)side.removeAttribute('data-event-mark');
+  const decor=[...document.querySelectorAll('#eventThemeDecor .event-theme-item')];decor.forEach(x=>x.textContent='');
+  const chipName=document.querySelector('#eventThemeName'),chipSub=document.querySelector('#eventThemeSub');
+  if(!key)return;
+  const t=EVENT_THEME_CONFIG[key];document.body.classList.add('event-active',t.className);
+  if(side)side.setAttribute('data-event-mark',t.mark);decor.forEach((x,i)=>x.textContent=t.decor[i]||'');
+  if(chipName)chipName.textContent=t.name;if(chipSub)chipSub.textContent='• '+t.sub;
+}
+applyEventTheme();
+
 
 let loginBusy=false;
 async function login(){
