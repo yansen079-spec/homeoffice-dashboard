@@ -2055,8 +2055,15 @@ function seasonalEventV59(date=new Date()){
 
   return null;
 }
-function applySeasonalThemeV59(){
+let seasonalActiveKeyV60=null;
+let seasonalTimerV60=null;
+
+function applySeasonalThemeV59(force=false){
   const ev=seasonalEventV59(new Date());
+  const nextKey=ev?.key||null;
+  if(!force&&seasonalActiveKeyV60===nextKey)return;
+  seasonalActiveKeyV60=nextKey;
+
   const body=document.body;
   [...body.classList].filter(x=>x.startsWith('seasonal-')).forEach(x=>body.classList.remove(x));
   document.querySelectorAll('.seasonal-strip,.seasonal-corner').forEach(x=>x.remove());
@@ -2078,7 +2085,18 @@ function applySeasonalThemeV59(){
   corner.innerHTML=`<span class="s-main">${ev.icon}</span><span class="s-mini">${ev.mini}</span>`;
   body.appendChild(corner);
 }
-document.addEventListener('DOMContentLoaded',applySeasonalThemeV59);
+
+function startSeasonalRealtimeV60(){
+  applySeasonalThemeV59(true);
+  if(seasonalTimerV60)clearInterval(seasonalTimerV60);
+  seasonalTimerV60=setInterval(()=>applySeasonalThemeV59(false),5*60*1000);
+}
+
+document.addEventListener('DOMContentLoaded',startSeasonalRealtimeV60);
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)applySeasonalThemeV59(false);
+});
+window.addEventListener('focus',()=>applySeasonalThemeV59(false));
 /* ===== END V59 SEASONAL EVENT THEME ===== */
 
 let loginBusy=false;
