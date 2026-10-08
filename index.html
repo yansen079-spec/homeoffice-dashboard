@@ -1427,6 +1427,22 @@ body.seasonal-newyear{
         </div>
       </div>
 
+      <div class="set47-card" style="margin-top:16px">
+        <div class="set47-card-head">
+          <div class="set47-card-icon blue">🔔</div>
+          <div><h3>Notifikasi Aplikasi</h3><p>Aktifkan izin notifikasi dan kirim notifikasi tes ke perangkat ini.</p></div>
+        </div>
+        <div class="set47-preview">
+          <div><span>Status</span><b id="pushTestStatus">Belum dicek</b></div>
+          <div><span>Perangkat</span><b id="pushTestDevice">Browser</b></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn primary" id="enablePushTest" type="button">🔔 Aktifkan Notifikasi</button>
+          <button class="btn" id="sendPushTest" type="button">🚀 Kirim Notifikasi Tes</button>
+        </div>
+        <div class="muted" style="margin-top:10px">Tes ini memakai notifikasi sistem perangkat. Push otomatis saat aplikasi tertutup akan kita sambungkan ke server setelah tes perangkat berhasil.</div>
+      </div>
+
       <div class="set47-savebar">
         <div><b>Simpan perubahan pengaturan kantor</b><span>Perubahan akan langsung dipakai pada absensi dan rekap.</span></div>
         <button class="btn primary" id="saveSettings">✓ Simpan Pengaturan</button>
@@ -5532,6 +5548,75 @@ async function deleteBusinessFinance(id) {
 // ===== END v42.24.2 =====
 
 
+
+
+// ===== V62 PWA NOTIFICATION TEST =====
+function pwaNotifPermissionLabelV62(){
+  if(!('Notification' in window))return 'Tidak didukung';
+  if(Notification.permission==='granted')return 'Aktif ✅';
+  if(Notification.permission==='denied')return 'Diblokir ❌';
+  return 'Belum diizinkan';
+}
+function refreshPwaNotifStatusV62(){
+  const status=document.getElementById('pushTestStatus');
+  const device=document.getElementById('pushTestDevice');
+  if(status)status.textContent=pwaNotifPermissionLabelV62();
+  if(device){
+    const standalone=window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone===true;
+    device.textContent=standalone?'Aplikasi / PWA':'Browser';
+  }
+}
+async function enablePwaNotificationV62(){
+  if(!('Notification' in window)){
+    alert('Perangkat/browser ini belum mendukung Web Notification.');
+    return false;
+  }
+  if(!('serviceWorker' in navigator)){
+    alert('Service Worker belum tersedia di perangkat ini.');
+    return false;
+  }
+  let permission=Notification.permission;
+  if(permission!=='granted')permission=await Notification.requestPermission();
+  refreshPwaNotifStatusV62();
+  if(permission!=='granted'){
+    alert(permission==='denied'
+      ?'Izin notifikasi diblokir. Aktifkan notifikasi HomeOffice dari pengaturan browser/HP.'
+      :'Notifikasi belum diizinkan.');
+    return false;
+  }
+  return true;
+}
+async function sendPwaNotificationTestV62(){
+  const btn=document.getElementById('sendPushTest');
+  try{
+    if(btn){btn.disabled=true;btn.textContent='Mengirim...'}
+    if(!(await enablePwaNotificationV62()))return;
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification('🔔 HomeOffice',{
+      body:'Notifikasi berhasil aktif! 🎉 Perangkat ini siap menerima notifikasi HomeOffice.',
+      icon:'./embedded-market-logo.png',
+      badge:'./embedded-market-logo.png',
+      tag:'homeoffice-test-notification',
+      renotify:true,
+      data:{url:'./'}
+    });
+  }catch(err){
+    console.warn('Notification test:',err);
+    alert('Gagal mengirim notifikasi tes: '+(err?.message||err));
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🚀 Kirim Notifikasi Tes'}
+    refreshPwaNotifStatusV62();
+  }
+}
+document.addEventListener('click',e=>{
+  const enable=e.target.closest('#enablePushTest');
+  if(enable){e.preventDefault();enablePwaNotificationV62()}
+  const send=e.target.closest('#sendPushTest');
+  if(send){e.preventDefault();sendPwaNotificationTestV62()}
+});
+document.addEventListener('DOMContentLoaded',refreshPwaNotifStatusV62);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPwaNotifStatusV62()});
+// ===== END V62 PWA NOTIFICATION TEST =====
 
 
 // ===== v42.24.5 SINGLE SAVE GUARD =====
