@@ -1990,8 +1990,8 @@ async function boot(user){
   $('#roleBadge').textContent=emp.role==='admin'?'AKSES BOS':'AKSES KARYAWAN';
   $('#welcome').textContent=emp.role==='admin'?'Selamat datang, Bos.':'Selamat bekerja, '+emp.full_name+'.';
   const canSales = emp.role==='admin' || emp.can_manage_sales===true;
-  $('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
-  $('.salesUploaderOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
+  document.querySelectorAll('.salesOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
+  document.querySelectorAll('.salesUploaderOnly').forEach(x=>x.classList.toggle('hidden',!canSales));
   if(canSales){
     $('#salesRecapSubtitle').textContent=emp.role==='admin'?'Pantau seluruh rekap penjualan YANSTORE.':'Upload Excel rekap harian dan pantau hasilnya.';
   }
