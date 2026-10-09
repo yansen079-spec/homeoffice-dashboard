@@ -378,6 +378,14 @@ body.seasonal-newyear{
 .vault63-actions{display:flex;gap:6px;flex-wrap:wrap}
 .vault63-upload{border:2px dashed #cbd5e1;border-radius:14px;padding:16px;text-align:center;background:#f8fafc;margin-top:12px}
 .vault63-hint{font-size:11px;color:#7a8799;line-height:1.45;margin-top:8px}
+.vault64-bulk{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 0;border-top:1px solid #edf0f4;margin-top:10px}
+.vault64-bulk .muted{margin-right:auto}
+.vault64-log{display:grid;gap:8px;max-height:260px;overflow:auto}
+.vault64-log-row{padding:10px 0;border-bottom:1px solid #edf0f4;font-size:12px}
+.vault64-log-row b{display:block;margin-bottom:3px}
+.vault64-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vault64-edit-grid .full{grid-column:1/-1}
+@media(max-width:520px){.vault64-edit-grid{grid-template-columns:1fr}}
 @media(max-width:1000px){.vault63-grid{grid-template-columns:1fr}.vault63-kpis{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:520px){.vault63-kpis{grid-template-columns:1fr}.vault63-tools>*{width:100%}}
 /* ===== END V63 ACCOUNT VAULT ===== */
@@ -1152,16 +1160,51 @@ body.seasonal-newyear{
               <option value="inactive">Nonaktif</option>
             </select>
             <button class="btn" id="vault63Reload" type="button">↻ Refresh</button>
+            <button class="btn" id="vault64Export" type="button">⬇ Export Excel</button>
           </div>
           <div class="table">
             <table>
-              <thead><tr><th>#</th><th>Kategori</th><th>Nama / Label</th><th>Email / Username</th><th>Credential</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr></thead>
-              <tbody id="vault63Rows"><tr><td colspan="8" class="muted">Belum memuat data.</td></tr></tbody>
+              <thead><tr><th><input id="vault64SelectAll" type="checkbox" title="Pilih semua yang terlihat"></th><th>#</th><th>Kategori</th><th>Nama / Label</th><th>Email / Username</th><th>Credential</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr></thead>
+              <tbody id="vault63Rows"><tr><td colspan="9" class="muted">Belum memuat data.</td></tr></tbody>
             </table>
+          </div>
+          <div class="vault64-bulk">
+            <span class="muted"><b id="vault64SelectedCount">0</b> dipilih</span>
+            <select class="input" id="vault64BulkStatus">
+              <option value="">Ubah status...</option>
+              <option value="available">Tersedia</option>
+              <option value="used">Dipakai</option>
+              <option value="inactive">Nonaktif</option>
+            </select>
+            <button class="btn danger" id="vault64BulkDelete" type="button">Hapus Terpilih</button>
           </div>
         </div>
       </div>
+
+      <div class="vault63-card" style="margin-top:14px">
+        <div class="top" style="margin-bottom:10px">
+          <div><h3 style="margin:0">🕘 Riwayat Aktivitas Data Akun</h3><div class="muted">Mencatat aksi penting tanpa menyimpan isi password di log.</div></div>
+          <button class="btn" id="vault64ReloadAudit" type="button">↻ Refresh Log</button>
+        </div>
+        <div id="vault64AuditList" class="vault64-log"><div class="muted">Memuat riwayat...</div></div>
+      </div>
     </section>
+
+    <div class="modal" id="vault64EditModal">
+      <div class="box" style="max-width:680px">
+        <div class="top"><div><h2 style="margin:0">✏ Edit Data Akun</h2><div class="muted">Perbarui data akun yang dipilih.</div></div></div>
+        <input id="vault64EditId" type="hidden">
+        <div class="vault64-edit-grid">
+          <label class="field">Kategori<input class="input" id="vault64EditCategory"></label>
+          <label class="field">Nama / Label<input class="input" id="vault64EditLabel"></label>
+          <label class="field">Email / Username<input class="input" id="vault64EditUsername"></label>
+          <label class="field">Status<select class="input" id="vault64EditStatus"><option value="available">Tersedia</option><option value="used">Dipakai</option><option value="inactive">Nonaktif</option></select></label>
+          <label class="field full">Password / Credential<input class="input" id="vault64EditSecret" type="password" placeholder="Kosongkan jika tidak ingin mengubah"></label>
+          <label class="field full">Catatan<textarea class="input" id="vault64EditNotes" rows="3"></textarea></label>
+        </div>
+        <div class="actions"><button class="btn" type="button" id="vault64EditCancel">Batal</button><button class="btn primary" type="button" id="vault64EditSave">Simpan Perubahan</button></div>
+      </div>
+    </div>
 
     <section id="recap" class="page hidden">
       <div class="rec46-head">
@@ -5627,9 +5670,10 @@ async function deleteBusinessFinance(id) {
 
 
 
-// ===== V63 ACCOUNT VAULT =====
+// ===== V63 ACCOUNT VAULT + V64 TOOLS =====
 let accountVaultV63=[];
 let accountVaultRevealV63=new Set();
+let accountVaultSelectedV64=new Set();
 
 function vault63StatusLabel(s){
   return s==='used'?'Dipakai':s==='inactive'?'Nonaktif':'Tersedia';
@@ -5645,33 +5689,60 @@ function vault63PickIndex(headers,names){
   }
   return -1;
 }
-async function loadAccountVaultV63(){
-  if(currentEmployee?.role!=='admin')return;
-  const body=document.getElementById('vault63Rows');
-  if(body)body.innerHTML='<tr><td colspan="8" class="muted">Memuat data...</td></tr>';
-  try{
-    const {data,error}=await sb.from('account_vault').select('*').order('created_at',{ascending:false}).limit(5000);
-    if(error){
-      console.warn('Account vault:',error);
-      if(body)body.innerHTML=`<tr><td colspan="8" class="muted">Data Akun belum siap. Jalankan SQL_SETUP_V63_ACCOUNT_VAULT.sql di Supabase terlebih dahulu.</td></tr>`;
-      return;
-    }
-    accountVaultV63=data||[];
-    renderAccountVaultV63();
-  }catch(err){
-    console.warn('Account vault load:',err);
-    if(body)body.innerHTML='<tr><td colspan="8" class="muted">Gagal memuat Data Akun.</td></tr>';
-  }
-}
-function renderAccountVaultV63(){
+function vault64FilteredRows(){
   const q=(document.getElementById('vault63Search')?.value||'').trim().toLowerCase();
   const st=document.getElementById('vault63Status')?.value||'';
-  const rows=accountVaultV63.filter(x=>{
+  return accountVaultV63.filter(x=>{
     if(st&&x.status!==st)return false;
     if(!q)return true;
     return [x.category,x.account_label,x.username,x.notes].some(v=>String(v||'').toLowerCase().includes(q));
   });
-
+}
+async function vault64Audit(action,itemId=null,itemLabel=null,detail=null){
+  if(currentEmployee?.role!=='admin')return;
+  try{
+    await sb.from('account_vault_audit').insert({
+      vault_item_id:itemId,
+      action,
+      item_label:itemLabel||null,
+      detail:detail||null,
+      actor_employee_id:currentEmployee.id
+    });
+  }catch(_){}
+}
+async function loadVaultAuditV64(){
+  if(currentEmployee?.role!=='admin')return;
+  const box=document.getElementById('vault64AuditList');
+  if(!box)return;
+  const {data,error}=await sb.from('account_vault_audit').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){
+    box.innerHTML='<div class="muted">Riwayat aktivitas belum aktif. Jalankan SQL_SETUP_V64_ACCOUNT_VAULT_V2.sql di Supabase.</div>';
+    return;
+  }
+  box.innerHTML=(data||[]).length?(data||[]).map(x=>`<div class="vault64-log-row"><b>${esc(x.action)} • ${esc(x.item_label||'-')}</b><span class="muted">${new Date(x.created_at).toLocaleString('id-ID')} ${x.detail?'• '+esc(x.detail):''}</span></div>`).join(''):'<div class="muted">Belum ada aktivitas.</div>';
+}
+async function loadAccountVaultV63(){
+  if(currentEmployee?.role!=='admin')return;
+  const body=document.getElementById('vault63Rows');
+  if(body)body.innerHTML='<tr><td colspan="9" class="muted">Memuat data...</td></tr>';
+  try{
+    const {data,error}=await sb.from('account_vault').select('*').order('created_at',{ascending:false}).limit(5000);
+    if(error){
+      console.warn('Account vault:',error);
+      if(body)body.innerHTML=`<tr><td colspan="9" class="muted">Data Akun belum siap. Jalankan SQL_SETUP_V63_ACCOUNT_VAULT.sql di Supabase terlebih dahulu.</td></tr>`;
+      return;
+    }
+    accountVaultV63=data||[];
+    accountVaultSelectedV64=new Set([...accountVaultSelectedV64].filter(id=>accountVaultV63.some(x=>x.id===id)));
+    renderAccountVaultV63();
+    loadVaultAuditV64();
+  }catch(err){
+    console.warn('Account vault load:',err);
+    if(body)body.innerHTML='<tr><td colspan="9" class="muted">Gagal memuat Data Akun.</td></tr>';
+  }
+}
+function renderAccountVaultV63(){
+  const rows=vault64FilteredRows();
   const total=accountVaultV63.length;
   const available=accountVaultV63.filter(x=>x.status==='available').length;
   const t=document.getElementById('vault63Total'),a=document.getElementById('vault63Available'),u=document.getElementById('vault63Unavailable');
@@ -5683,6 +5754,7 @@ function renderAccountVaultV63(){
     const reveal=accountVaultRevealV63.has(x.id);
     const secret=reveal?esc(x.secret_value||'-'):'••••••••';
     return `<tr>
+      <td><input class="vault64-row-check" type="checkbox" data-id="${x.id}" ${accountVaultSelectedV64.has(x.id)?'checked':''}></td>
       <td>${i+1}</td>
       <td>${esc(x.category||'Lainnya')}</td>
       <td><b>${esc(x.account_label||'-')}</b></td>
@@ -5690,32 +5762,53 @@ function renderAccountVaultV63(){
       <td><span class="vault63-secret"><code>${secret}</code><button class="btn" type="button" onclick="vault63Reveal('${x.id}')">${reveal?'Sembunyi':'Lihat'}</button><button class="btn" type="button" onclick="vault63CopySecret('${x.id}')">Copy</button></span></td>
       <td><select class="input" onchange="vault63SetStatus('${x.id}',this.value)"><option value="available" ${x.status==='available'?'selected':''}>Tersedia</option><option value="used" ${x.status==='used'?'selected':''}>Dipakai</option><option value="inactive" ${x.status==='inactive'?'selected':''}>Nonaktif</option></select></td>
       <td>${esc(x.notes||'-')}</td>
-      <td><div class="vault63-actions"><button class="btn danger" type="button" onclick="vault63Delete('${x.id}')">Hapus</button></div></td>
+      <td><div class="vault63-actions"><button class="btn" type="button" onclick="vault64OpenEdit('${x.id}')">Edit</button><button class="btn danger" type="button" onclick="vault63Delete('${x.id}')">Hapus</button></div></td>
     </tr>`;
-  }).join(''):'<tr><td colspan="8" class="muted">Tidak ada data sesuai filter.</td></tr>';
+  }).join(''):'<tr><td colspan="9" class="muted">Tidak ada data sesuai filter.</td></tr>';
+
+  const count=document.getElementById('vault64SelectedCount');
+  if(count)count.textContent=accountVaultSelectedV64.size;
+  const all=document.getElementById('vault64SelectAll');
+  if(all){
+    const ids=rows.map(x=>x.id);
+    all.checked=ids.length>0&&ids.every(id=>accountVaultSelectedV64.has(id));
+    all.indeterminate=ids.some(id=>accountVaultSelectedV64.has(id))&&!all.checked;
+  }
 }
-function vault63Reveal(id){
-  if(accountVaultRevealV63.has(id))accountVaultRevealV63.delete(id);else accountVaultRevealV63.add(id);
+async function vault63Reveal(id){
+  const x=accountVaultV63.find(v=>v.id===id);
+  if(accountVaultRevealV63.has(id))accountVaultRevealV63.delete(id);
+  else{
+    accountVaultRevealV63.add(id);
+    if(x)vault64Audit('Lihat credential',id,x.account_label);
+  }
   renderAccountVaultV63();
 }
 async function vault63CopySecret(id){
   const x=accountVaultV63.find(v=>v.id===id);
   if(!x?.secret_value){alert('Credential kosong.');return}
-  try{await navigator.clipboard.writeText(x.secret_value);alert('Credential berhasil disalin.')}
-  catch(_){alert('Browser tidak mengizinkan copy otomatis.')}
+  try{
+    await navigator.clipboard.writeText(x.secret_value);
+    await vault64Audit('Copy credential',id,x.account_label);
+    alert('Credential berhasil disalin.');
+  }catch(_){alert('Browser tidak mengizinkan copy otomatis.')}
 }
 async function vault63SetStatus(id,status){
+  const x=accountVaultV63.find(v=>v.id===id);
   const {error}=await sb.from('account_vault').update({status,updated_at:new Date().toISOString()}).eq('id',id);
   if(error){alert('Gagal mengubah status: '+error.message);await loadAccountVaultV63();return}
-  const x=accountVaultV63.find(v=>v.id===id);if(x)x.status=status;renderAccountVaultV63();
+  if(x){x.status=status;await vault64Audit('Ubah status',id,x.account_label,'Status: '+vault63StatusLabel(status))}
+  renderAccountVaultV63();
 }
 async function vault63Delete(id){
+  const x=accountVaultV63.find(v=>v.id===id);
   if(!confirm('Hapus data akun ini?'))return;
+  await vault64Audit('Hapus akun',id,x?.account_label||'-');
   const {error}=await sb.from('account_vault').delete().eq('id',id);
   if(error){alert('Gagal menghapus: '+error.message);return}
-  accountVaultV63=accountVaultV63.filter(x=>x.id!==id);
-  accountVaultRevealV63.delete(id);
-  renderAccountVaultV63();
+  accountVaultV63=accountVaultV63.filter(v=>v.id!==id);
+  accountVaultRevealV63.delete(id);accountVaultSelectedV64.delete(id);
+  renderAccountVaultV63();loadVaultAuditV64();
 }
 async function vault63SaveManual(){
   if(currentEmployee?.role!=='admin')return;
@@ -5730,10 +5823,83 @@ async function vault63SaveManual(){
     status:'available',
     created_by:currentEmployee.id
   };
-  const {error}=await sb.from('account_vault').insert(payload);
+  const {data,error}=await sb.from('account_vault').insert(payload).select().single();
   if(error){alert('Gagal menyimpan: '+error.message);return}
+  await vault64Audit('Tambah akun',data?.id||null,label);
   ['vault63Category','vault63Label','vault63Username','vault63Secret','vault63Notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   await loadAccountVaultV63();
+}
+function vault64OpenEdit(id){
+  const x=accountVaultV63.find(v=>v.id===id);if(!x)return;
+  document.getElementById('vault64EditId').value=id;
+  document.getElementById('vault64EditCategory').value=x.category||'';
+  document.getElementById('vault64EditLabel').value=x.account_label||'';
+  document.getElementById('vault64EditUsername').value=x.username||'';
+  document.getElementById('vault64EditStatus').value=x.status||'available';
+  document.getElementById('vault64EditSecret').value='';
+  document.getElementById('vault64EditNotes').value=x.notes||'';
+  document.getElementById('vault64EditModal').classList.add('open');
+}
+async function vault64SaveEdit(){
+  const id=document.getElementById('vault64EditId').value;
+  const old=accountVaultV63.find(v=>v.id===id);if(!old)return;
+  const label=document.getElementById('vault64EditLabel').value.trim();
+  if(!label){alert('Nama / label wajib diisi.');return}
+  const payload={
+    category:document.getElementById('vault64EditCategory').value.trim()||'Lainnya',
+    account_label:label,
+    username:document.getElementById('vault64EditUsername').value.trim()||null,
+    notes:document.getElementById('vault64EditNotes').value.trim()||null,
+    status:document.getElementById('vault64EditStatus').value,
+    updated_at:new Date().toISOString()
+  };
+  const secret=document.getElementById('vault64EditSecret').value;
+  if(secret)payload.secret_value=secret;
+  const {error}=await sb.from('account_vault').update(payload).eq('id',id);
+  if(error){alert('Gagal menyimpan perubahan: '+error.message);return}
+  await vault64Audit('Edit akun',id,label,secret?'Credential ikut diperbarui':'Credential tidak diubah');
+  document.getElementById('vault64EditModal').classList.remove('open');
+  await loadAccountVaultV63();
+}
+async function vault64BulkStatus(){
+  const status=document.getElementById('vault64BulkStatus').value;
+  const ids=[...accountVaultSelectedV64];
+  if(!status||!ids.length)return;
+  const {error}=await sb.from('account_vault').update({status,updated_at:new Date().toISOString()}).in('id',ids);
+  if(error){alert('Bulk status gagal: '+error.message);return}
+  await vault64Audit('Bulk status',null,ids.length+' akun','Status: '+vault63StatusLabel(status));
+  document.getElementById('vault64BulkStatus').value='';
+  await loadAccountVaultV63();
+}
+async function vault64BulkDelete(){
+  const ids=[...accountVaultSelectedV64];
+  if(!ids.length){alert('Pilih data akun terlebih dahulu.');return}
+  if(!confirm('Hapus '+ids.length+' data akun terpilih?'))return;
+  await vault64Audit('Bulk hapus',null,ids.length+' akun');
+  const {error}=await sb.from('account_vault').delete().in('id',ids);
+  if(error){alert('Bulk hapus gagal: '+error.message);return}
+  accountVaultSelectedV64.clear();
+  await loadAccountVaultV63();
+}
+async function vault64ExportExcel(){
+  const rows=vault64FilteredRows();
+  if(!rows.length){alert('Tidak ada data untuk diexport.');return}
+  if(!confirm('Export Excel akan menyertakan credential/password yang terlihat oleh admin. Lanjutkan?'))return;
+  const data=rows.map(x=>({
+    Kategori:x.category||'',
+    'Nama / Label':x.account_label||'',
+    'Email / Username':x.username||'',
+    Credential:x.secret_value||'',
+    Status:vault63StatusLabel(x.status),
+    Catatan:x.notes||'',
+    'Sumber File':x.source_file||'',
+    'Dibuat':x.created_at?new Date(x.created_at).toLocaleString('id-ID'):''
+  }));
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data Akun');
+  XLSX.writeFile(wb,'HomeOffice_Data_Akun_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  await vault64Audit('Export Excel',null,rows.length+' akun');
+  loadVaultAuditV64();
 }
 async function vault63ImportExcel(file){
   const info=document.getElementById('vault63ImportInfo');
@@ -5751,7 +5917,6 @@ async function vault63ImportExcel(file){
     const iSecret=vault63PickIndex(headers,['password','credential','secret','kode']);
     const iNotes=vault63PickIndex(headers,['catatan','note','notes','keterangan']);
     const iStatus=vault63PickIndex(headers,['status']);
-
     if(iLabel<0&&iUser<0)throw new Error('Kolom nama/label atau email/username tidak ditemukan.');
     const rows=raw.slice(1).map(r=>{
       const label=String(iLabel>=0?r[iLabel]:'').trim()||String(iUser>=0?r[iUser]:'').trim();
@@ -5763,15 +5928,11 @@ async function vault63ImportExcel(file){
         username:String(iUser>=0?r[iUser]:'').trim()||null,
         secret_value:String(iSecret>=0?r[iSecret]:'')||null,
         notes:String(iNotes>=0?r[iNotes]:'').trim()||null,
-        status,
-        source_file:file.name,
-        created_by:currentEmployee.id
+        status,source_file:file.name,created_by:currentEmployee.id
       };
     }).filter(x=>x.account_label);
-
     if(!rows.length)throw new Error('Tidak ada baris akun yang bisa diimport.');
     if(!confirm(`Import ${rows.length} data akun dari ${file.name}?`)){if(info)info.textContent='Import dibatalkan.';return}
-
     let inserted=0;
     for(let i=0;i<rows.length;i+=300){
       const batch=rows.slice(i,i+300);
@@ -5780,6 +5941,7 @@ async function vault63ImportExcel(file){
       inserted+=batch.length;
       if(info)info.textContent=`Mengimport ${inserted}/${rows.length}...`;
     }
+    await vault64Audit('Import Excel',null,file.name,inserted+' akun');
     if(info)info.textContent=`✅ ${inserted} data berhasil diimport dari ${file.name}.`;
     await loadAccountVaultV63();
   }catch(err){
@@ -5794,13 +5956,27 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#vault63Save'))vault63SaveManual();
   if(e.target.closest('#vault63ChooseFile'))document.getElementById('vault63File')?.click();
   if(e.target.closest('#vault63Reload'))loadAccountVaultV63();
+  if(e.target.closest('#vault64Export'))vault64ExportExcel();
+  if(e.target.closest('#vault64BulkDelete'))vault64BulkDelete();
+  if(e.target.closest('#vault64ReloadAudit'))loadVaultAuditV64();
+  if(e.target.closest('#vault64EditSave'))vault64SaveEdit();
+  if(e.target.closest('#vault64EditCancel'))document.getElementById('vault64EditModal')?.classList.remove('open');
 });
 document.addEventListener('change',e=>{
   if(e.target.id==='vault63File'&&e.target.files?.[0])vault63ImportExcel(e.target.files[0]);
   if(e.target.id==='vault63Status')renderAccountVaultV63();
+  if(e.target.id==='vault64BulkStatus')vault64BulkStatus();
+  if(e.target.id==='vault64SelectAll'){
+    vault64FilteredRows().forEach(x=>e.target.checked?accountVaultSelectedV64.add(x.id):accountVaultSelectedV64.delete(x.id));
+    renderAccountVaultV63();
+  }
+  if(e.target.classList.contains('vault64-row-check')){
+    e.target.checked?accountVaultSelectedV64.add(e.target.dataset.id):accountVaultSelectedV64.delete(e.target.dataset.id);
+    renderAccountVaultV63();
+  }
 });
 document.addEventListener('input',e=>{if(e.target.id==='vault63Search')renderAccountVaultV63()});
-// ===== END V63 ACCOUNT VAULT =====
+// ===== END V63 ACCOUNT VAULT + V64 TOOLS =====
 
 
 // ===== V62 PWA NOTIFICATION TEST =====
