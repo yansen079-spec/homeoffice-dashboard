@@ -105,6 +105,45 @@ for (const { name, regex } of secretPatterns) {
   else pass(`no ${name} found`);
 }
 
+
+const pwaFiles = ['manifest.webmanifest', 'sw.js'];
+for (const file of pwaFiles) {
+  if (!fs.existsSync(file)) fail(`missing PWA file: ${file}`);
+  else pass(`PWA file exists: ${file}`);
+}
+
+if (fs.existsSync('manifest.webmanifest')) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+    if (!manifest.name || !manifest.start_url || !manifest.scope) {
+      fail('PWA manifest missing name/start_url/scope');
+    } else {
+      pass('PWA manifest has required app metadata');
+    }
+    for (const icon of manifest.icons || []) {
+      if (icon.src && !/^(https?:|data:)/i.test(icon.src)) {
+        const iconPath = icon.src.replace(/^\.\//, '');
+        if (!fs.existsSync(iconPath)) fail(`PWA icon missing: ${iconPath}`);
+      }
+    }
+  } catch (error) {
+    fail(`PWA manifest invalid JSON: ${error.message}`);
+  }
+}
+
+if (fs.existsSync('sw.js')) {
+  const sw = fs.readFileSync('sw.js', 'utf8');
+  try {
+    new vm.Script(sw, { filename: 'sw.js' });
+    pass('Service worker JavaScript parses');
+  } catch (error) {
+    fail(`Service worker syntax error: ${error.message}`);
+  }
+  if (!sw.includes("addEventListener('fetch'") && !sw.includes('addEventListener("fetch"')) {
+    warn('Service worker has no fetch handler');
+  }
+}
+
 if (failed) {
   console.error('\nStatic smoke audit failed.');
   process.exit(1);
