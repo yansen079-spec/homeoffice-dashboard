@@ -846,6 +846,7 @@ body.seasonal-newyear{
     <div class="brand">🏠 HomeOffice</div>
     <nav class="nav">
       <button data-page="dashboard" class="active">⌂ Dashboard</button>
+      <button type="button" id="openOfficeCalendar">📅 Kalender Kantor ↗</button>
       <button data-page="attendance">◷ Absensi</button>
       <button data-page="employees" class="adminOnly">♙ Karyawan</button>
       <button data-page="recap" class="adminOnly">▦ Rekap Absensi</button>
@@ -2280,6 +2281,7 @@ async function login(){
     btn.textContent=oldText;
   }
 }
+document.getElementById('openOfficeCalendar').onclick=()=>window.open('./office-calendar.html','_blank','noopener');
 $('#loginBtn').onclick=login;
 $('#loginPass').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();login()}};
 $('#logout').onclick=async()=>{
