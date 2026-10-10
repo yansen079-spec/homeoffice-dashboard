@@ -2154,15 +2154,21 @@ const ymd=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1
 const hm=()=>new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':');
 
 function updateDashLiveClockV431(){
-  const el=$('#dashLiveClock');
-  if(!el)return;
-  el.textContent=new Intl.DateTimeFormat('id-ID',{
-    timeZone:'Asia/Jakarta',
-    hour:'2-digit',
-    minute:'2-digit',
-    second:'2-digit',
-    hour12:false
-  }).format(new Date()).replace(/\./g,':');
+  const now=new Date();
+  const dateEl=$('#today');
+  if(dateEl){
+    dateEl.textContent=new Intl.DateTimeFormat('id-ID',{
+      timeZone:'Asia/Jakarta',
+      weekday:'long',day:'numeric',month:'long',year:'numeric'
+    }).format(now);
+  }
+  const clockEl=$('#dashLiveClock');
+  if(clockEl){
+    clockEl.textContent=new Intl.DateTimeFormat('id-ID',{
+      timeZone:'Asia/Jakarta',
+      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+    }).format(now).replace(/\./g,':');
+  }
 }
 setInterval(updateDashLiveClockV431,1000);
 
@@ -2312,7 +2318,7 @@ async function boot(user){
     $('#salesRecapSubtitle').textContent=emp.role==='admin'?'Pantau seluruh rekap penjualan YANSTORE.':'Upload Excel rekap harian dan pantau hasilnya.';
   }
 
-  $('#today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Date and clock are updated together in Jakarta time.
   updateDashLiveClockV431();
   $('#attendanceSubtitle').textContent=emp.role==='admin'?'Lihat absensi semua karyawan.':'Riwayat absensi milik kamu sendiri.';
   /* v42.19: legacy Stok Produk menu retired; stock is managed from Seller Center */
