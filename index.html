@@ -2468,6 +2468,30 @@ async function markAllBossNotificationsRead(){
 function bossNotifAction(key,page){
   markBossNotificationRead(key);
   $('#bossNotifyPanel')?.classList.add('hidden');
+  if(page==='digitalstock'){
+    // Stock alerts use a product UUID in their key, not unreliable text matching.
+    const match=String(key||'').match(/^(?:dout|dlow):([0-9a-f-]{36})(?::|$)/i);
+    if(match){
+      const product=digitalProductsV34.find(p=>p.id===match[1]);
+      if(product){
+        go('digitalstock');
+        const search=$('#digitalSearch'),category=$('#digitalCategoryFilter'),status=$('#digitalStatusFilter');
+        if(search)search.value=product.product_name;
+        if(category)category.value='';
+        if(status)status.value='';
+        renderDigital();
+        requestAnimationFrame(()=>{
+          const card=document.querySelector('#digitalProductGrid .digital-product-card');
+          if(card){
+            card.scrollIntoView({behavior:'smooth',block:'center'});
+            card.style.outline='3px solid #2563eb';
+            card.style.outlineOffset='3px';
+          }
+        });
+        return;
+      }
+    }
+  }
   go(page);
 }
 function bossNotifTimeV52(value){
