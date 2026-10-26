@@ -1261,6 +1261,13 @@ body.seasonal-newyear{
         <div class="card stat"><span class="muted">Total Item</span><b id="dsTotal">0</b></div>
       </div>
 
+      <div class="card adminOnly" style="margin-bottom:14px" id="digitalMonitorV67">
+        <div class="top" style="margin-bottom:10px">
+          <div><h3 style="margin:0">🛡️ Monitor Sistem Gudang</h3><div class="muted">Pemeriksaan manual koneksi dan konsistensi angka. Tidak mengubah data atau membuka credential.</div></div>
+          <button class="btn" type="button" id="digitalMonitorRunV67">Periksa Sistem</button>
+        </div>
+        <div class="muted" id="digitalMonitorResultV67" role="status" aria-live="polite">Belum diperiksa. Klik Periksa Sistem.</div>
+      </div>
       <div class="card adminOnly" id="digitalBestSellerCard" style="margin-bottom:14px">
         <div class="top" style="margin-bottom:10px">
           <div>
@@ -4858,6 +4865,42 @@ document.addEventListener('click',(e)=>{
   if(p&&!p.classList.contains('hidden')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.add('hidden');
 });
 
+
+
+/* Read-only, on-demand system checks. Not continuous monitoring. */
+window.runDigitalMonitorV67=async function(){
+  if(currentEmployee?.role!=='admin')return;
+  const btn=document.getElementById('digitalMonitorRunV67');
+  const target=document.getElementById('digitalMonitorResultV67');
+  if(!btn||!target)return;
+  btn.disabled=true;target.textContent='Memeriksa koneksi dan ringkasan stok...';
+  try{
+    const started=performance.now();
+    const [products,all,available,claimed,delivered]=await Promise.all([
+      sb.from('digital_products').select('id',{count:'exact',head:true}).eq('active',true),
+      sb.from('digital_inventory').select('id',{count:'exact',head:true}),
+      sb.from('digital_inventory').select('id',{count:'exact',head:true}).eq('status','available'),
+      sb.from('digital_inventory').select('id',{count:'exact',head:true}).eq('status','claimed'),
+      sb.from('digital_inventory').select('id',{count:'exact',head:true}).eq('status','delivered')
+    ]);
+    if([products,all,available,claimed,delivered].some(r=>r.error))throw Error('Permintaan database tidak berhasil.');
+    const ms=Math.round(performance.now()-started);
+    const counts={total:all.count||0,available:available.count||0,claimed:claimed.count||0,delivered:delivered.count||0};
+    const consistent=counts.total===counts.available+counts.claimed+counts.delivered;
+    const rows=[
+      ['Koneksi Supabase','Terhubung ('+ms+' ms)'],
+      ['Produk aktif',String(products.count??0)],
+      ['Stok tersedia',String(counts.available)],
+      ['Stok diambil',String(counts.claimed)],
+      ['Stok dikirim',String(counts.delivered)],
+      ['Total item',String(counts.total)],
+      ['Konsistensi status',consistent?'Sesuai':'Perlu diperiksa: ada status lain atau angka berbeda']
+    ];
+    target.innerHTML='<div style="overflow:auto"><table class="sheet-table"><tbody>'+rows.map(r=>'<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>').join('')+'</tbody></table></div><div class="muted" style="margin-top:8px">Pemeriksaan terakhir: '+esc(new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}))+'. Pemeriksaan manual ini bukan pemantauan real-time dan tidak membuktikan semua transaksi aman.</div>';
+  }catch(e){target.textContent='⚠️ Pemeriksaan gagal atau koneksi bermasalah. Coba lagi setelah memastikan internet dan sesi login aktif.';}
+  finally{btn.disabled=false;}
+};
+document.getElementById('digitalMonitorRunV67')?.addEventListener('click',window.runDigitalMonitorV67);
 
 /* ===== V34 GROUPED DIGITAL WAREHOUSE OVERRIDE ===== */
 /* Admin configurable stock warnings; saved locally on this browser only. */
