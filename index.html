@@ -2531,9 +2531,10 @@ function renderBossNotifications(){
   if(low.length)add('stocklow:'+low.map(x=>x.id+':'+x.stock).sort().join(','),'📉',low.length+' stok produk menipis',low.map(x=>x.product_name+' ('+x.stock+')').join(', '),'stock','Stok minimum',low);
 
   if(typeof digitalProductsV34!=='undefined'&&typeof digitalItems!=='undefined')digitalProductsV34.forEach(p=>{
-    const units=digitalItems.filter(x=>x.product_id===p.id),av=units.filter(x=>x.status==='available').length;
+    const units=digitalItems.filter(x=>x.product_id===p.id),av=digitalStatusCountsVFix[p.id]?.available??units.filter(x=>x.status==='available').length;
+    const threshold=digitalThresholdV65(p.id);
     if(av===0)add('dout:'+p.id,'🚨','Stok digital HABIS',p.product_name+' tidak punya stok tersedia.','digitalstock','Segera tambah stok',units);
-    else if(av<=3)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun.','digitalstock','Gudang Digital',units);
+    else if(av<=threshold)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun (batas '+threshold+').','digitalstock','Gudang Digital',units);
   });
 
   if(typeof digitalItems!=='undefined'){
@@ -4859,6 +4860,29 @@ document.addEventListener('click',(e)=>{
 
 
 /* ===== V34 GROUPED DIGITAL WAREHOUSE OVERRIDE ===== */
+/* Admin configurable stock warnings; saved locally on this browser only. */
+const digitalThresholdKeyV65='yanstore-digital-restock-threshold-v65';
+function digitalThresholdV65(id){
+  try{
+    const v=JSON.parse(localStorage.getItem(digitalThresholdKeyV65)||'{}')[id];
+    return Number.isInteger(v)&&v>=1&&v<=100000?v:3;
+  }catch(e){return 3}
+}
+window.setDigitalThresholdV65=function(id){
+  if(currentEmployee?.role!=='admin')return;
+  const p=digitalProductsV34.find(x=>x.id===id);if(!p)return;
+  const input=prompt('Batas notifikasi stok minimum untuk '+p.product_name+' (1-100000):',String(digitalThresholdV65(id)));
+  if(input===null)return;
+  const v=Number(input);
+  if(!Number.isInteger(v)||v<1||v>100000){alert('Masukkan angka bulat 1 sampai 100000.');return}
+  try{
+    const all=JSON.parse(localStorage.getItem(digitalThresholdKeyV65)||'{}');
+    all[id]=v;
+    localStorage.setItem(digitalThresholdKeyV65,JSON.stringify(all));
+  }catch(e){alert('Pengaturan gagal disimpan di browser ini.');return}
+  renderDigital();renderBossNotifications();
+};
+
 /* Keep card totals aligned with the existing paginated bestseller scan. */
 let digitalStatusCountsVFix={};
 let digitalProductsV34=[];
@@ -4987,7 +5011,7 @@ function renderDigital(){
   $('#dsAvailable').textContent=digitalStatsV34.available;$('#dsClaimed').textContent=digitalStatsV34.claimed;$('#dsDelivered').textContent=digitalStatsV34.delivered;$('#dsTotal').textContent=digitalStatsV34.total;
   renderDigitalBestSellersV1();
   let ps=digitalProductsV34.filter(p=>{const u=digitalUnitsV34(p.id);if(cat&&p.category!==cat)return false;if(stf&&!u.some(x=>x.status===stf))return false;if(q&&!([p.product_name,p.category].join(' ').toLowerCase().includes(q)||u.some(x=>[x.note,x.buyer_ref].join(' ').toLowerCase().includes(q))))return false;return true});
-  grid.innerHTML=ps.length?ps.map(p=>{const u=digitalUnitsV34(p.id),counts=digitalStatusCountsVFix[p.id],av=counts?.available??u.filter(x=>x.status==='available').length,cl=counts?.claimed??u.filter(x=>x.status==='claimed').length,de=counts?.delivered??u.filter(x=>x.status==='delivered').length,total=counts?.total??u.length;const stockLabel=av===0?'Habis':av<=3?'Menipis':'Tersedia',stockClass=av===0?'sakit':av<=3?'telat':'hadir',cardStyle=av>0&&av<=3?'border-color:#facc15;background:#fffdf2;':'';const a=(currentEmployee.role==='admin'||isPaqihDigitalManagerV344())?`<button class="btn" onclick="viewDigitalProductV34('${p.id}')">Lihat Stok</button><button class="btn primary" onclick="addDigitalStockV34('${p.id}')">+ Tambah Stok</button>${av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>'}`:(av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>');return `<div class="digital-product-card" style="${cardStyle}"><div class="digital-product-head"><div><b style="font-size:17px">${esc(p.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(p.category)}</span></div></div><span class="badge ${stockClass}">${stockLabel}</span></div><div style="margin-top:10px;font-weight:900">${Number(p.sale_price||0)>0?'Rp'+Number(p.sale_price||0).toLocaleString('id-ID'):'<span style="color:#b45309">Harga belum diisi</span>'}</div><div class="digital-stock-number">${av}</div><div class="muted">stok tersedia</div><div class="muted" style="margin-top:7px">Diambil ${cl} • Total ${total}</div><div class="digital-product-actions">${a}</div></div>`}).join(''):'<div class="card">Belum ada produk yang cocok.</div>';
+  grid.innerHTML=ps.length?ps.map(p=>{const u=digitalUnitsV34(p.id),counts=digitalStatusCountsVFix[p.id],av=counts?.available??u.filter(x=>x.status==='available').length,cl=counts?.claimed??u.filter(x=>x.status==='claimed').length,de=counts?.delivered??u.filter(x=>x.status==='delivered').length,total=counts?.total??u.length;const limit=digitalThresholdV65(p.id),stockLabel=av===0?'Habis':av<=limit?'Menipis':'Tersedia',stockClass=av===0?'sakit':av<=limit?'telat':'hadir',cardStyle=av>0&&av<=limit?'border-color:#facc15;background:#fffdf2;':'';const a=(currentEmployee.role==='admin'||isPaqihDigitalManagerV344())?`<button class="btn" onclick="viewDigitalProductV34('${p.id}')">Lihat Stok</button><button class="btn primary" onclick="addDigitalStockV34('${p.id}')">+ Tambah Stok</button>${av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>'}`:(av?`<button class="btn primary" onclick="claimDigitalProductV34('${p.id}')">Ambil 1 Stok</button>`:'<button class="btn" disabled>Stok Habis</button>');return `<div class="digital-product-card" style="${cardStyle}"><div class="digital-product-head"><div><b style="font-size:17px">${esc(p.product_name)}</b><div style="margin-top:6px"><span class="categorypill">${esc(p.category)}</span></div></div><span class="badge ${stockClass}">${stockLabel}</span></div><div style="margin-top:10px;font-weight:900">${Number(p.sale_price||0)>0?'Rp'+Number(p.sale_price||0).toLocaleString('id-ID'):'<span style="color:#b45309">Harga belum diisi</span>'}</div><div class="digital-stock-number">${av}</div><div class="muted">stok tersedia</div><div class="muted" style="margin-top:7px">Diambil ${cl} • Total ${total}</div><div class="digital-product-actions">${a}${currentEmployee.role==='admin'?`<button class="btn" onclick="setDigitalThresholdV65('${p.id}')">🔔 Batas ${limit}</button>`:''}</div></div>`}).join(''):'<div class="card">Belum ada produk yang cocok.</div>';
 }
 window.viewDigitalProductV34=async id=>{
   const p=digitalProductsV34.find(x=>x.id===id);
