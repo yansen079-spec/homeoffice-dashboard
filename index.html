@@ -4835,28 +4835,8 @@ document.addEventListener('click',(e)=>{
 
 
 /* ===== V34 GROUPED DIGITAL WAREHOUSE OVERRIDE ===== */
-/* Correct stock counts without relying on the first 1,000 inventory rows. */
-/* Count every product/status across all pages, independent of the limited UI rows. */
+/* Keep card totals aligned with the existing paginated bestseller scan. */
 let digitalStatusCountsVFix={};
-let digitalLoadSeqVFix=0;
-async function fetchDigitalStatusCountsVFix(){
-  const counts={};
-  const pageSize=1000;
-  for(let from=0;from<100000;from+=pageSize){
-    const r=await sb.from('digital_inventory')
-      .select('id,product_id,status')
-      .order('id',{ascending:true}).range(from,from+pageSize-1);
-    if(r.error)throw r.error;
-    (r.data||[]).forEach(x=>{
-      if(!x.product_id)return;
-      const c=counts[x.product_id]||(counts[x.product_id]={available:0,claimed:0,delivered:0,total:0});
-      c.total++;
-      if(Object.prototype.hasOwnProperty.call(c,x.status)&&x.status!=='total')c[x.status]++;
-    });
-    if((r.data||[]).length<pageSize)return counts;
-  }
-  throw new Error('Inventory is too large for browser-side counting; add server-side grouped counts.');
-}
 let digitalProductsV34=[];
 let digitalStatsV34={available:0,claimed:0,delivered:0,total:0};
 let digitalBestSellersV1=[];
@@ -4869,6 +4849,7 @@ async function loadDigitalBestSellersV1(){
   }
 
   const counts={};
+  const stockCounts={};
   const pageSize=1000;
   let from=0;
 
@@ -4882,8 +4863,11 @@ async function loadDigitalBestSellersV1(){
     if(r.error)throw r.error;
 
     (r.data||[]).forEach(x=>{
-      if(!x.product_id||x.status==='available')return;
-      counts[x.product_id]=(counts[x.product_id]||0)+1;
+      if(!x.product_id)return;
+      const c=stockCounts[x.product_id]||(stockCounts[x.product_id]={available:0,claimed:0,delivered:0,total:0});
+      c.total++;
+      if(x.status==='available'||x.status==='claimed'||x.status==='delivered')c[x.status]++;
+      if(x.status!=='available')counts[x.product_id]=(counts[x.product_id]||0)+1;
     });
 
     if((r.data||[]).length<pageSize)break;
@@ -4891,6 +4875,7 @@ async function loadDigitalBestSellersV1(){
     if(from>50000)break;
   }
 
+  digitalStatusCountsVFix=stockCounts;
   digitalBestSellersV1=Object.entries(counts)
     .map(([product_id,sold_count])=>{
       const p=digitalProductsV34.find(x=>x.id===product_id);
@@ -4938,18 +4923,6 @@ async function loadDigitalSafe(){
 
     digitalItems=r.data||[];
     digitalSecrets={};
-    // Use paginated lightweight counts so recently added items remain visible
-    // even when the full inventory query has hit a server row limit.
-    const loadSeq=++digitalLoadSeqVFix;
-    try{
-      const counts=await fetchDigitalStatusCountsVFix();
-      if(loadSeq!==digitalLoadSeqVFix)return;
-      digitalStatusCountsVFix=counts;
-    }catch(countErr){
-      console.warn('Stock count refresh failed; showing loaded item counts',countErr);
-      digitalStatusCountsVFix={};
-    }
-
     let qTotal=sb.from('digital_inventory').select('*',{count:'exact',head:true});
     let qAvailable=sb.from('digital_inventory').select('*',{count:'exact',head:true}).eq('status','available');
     let qClaimed=sb.from('digital_inventory').select('*',{count:'exact',head:true}).eq('status','claimed');
