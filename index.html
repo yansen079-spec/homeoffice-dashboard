@@ -1261,6 +1261,13 @@ body.seasonal-newyear{
         <div class="card stat"><span class="muted">Total Item</span><b id="dsTotal">0</b></div>
       </div>
 
+      <div class="card adminOnly" style="margin-bottom:14px" id="digitalHistoryCardV66">
+        <div class="top" style="margin-bottom:10px">
+          <div><h3 style="margin:0">📋 Riwayat Aktivitas Gudang</h3><div class="muted">Catatan penambahan dan pengambilan stok yang masih tersimpan. Tidak menampilkan credential.</div></div>
+          <button class="btn" id="digitalHistoryLoadV66" type="button">Lihat Riwayat</button>
+        </div>
+        <div id="digitalHistoryContentV66" class="muted">Klik Lihat Riwayat untuk memuat aktivitas terbaru.</div>
+      </div>
       <div class="card adminOnly" id="digitalBestSellerCard" style="margin-bottom:14px">
         <div class="top" style="margin-bottom:10px">
           <div>
@@ -4858,6 +4865,38 @@ document.addEventListener('click',(e)=>{
   if(p&&!p.classList.contains('hidden')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.add('hidden');
 });
 
+
+
+// Read-only, on-demand history from existing inventory timestamps.
+// This is not an audit log: deleted items and unidentified stock creators cannot be recovered.
+window.loadDigitalHistoryV66=async function(){
+  if(currentEmployee?.role!=='admin')return;
+  const body=document.getElementById('digitalHistoryContentV66');
+  const btn=document.getElementById('digitalHistoryLoadV66');
+  if(!body||!btn)return;
+  btn.disabled=true;
+  body.textContent='Memuat 100 akun terbaru...';
+  try{
+    const {data,error}=await sb.from('digital_inventory')
+      .select('id,product_id,product_name,created_at,claimed_at,claimed_by,status')
+      .order('created_at',{ascending:false}).limit(100);
+    if(error)throw error;
+    const events=[];
+    (data||[]).forEach(x=>{
+      const pname=x.product_name||digitalProductsV34.find(p=>p.id===x.product_id)?.product_name||'-';
+      if(x.created_at)events.push({at:x.created_at,kind:'Stok ditambahkan',product:pname,who:'Tidak tercatat'});
+      if(x.claimed_at){
+        const emp=employees.find(e=>e.id===x.claimed_by);
+        events.push({at:x.claimed_at,kind:'Stok diambil',product:pname,who:emp?.full_name||'Petugas tidak diketahui'});
+      }
+    });
+    events.sort((x,y)=>Date.parse(y.at)-Date.parse(x.at));
+    const top=events.slice(0,100);
+    body.innerHTML=top.length?'<div style="overflow:auto"><table class="sheet-table"><thead><tr><th>Waktu</th><th>Aktivitas</th><th>Produk</th><th>Petugas</th></tr></thead><tbody>'+top.map(x=>'<tr><td>'+esc(new Date(x.at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}))+'</td><td>'+esc(x.kind)+'</td><td>'+esc(x.product)+'</td><td>'+esc(x.who)+'</td></tr>').join('')+'</tbody></table></div><div class="muted" style="margin-top:8px">Hanya sampel 100 akun terbaru berdasarkan tanggal penambahan, bukan audit lengkap. Penghapusan dan identitas penambah stok lama belum tercatat.</div>':'Belum ada riwayat stok yang bisa ditampilkan.';
+  }catch(err){body.textContent='Gagal memuat riwayat: '+(err?.message||'Kesalahan tidak diketahui');}
+  finally{btn.disabled=false;}
+};
+document.getElementById('digitalHistoryLoadV66')?.addEventListener('click',window.loadDigitalHistoryV66);
 
 /* ===== V34 GROUPED DIGITAL WAREHOUSE OVERRIDE ===== */
 /* Admin configurable stock warnings; saved locally on this browser only. */
