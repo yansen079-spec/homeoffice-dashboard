@@ -823,7 +823,33 @@ body.seasonal-newyear{
 @media(max-width:820px){.pay51-today-head{flex-direction:column}.pay51-today-summary{width:100%;grid-template-columns:repeat(3,1fr)}.pay51-today-summary>div{min-width:0}.pay51-today-list{grid-template-columns:1fr}}
 @media(max-width:520px){.pay51-today-summary{grid-template-columns:1fr}.pay51-history-top{flex-direction:column}.pay51-history-total{text-align:left;width:100%}}
 /* ===== END V48 ===== */
-</style></head>
+</style>
+<style id="yanThemeV68Styles">
+/* Theme V68: appearance-only overrides. No inventory or data logic changed. */
+.yan-theme-toggle{position:fixed;right:76px;top:14px;z-index:990;display:flex;gap:4px;padding:5px;border:1px solid #d9e3f2;border-radius:13px;background:#fff;box-shadow:0 5px 22px #152d511a}
+.yan-theme-toggle button{border:0;border-radius:9px;padding:8px 12px;background:transparent;color:#52627a;cursor:pointer;font-weight:700}
+.yan-theme-toggle button[aria-pressed="true"]{background:#e5efff;color:#175be8}
+body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:dark}
+.yan-dark .side,.yan-dark .main,.yan-dark .card,.yan-dark .digital-product-card,.yan-dark .sheet-wrap,.yan-dark .notify-panel,.yan-dark .loginbox,.yan-dark .modal-content,.yan-dark .bossdash,.yan-dark .dash43-card,.yan-dark .hl54-summary,.yan-dark .yan-theme-toggle{background:#101f35!important;color:#e8f0ff!important;border-color:#2c4464!important}
+.yan-dark .side{background:#0a1930!important}
+.yan-dark .main{background:#071427!important}
+.yan-dark .card,.yan-dark .digital-product-card{box-shadow:0 8px 26px #0002!important}
+.yan-dark .muted,.yan-dark .digital-product-card .muted,.yan-dark small{color:#a4b5cd!important}
+.yan-dark .nav button{color:#b7c8e1!important}
+.yan-dark .nav button.active,.yan-dark .nav button:hover{background:#193a69!important;color:#8bbaff!important}
+.yan-dark .btn:not(.primary):not(.danger),.yan-dark input,.yan-dark select,.yan-dark textarea,.yan-dark .input,.yan-dark .field input,.yan-dark .field select,.yan-dark .sheet-toolbar,.yan-dark .sheet-table td,.yan-dark .sheet-table th{background:#122640!important;color:#e8f0ff!important;border-color:#304966!important}
+.yan-dark .btn.primary,.yan-dark .primary{background:#2368ec!important;color:white!important;border-color:#2368ec!important}
+.yan-dark .btn.danger,.yan-dark .danger{background:#4c1f2b!important;color:#ffacb6!important;border-color:#783547!important}
+.yan-dark .sheet-table tr,.yan-dark .sheet-table tbody,.yan-dark .sheet-table thead{background:#101f35!important;color:#e8f0ff!important}
+.yan-dark .digital-product-card[style*="fffdf2"]{background:#352b18!important;border-color:#b58630!important}
+.yan-dark #digitalMonitorV67,.yan-dark #digitalBestSellerCard,.yan-dark #digitalHistoryCardV66{background:#101f35!important}
+.yan-dark #digitalMonitorV67 table th,.yan-dark #digitalMonitorV67 table td{background:#122640!important;color:#e8f0ff!important}
+.yan-dark .yan-theme-toggle button{color:#b7c8e1}
+.yan-dark .yan-theme-toggle button[aria-pressed="true"]{background:#174c9c!important;color:white!important}
+.yan-dark .login{background:linear-gradient(135deg,#071427,#142d4a)!important}
+@media(max-width:700px){.yan-theme-toggle{top:8px;right:8px;padding:3px}.yan-theme-toggle button{padding:7px 8px;font-size:12px}}
+</style>
+</head>
 <body>
 <section id="login" class="login">
   <div class="loginbox">
@@ -6277,6 +6303,33 @@ document.addEventListener('click', async function(e){
   });
 })();
 /* ===== END V61 PWA UPDATE PROMPT ===== */
+</script>
+
+<script>
+/* Appearance only. Safe fallback to Light if storage is unavailable. */
+(function(){
+ const key='yanstore_theme_v68';
+ let chosen='light';
+ try{chosen=localStorage.getItem(key)==='dark'?'dark':'light'}catch(e){}
+ function apply(mode){
+   const dark=mode==='dark';
+   document.body.classList.toggle('yan-dark',dark);
+   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#071427':'#2563eb');
+   document.querySelectorAll('#yanThemeV68 button[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+ }
+ function mount(){
+   const bar=document.createElement('div');
+   bar.id='yanThemeV68';bar.className='yan-theme-toggle';bar.setAttribute('role','group');bar.setAttribute('aria-label','Tema tampilan');
+   bar.innerHTML='<button type="button" data-mode="light" aria-pressed="false">☀ Light</button><button type="button" data-mode="dark" aria-pressed="false">☾ Dark</button>';
+   bar.addEventListener('click',e=>{
+     const b=e.target.closest('button[data-mode]');if(!b)return;
+     chosen=b.dataset.mode;try{localStorage.setItem(key,chosen)}catch(err){}
+     apply(chosen);
+   });
+   document.body.appendChild(bar);apply(chosen);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+})();
 </script>
 </body>
 </html>
