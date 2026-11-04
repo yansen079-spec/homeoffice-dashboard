@@ -1,4 +1,4 @@
-const CACHE_NAME='homeoffice-pwa-v2';
+const CACHE_NAME='homeoffice-pwa-v3';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
@@ -39,6 +39,21 @@ self.addEventListener('fetch',event=>{
                  (await caches.match('./index.html')) ||
                  Response.error();
         })
+    );
+    return;
+  }
+
+  // Always check the network for scripts and styles so a cached old version
+  // cannot mask a newly deployed release. Keep offline fallback when available.
+  if(/\\.(?:js|css)$/i.test(url.pathname)){
+    event.respondWith(
+      fetch(request).then(response=>{
+        if(response.ok){
+          const copy=response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.put(request,copy)));
+        }
+        return response;
+      }).catch(async()=> (await caches.match(request)) || Response.error())
     );
     return;
   }
