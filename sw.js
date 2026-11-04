@@ -45,7 +45,7 @@ self.addEventListener('fetch',event=>{
 
   // Always check the network for scripts and styles so a cached old version
   // cannot mask a newly deployed release. Keep offline fallback when available.
-  if(/\\.(?:js|css)$/i.test(url.pathname)){
+  if(/\.(?:js|css)$/i.test(url.pathname)){
     event.respondWith(
       fetch(request).then(response=>{
         if(response.ok){
