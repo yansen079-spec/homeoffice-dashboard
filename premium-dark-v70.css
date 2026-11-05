@@ -1,0 +1,191 @@
+/* V70 YANSTORE Premium Midnight System — scoped appearance-only override.
+   Loaded after V68 and V69. No JavaScript, data, permissions, or Light Mode changes. */
+body.yan-dark{
+  --v70-panel:#0e1d37;
+  --v70-raised:#132849;
+  --v70-deep:#09172f;
+  --v70-border:rgba(100,159,250,.38);
+  --v70-text:#eef5ff;
+  --v70-muted:#b4c7e4;
+  --v70-blue:#83d0ff;
+  --v70-shadow:0 10px 28px rgba(0,0,0,.19),inset 0 1px rgba(195,217,255,.045);
+}
+body.yan-dark .page h1,body.yan-dark .page h2,body.yan-dark .page h3,
+body.yan-dark .page h4,body.yan-dark .page strong,
+body.yan-dark .page :is(.top,.card,.box) > b{color:var(--v70-text)}
+body.yan-dark .page .muted,body.yan-dark .page small,
+body.yan-dark .page p,body.yan-dark .page label{color:var(--v70-muted)}
+body.yan-dark .page :is(.card,.box,.sheet-wrap,.vault63-card,.vault63-kpi,
+  .att44-filter-card,.att44-table-card,.att44-stat,
+  .emp45-filter-card,.emp45-table-card,.emp45-stat,
+  .rec46-filter-card,.rec46-table-card,.rec46-stat,
+  .rep47-filter-card,.rep47-table-card,.rep47-stat,
+  .set47-card,.set47-preview,.set47-savebar,
+  .sc47-panel,.sc47-kpi,.sc47-tabs,
+  .pay48-control-card,.pay48-stat,.pay48-card,.pay51-today-card,
+  .bm57-card,.hl54-stat,.hl54-card,.dash43-mini,
+  .vault63-upload,.cred-hidden,.taskcard,.leavecard,
+  .stockcard,.detailitem){
+  background:linear-gradient(145deg,#112342 0%,#0d1b35 100%)!important;
+  border-color:var(--v70-border)!important;
+  color:var(--v70-text)!important;
+  box-shadow:var(--v70-shadow)!important;
+}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat,
+  .rec46-stat,.pay51-today-summary>div) b{color:#f5f9ff!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat,
+  .rec46-stat,.pay51-today-summary>div) span,
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat,
+  .rec46-stat,.pay51-today-summary>div) small{color:#bed1ed!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat).green{border-left:3px solid #0bd8b0!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat).blue{border-left:3px solid #4baaff!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat).purple{border-left:3px solid #ad7bff!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat).amber{border-left:3px solid #e6ad4f!important}
+body.yan-dark .page :is(.att44-stat,.emp45-stat,.rep47-stat,.sc47-kpi,.pay48-stat).red{border-left:3px solid #ef6795!important}
+body.yan-dark .page :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea,.input),
+body.yan-dark .modal :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea,.input){
+  background:#122843!important;
+  color:#eff7ff!important;
+  border:1px solid rgba(118,169,247,.47)!important;
+  color-scheme:dark;
+}
+body.yan-dark :is(.page,.modal) :is(input,textarea)::placeholder{color:#8ea8c9!important;opacity:1}
+body.yan-dark :is(.page,.modal) :is(input,select,textarea,button,a):focus-visible{
+  outline:2px solid #65c9ff!important;outline-offset:2px;
+}
+body.yan-dark :is(.page,.modal) :is(.btn:not(.danger),a.btn:not(.danger)){
+  color:#eaf5ff!important;border-color:rgba(94,164,255,.57)!important;
+  background:linear-gradient(135deg,#19375e,#102849)!important;
+}
+body.yan-dark :is(.page,.modal) :is(.btn.primary,.primary){
+  background:linear-gradient(120deg,#0972ce,#3154d2)!important;
+  border-color:#579dfb!important;color:#fff!important;
+  box-shadow:0 4px 17px rgba(23,95,226,.23)!important;
+}
+body.yan-dark :is(.page,.modal) .btn.danger{
+  background:#4e2134!important;color:#ffc6d2!important;border-color:#ac5067!important;
+}
+body.yan-dark :is(.page,.modal) .btn:hover{filter:brightness(1.14)}
+body.yan-dark .page :is(.table,.sheet-wrap,.sc47-table-wrap,.att44-table-wrap,.rep47-table-wrap){
+  border-color:var(--v70-border)!important;
+  background:var(--v70-deep)!important;
+}
+body.yan-dark .page table :is(th,td),
+body.yan-dark .page .sheet-table :is(th,td){
+  background:#10223d!important;color:#dbe9fc!important;
+  border-bottom:1px solid rgba(107,152,221,.21)!important;
+}
+body.yan-dark .page table th{background:#173052!important;color:#b9d8ff!important;font-weight:800}
+body.yan-dark .page table tbody tr:nth-child(even) td{background:#122641!important}
+body.yan-dark .page table tbody tr:hover td{background:#1a3658!important}
+body.yan-dark .page :is(.badge,.rolebox,.categorypill,.pay48-count,.att44-count,.rep47-count){
+  background:#1a3b67!important;color:#cde7ff!important;border-color:rgba(113,170,255,.42)!important;
+}
+body.yan-dark .page :is(.notice,.sc47-safe-note,.sc47-market-note){
+  background:linear-gradient(135deg,#153555,#112b47)!important;
+  color:#d6ebff!important;border:1px solid rgba(95,161,245,.42)!important;
+}
+body.yan-dark .page :is(.notice,.sc47-safe-note,.sc47-market-note) :is(b,p){color:#dcefff!important}
+body.yan-dark .side .user{
+  border:1px solid rgba(91,156,246,.42)!important;
+  border-radius:15px;
+  background:linear-gradient(145deg,#132d53,#09172f)!important;
+  padding:12px!important;left:12px!important;right:12px!important;bottom:12px!important;
+  box-shadow:0 10px 25px rgba(0,0,0,.24);
+}
+body.yan-dark .side .user b{color:#f6f9ff!important}
+body.yan-dark .side .user .muted{color:#afc7ea!important}
+body.yan-dark .side .user .rolebox{
+  background:#164583!important;color:#c5eaff!important;border:1px solid #4d85d4!important;
+}
+body.yan-dark .side .user #logout{
+  background:linear-gradient(135deg,#1b3b68,#132849)!important;
+  color:#eaf5ff!important;border:1px solid rgba(113,165,246,.43)!important;
+}
+body.yan-dark .notify-panel{
+  background:#0d1d36!important;color:#eff6ff!important;
+  border:1px solid rgba(93,156,247,.5)!important;
+  box-shadow:0 20px 55px #0009!important;
+}
+body.yan-dark .notify-head{background:#13294b!important;border-color:#355278!important}
+body.yan-dark .notify-head b,body.yan-dark .notify-title{color:#f4f8ff!important}
+body.yan-dark .notify-desc,body.yan-dark .notify-empty{color:#b7cce8!important}
+body.yan-dark .notify-item{background:#112744!important;color:#f0f8ff!important}
+body.yan-dark .notify-item:hover{background:#1e416d!important}
+body.yan-dark .notify-icon{background:#1a437a!important}
+/* Digital warehouse: fix white bestseller rows and washed-out pale text. */
+body.yan-dark #digitalstock .digital-best-list{display:grid;gap:9px}
+body.yan-dark #digitalstock .digital-best-row{
+  display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;
+  gap:12px;background:linear-gradient(105deg,#19385a,#112541)!important;
+  border:1px solid rgba(92,160,249,.39)!important;
+  color:#f4f8ff!important;border-radius:13px;
+  padding:12px 15px;min-width:0;
+}
+body.yan-dark #digitalstock .digital-best-row:hover{border-color:#65baff!important;background:#1b4068!important}
+body.yan-dark #digitalstock .digital-best-rank{
+  background:#24446e!important;color:#e6f1ff!important;
+  border-radius:10px;padding:6px;text-align:center;
+}
+body.yan-dark #digitalstock .digital-best-name{
+  color:#f4f8ff!important;font-size:14px!important;font-weight:800;
+  overflow-wrap:anywhere;
+}
+body.yan-dark #digitalstock .digital-best-count{
+  color:#8cd9ff!important;font-weight:900;font-size:16px;white-space:nowrap;
+}
+body.yan-dark #digitalstock .digital-best-count span{color:#b6cbe6!important;font-weight:500;font-size:11px}
+body.yan-dark #digitalstock .digital-best-row .muted{color:#adbfdf!important}
+body.yan-dark #digitalstock .stats .card{
+  background:linear-gradient(145deg,#122a4b,#0e1c37)!important;
+  border-color:rgba(104,160,245,.42)!important;
+}
+body.yan-dark #digitalstock .stats .card:nth-child(1){border-top:2px solid #0bccad!important}
+body.yan-dark #digitalstock .stats .card:nth-child(2){border-top:2px solid #a47bff!important}
+body.yan-dark #digitalstock .stats .card:nth-child(3){border-top:2px solid #55aaff!important}
+body.yan-dark #digitalstock .stats .card:nth-child(4){border-top:2px solid #e7b75e!important}
+body.yan-dark #digitalstock :is(#digitalMonitorV67,#digitalBestSellerCard){
+  background:linear-gradient(145deg,#112542,#0d1b35)!important;
+  border:1px solid rgba(107,160,245,.37)!important;
+}
+body.yan-dark #digitalstock .sheet-toolbar{background:transparent!important}
+body.yan-dark #digitalstock .sheet-table :is(th,td){color:#d8e8ff!important}
+body.yan-dark #digitalstock .digital-product-card{
+  background:linear-gradient(145deg,#122b4b,#0d1d37)!important;
+  border:1px solid rgba(100,159,245,.4)!important;color:#f4f8ff!important;
+}
+/* Important module-specific elements that have hardcoded light surfaces. */
+body.yan-dark .page :is(.pay51-today-summary>div,.pay51-today-row,.pay48-detail,
+  .sc47-table-wrap,.seller-tabs,.set47-preview,.emp45-card,.rec46-card,
+  .bm57-row,.bm57-level-card,.bm57-mini-stats>div,.bm57-stat-grid>div,
+  .hl54-grid>div,.vault63-secret code,.vault64-log-row,.sheet-toolbar){
+  background:#122744!important;color:#eaf4ff!important;
+  border-color:rgba(110,163,242,.36)!important;
+}
+body.yan-dark .page :is(.bm57-card-head h3,.bm57-card-head p,
+  .pay48-section-head h3,.sc47-panel-head h3,.rep47-table-head h3,
+  .att44-table-head h3,.emp45-table-head h3){color:#eaf4ff!important}
+body.yan-dark .page :is(.sc47-tabs .btn.active,.bm57-tabs button.active){
+  background:linear-gradient(120deg,#135fbd,#5138c8)!important;
+  color:white!important;
+}
+body.yan-dark .modal .box{
+  background:#0f203d!important;color:#eef6ff!important;
+  border:1px solid rgba(102,158,242,.5)!important;
+}
+body.yan-dark .modal .box :is(h2,h3,b,label){color:#eff6ff!important}
+body.yan-dark .page .vault63-secret code{color:#eaf5ff!important}
+/* Theme control stays fixed, but no longer rests on warehouse KPIs. */
+body.yan-dark .yan-theme-toggle{top:auto!important;bottom:18px!important;right:24px!important;z-index:40}
+@media(min-width:851px){
+ body.yan-dark .side .user{position:absolute}
+}
+@media(max-width:850px){
+ body.yan-dark .side .user{position:static!important;margin-top:12px}
+ body.yan-dark .yan-theme-toggle{bottom:12px!important;right:12px!important}
+}
+@media(max-width:600px){
+ body.yan-dark #digitalstock .digital-best-row{grid-template-columns:32px minmax(0,1fr);gap:8px}
+ body.yan-dark #digitalstock .digital-best-count{grid-column:2;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){body.yan-dark .page .btn{transition:none!important}}
