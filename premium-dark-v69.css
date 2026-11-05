@@ -1,0 +1,155 @@
+/* YANSTORE Premium Midnight Dashboard, 2026-11-05.
+   Visual-only dark theme. Original light mode, auth, data and workflows remain unchanged.
+   Loaded AFTER V68 styles; CSS is scoped to body.yan-dark. */
+body.yan-dark {
+  --yn-ink:#eff6ff;
+  --yn-muted:#9eb6d8;
+  --yn-edge:rgba(89,150,250,.35);
+  --yn-panel:linear-gradient(145deg,#101e3a 0%,#0c1931 60%,#111c42 100%);
+  --yn-glow:0 14px 34px rgba(0,0,0,.24), inset 0 1px rgba(157,202,255,.07);
+  background:#061024!important;
+  color:var(--yn-ink)!important;
+}
+body.yan-dark .main {
+  background:radial-gradient(ellipse 50% 22% at 72% 0%,rgba(68,49,174,.23),transparent 80%),
+             radial-gradient(ellipse 35% 24% at 14% 12%,rgba(0,126,255,.10),transparent 80%),
+             #061024!important;
+}
+body.yan-dark .side {
+  background:linear-gradient(170deg,#060f25,#0a1832 57%,#050e21)!important;
+  border-right:1px solid rgba(83,153,255,.26)!important;
+  box-shadow:6px 0 24px rgba(0,0,0,.15);
+}
+body.yan-dark .brand {color:#f4f8ff!important;text-shadow:0 0 24px rgba(72,158,255,.15)}
+body.yan-dark .nav button {
+  color:#c0d4f3!important;
+  transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+body.yan-dark .nav button.active {
+  color:#fff!important;
+  background:linear-gradient(110deg,#06599b,#2848c7 65%,#5e23cb)!important;
+  box-shadow:0 0 0 1px rgba(98,199,255,.65),0 5px 18px rgba(31,91,232,.29)!important;
+}
+body.yan-dark .nav button:hover:not(.active) {color:#fff!important;background:rgba(40,100,177,.25)!important}
+body.yan-dark .user{border-color:rgba(104,158,237,.20)!important}
+body.yan-dark #dashboard .dash43-header{
+  position:relative;isolation:isolate;min-height:100px;
+}
+body.yan-dark #dashboard .dash43-header::before {
+  content:"";pointer-events:none;position:absolute;inset:-30px -10px -14px 25%;
+  z-index:-1;opacity:.75;
+  background:linear-gradient(155deg,transparent 40%,rgba(61,103,229,.20) 55%,transparent 62%),
+             linear-gradient(160deg,transparent 51%,rgba(141,66,255,.18) 58%,transparent 68%);
+}
+body.yan-dark #dashboard .dash43-header h1 {color:#f4f8ff!important;text-shadow:0 3px 18px rgba(13,49,109,.3)}
+body.yan-dark #dashboard .dash43-eyebrow {color:#55b9ff!important}
+body.yan-dark #dashboard .dash43-welcome {color:#c1d4f2!important}
+body.yan-dark #dashboard .dash43-realtime {color:#8fe3bf!important}
+body.yan-dark .dash43-date-pill,body.yan-dark .yan-theme-toggle {
+  background:linear-gradient(135deg,rgba(21,48,93,.98),rgba(10,26,57,.98))!important;
+  border:1px solid rgba(90,169,255,.65)!important;
+  color:#eff6ff!important;
+  box-shadow:0 6px 25px rgba(12,53,128,.22),inset 0 1px rgba(200,233,255,.08)!important;
+}
+body.yan-dark .dash43-date-pill b,body.yan-dark .dash43-date-sub {color:#eaf4ff!important}
+body.yan-dark .dash43-date-sub strong {color:#6bd2ff!important}
+body.yan-dark .dash43-date-icon {background:linear-gradient(135deg,#075da8,#172f84)!important}
+body.yan-dark .dash43-date-sub em {background:#1c3d74!important;color:#c6e7ff!important}
+body.yan-dark .yan-theme-toggle button[aria-pressed="true"] {
+  color:#fff!important;background:linear-gradient(125deg,#2557d6,#6e2ad9)!important;
+  box-shadow:0 0 0 1px #588cff,0 4px 14px rgba(74,60,233,.32);
+}
+body.yan-dark #dashboard .dash43-kpi {
+  background:linear-gradient(142deg,#142647,#0a1935)!important;
+  border:1px solid rgba(84,155,255,.46)!important;
+  border-radius:17px;
+  color:#f0f6ff!important;
+  box-shadow:var(--yn-glow)!important;
+}
+body.yan-dark #dashboard .dash43-kpi:nth-child(1) {background:linear-gradient(140deg,#073d48,#0b263a)!important;border-color:rgba(13,214,184,.66)!important}
+body.yan-dark #dashboard .dash43-kpi:nth-child(2) {background:linear-gradient(140deg,#123b70,#10234b)!important;border-color:rgba(67,164,255,.72)!important}
+body.yan-dark #dashboard .dash43-kpi:nth-child(3) {background:linear-gradient(140deg,#482449,#1c2040)!important;border-color:rgba(239,91,190,.62)!important}
+body.yan-dark #dashboard .dash43-kpi:nth-child(4) {background:linear-gradient(140deg,#3a245d,#1b2245)!important;border-color:rgba(173,109,255,.70)!important}
+body.yan-dark #dashboard .dash43-kpi span,body.yan-dark #dashboard .dash43-kpi small {color:#b5c9e7!important}
+body.yan-dark #dashboard .dash43-kpi b {color:#fff!important}
+body.yan-dark #dashboard .dash43-kpi-icon.green {background:linear-gradient(145deg,#0dbe9c,#07545a)!important;color:#e5fff7!important}
+body.yan-dark #dashboard .dash43-kpi-icon.blue {background:linear-gradient(145deg,#207bec,#123a97)!important;color:#f2f8ff!important}
+body.yan-dark #dashboard .dash43-kpi-icon.red {background:linear-gradient(145deg,#c52a81,#68214f)!important;color:#fff0f6!important}
+body.yan-dark #dashboard .dash43-kpi-icon.purple {background:linear-gradient(145deg,#8f52f0,#3b2785)!important;color:#f7f0ff!important}
+body.yan-dark #dashboard .dash43-section,
+body.yan-dark #dashboard .dash43-panel,
+body.yan-dark #dashboard .dash43-card {
+  background:var(--yn-panel)!important;
+  border:1px solid rgba(91,156,254,.52)!important;
+  color:var(--yn-ink)!important;
+  box-shadow:var(--yn-glow)!important;
+}
+body.yan-dark #dashboard .dash43-section-head h3,
+body.yan-dark #dashboard .dash43-panel-head h3 {color:#f2f7ff!important}
+body.yan-dark #dashboard .dash43-section-head p,
+body.yan-dark #dashboard .dash43-panel-head p {color:#a5bedf!important}
+body.yan-dark #dashboard .dash43-warehouse-card {
+  position:relative;overflow:hidden;
+  box-shadow:inset 0 1px rgba(255,255,255,.07);
+}
+body.yan-dark #dashboard .dash43-warehouse-card.mint {background:linear-gradient(135deg,#064f49,#052f3c)!important;border-color:#08bb9b!important}
+body.yan-dark #dashboard .dash43-warehouse-card.rose {background:linear-gradient(135deg,#57294d,#28203f)!important;border-color:#d05aa7!important}
+body.yan-dark #dashboard .dash43-warehouse-card.sky {background:linear-gradient(135deg,#173c79,#10254c)!important;border-color:#448eff!important}
+body.yan-dark #dashboard .dash43-warehouse-card.gold {background:linear-gradient(135deg,#52412c,#2a2935)!important;border-color:#b99139!important}
+body.yan-dark #dashboard .dash43-warehouse-card::after{
+  content:"";position:absolute;width:130px;height:85px;border-radius:50%;right:-62px;bottom:-60px;
+  border:1px solid rgba(255,255,255,.13);pointer-events:none;
+  box-shadow:0 0 35px rgba(104,154,255,.08);
+}
+body.yan-dark #dashboard .dash43-warehouse-card b {color:#fff!important}
+body.yan-dark #dashboard .dash43-warehouse-card small,
+body.yan-dark #dashboard .dash43-warehouse-card em {color:#c0d4ee!important}
+body.yan-dark #dashboard .dash43-warehouse-icon {background:rgba(255,255,255,.12)!important;color:#eaf9ff!important}
+body.yan-dark #dashboard .sales-kpi,
+body.yan-dark #dashboard .dash43-mini {
+  background:linear-gradient(140deg,#152c53,#112141)!important;
+  border:1px solid rgba(88,151,255,.55)!important;
+  box-shadow:inset 0 1px rgba(188,218,255,.06);
+}
+body.yan-dark #dashboard .sales-kpi span,
+body.yan-dark #dashboard .dash43-mini span {color:#c0d4f1!important}
+body.yan-dark #dashboard .sales-kpi b,
+body.yan-dark #dashboard .dash43-mini b {color:#8bdaff!important}
+body.yan-dark #dashboard .dash43-section .btn,
+body.yan-dark #dashboard .dash43-panel .btn {
+  background:linear-gradient(110deg,#0864ad,#2343a5)!important;
+  border:1px solid #4caaff!important;
+  color:#fff!important;box-shadow:0 3px 15px rgba(21,117,237,.24);
+}
+body.yan-dark #dashboard .act53-wrap {
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse at 90% -25%,rgba(112,52,227,.35),transparent 46%),
+             linear-gradient(128deg,#0c1c38 0%,#12265b 52%,#0d1a40 100%)!important;
+  border:1px solid rgba(93,144,255,.70)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.22),inset 0 1px rgba(172,204,255,.10)!important;
+}
+body.yan-dark #dashboard .act53-wrap h3 {color:#fff!important}
+body.yan-dark #dashboard .act53-wrap p {color:#b9d2f1!important}
+body.yan-dark #dashboard .act53-kicker {color:#7ccfff!important}
+body.yan-dark #dashboard .act53-badge {background:rgba(104,106,221,.26)!important;border:1px solid rgba(163,143,255,.42)!important;color:#fff!important}
+body.yan-dark #dashboard .act53-item,
+body.yan-dark #dashboard .act53-card {
+  background:linear-gradient(110deg,rgba(36,63,112,.9),rgba(24,40,87,.95))!important;
+  border:1px solid rgba(96,143,237,.42)!important;
+  color:#eff7ff!important;
+}
+body.yan-dark #dashboard .act53-item *,
+body.yan-dark #dashboard .act53-card * {text-shadow:none}
+body.yan-dark #dashboard .act53-item small,
+body.yan-dark #dashboard .act53-card small {color:#c1d3ef!important}
+body.yan-dark #dashboard .card {background:#11213e!important;border-color:rgba(102,158,242,.35)!important}
+body.yan-dark #dashboard .muted {color:#a8c1e3!important}
+body.yan-dark #dashboard a {color:#8bd8ff}
+body.yan-dark #dashboard .btn:hover {filter:brightness(1.12)}
+@media(max-width:850px){
+ body.yan-dark #dashboard .dash43-header::before {display:none}
+ body.yan-dark .yan-theme-toggle{box-shadow:0 4px 13px #02081e90!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.yan-dark .nav button{transition:none}
+}
