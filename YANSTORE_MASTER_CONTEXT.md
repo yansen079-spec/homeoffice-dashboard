@@ -13,6 +13,22 @@
 - **Preferensi produk/UI:** premium, minimalis, rapi, terasa seperti command center, **tidak ramai**. Mengutamakan fitur yang langsung menghemat kerja atau membantu bisnis. Jangan menambah kartu/dashboard yang tidak perlu.
 - **Pola kolaborasi:** sering meminta ide, menyeleksi dengan ketat, lalu meminta implementasi langsung ke GitHub ketika setuju. Jangan mengimplementasikan ide yang masih sebatas diskusi.
 
+## Kisah awal YANSTORE — cerita pemilik, 21 November 2026
+
+> Bagian ini berdasarkan cerita langsung pemilik. Catat sebagai sejarah pribadi bisnis; jangan menambahkan detail yang belum pernah diceritakan.
+
+- Minat jualan produk digital sudah ada **jauh sebelum tahun 2022**, tetapi pada waktu itu pemilik belum mengerti cara memulai atau menjualnya.
+- Sebelum berjualan layanan aplikasi premium, pemilik sempat mencoba **menjual followers Instagram dan TikTok**. Pengalaman tersebut berakhir dengan **ditipu**, sehingga ia menjadi lebih berhati-hati dan sulit percaya kepada orang lain dalam urusan jualan.
+- Pada **2022**, YANSTORE menjadi **usaha sampingan**. Pada awalnya pemilik berperan sebagai **seller/reseller**, bukan penyedia langsung.
+- Dalam perjalanan ini pemilik mengenal seorang mentor/supplier yang ia panggil **Bang Wan**. Awalnya pemilik sempat khawatir ditipu lagi, bahkan bertanya kepadanya, **"Ini nggak nipu kan, Kak?"** Bang Wan menjawab bahwa itu aman.
+- Pemilik mengatakan ia **belajar banyak selama sekitar satu tahun** melalui hubungan dengan Bang Wan. Belum dikonfirmasi apakah proses belajar itu berupa pengajaran langsung atau lebih banyak melalui pengalaman dan pengamatan; jangan mengasumsikan.
+- Contoh model usaha awal: membeli akses **Netflix seharga Rp20.000 dari Bang Wan**, lalu menjualnya **Rp30.000**, dengan selisih harga **Rp10.000** sebelum pengeluaran lain. Ini contoh pengalaman masa lalu, **bukan** harga aktif saat ini.
+- Seiring waktu, pemilik membangun jaringan lebih luas dan kini menggambarkan dirinya sebagai **first hand**, yakni mampu membuat/menyediakan akun sendiri. Ia tidak lagi sering membeli stok dari Bang Wan karena sumber/jaringannya sudah lebih banyak.
+- Hal yang sangat berarti bagi pemilik: **ia tetap mengingat dan menghargai Bang Wan** sebagai orang yang mengenalkannya pada dunia bisnis ini dan membantunya belajar, meskipun kini sudah lebih mandiri.
+- Pemilik secara eksplisit meminta agar **kisah ini masuk ke YANSTORE MASTER CONTEXT**, supaya kelak asisten baru tidak membuatnya bercerita ulang.
+
+**Panduan untuk asisten:** jangan memanggil YANSTORE bisnis yang baru dirintis dari nol pada 2026; hormati sejarah sejak 2022 dan peranan Bang Wan. Jika pemilik kelak bercerita lebih lanjut, tambahkan fakta baru secara akurat tanpa menebak.
+
 ## 2. Repo, aplikasi, dan tautan utama
 
 | Komponen | Alamat / lokasi | Keterangan |
