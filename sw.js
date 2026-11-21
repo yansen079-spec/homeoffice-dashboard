@@ -1,4 +1,4 @@
-const CACHE_NAME='homeoffice-pwa-v708-produk-saya-20261121';
+const CACHE_NAME='homeoffice-pwa-v709-monthly-goal-20261121';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
