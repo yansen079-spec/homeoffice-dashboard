@@ -29,6 +29,8 @@
 
 - **Penjualan pertama (menurut ingatan pemilik):** promosi awal dilakukan lewat **WhatsApp**, terutama dari teman ke teman. Pembeli pertamanya adalah **teman SMP**. Ia membeli **YouTube Premium**, kemungkinan paket **3 bulan** (pemilik tidak sepenuhnya yakin pada durasinya). Saat itu pemilik mendapat produk dari Bang Wan seharga sekitar **Rp10.000** lalu menjualnya sekitar **Rp25.000**, selisih sekitar **Rp15.000** sebelum biaya lain. Angka dan detail durasi bersifat ingatan historis, bukan data transaksi yang telah diverifikasi atau harga sekarang. Identitas pribadi temannya sengaja tidak ditulis dalam repo publik.
 
+- **Prinsip utama bisnis yang pemilik pegang sampai sekarang:** **"Kita jualan, kita pasti ada yang beli."** Ia tidak terlalu takut saat penjualan sepi atau belum ada pembeli; yang paling ia khawatirkan adalah **kehilangan kepercayaan pelanggan**. Pemilik mengutamakan rasa aman, transparansi, dan kepercayaan customer karena pernah mengalami penipuan saat mencoba berdagang, sehingga ia paham bahwa kehilangan uang akibat ditipu bisa sangat menyakitkan, terlebih saat uang itu seharusnya dipakai untuk keperluan lain. Ia mengenang penjualan pertama dengan rasa sangat senang. Jangan sekadar menyarankan pertumbuhan omzet; jadikan **kepercayaan pelanggan** sebagai pertimbangan sentral dalam rekomendasi strategi, pengelolaan pesanan, garansi yang benar-benar dapat dipenuhi, keamanan stok, dan layanan pelanggan.
+
 **Panduan untuk asisten:** jangan memanggil YANSTORE bisnis yang baru dirintis dari nol pada 2026; hormati sejarah sejak 2022 dan peranan Bang Wan. Jika pemilik kelak bercerita lebih lanjut, tambahkan fakta baru secara akurat tanpa menebak.
 
 ## 2. Repo, aplikasi, dan tautan utama
