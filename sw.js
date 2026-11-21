@@ -1,4 +1,4 @@
-const CACHE_NAME='homeoffice-pwa-v709-monthly-goal-20261121';
+const CACHE_NAME='homeoffice-pwa-v710-quick-actions-20261121';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
