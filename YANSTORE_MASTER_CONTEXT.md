@@ -27,6 +27,8 @@
 - Hal yang sangat berarti bagi pemilik: **ia tetap mengingat dan menghargai Bang Wan** sebagai orang yang mengenalkannya pada dunia bisnis ini dan membantunya belajar, meskipun kini sudah lebih mandiri.
 - Pemilik secara eksplisit meminta agar **kisah ini masuk ke YANSTORE MASTER CONTEXT**, supaya kelak asisten baru tidak membuatnya bercerita ulang.
 
+- **Penjualan pertama (menurut ingatan pemilik):** promosi awal dilakukan lewat **WhatsApp**, terutama dari teman ke teman. Pembeli pertamanya adalah **teman SMP**. Ia membeli **YouTube Premium**, kemungkinan paket **3 bulan** (pemilik tidak sepenuhnya yakin pada durasinya). Saat itu pemilik mendapat produk dari Bang Wan seharga sekitar **Rp10.000** lalu menjualnya sekitar **Rp25.000**, selisih sekitar **Rp15.000** sebelum biaya lain. Angka dan detail durasi bersifat ingatan historis, bukan data transaksi yang telah diverifikasi atau harga sekarang. Identitas pribadi temannya sengaja tidak ditulis dalam repo publik.
+
 **Panduan untuk asisten:** jangan memanggil YANSTORE bisnis yang baru dirintis dari nol pada 2026; hormati sejarah sejak 2022 dan peranan Bang Wan. Jika pemilik kelak bercerita lebih lanjut, tambahkan fakta baru secara akurat tanpa menebak.
 
 ## 2. Repo, aplikasi, dan tautan utama
