@@ -1,9 +1,16 @@
-const CACHE_NAME='homeoffice-pwa-v2';
+const CACHE_NAME='homeoffice-pwa-v70-live-sales-20261121';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then(async cache=>{
+      await Promise.all(APP_SHELL.map(async path=>{
+        const request=new Request(path,{cache:'reload'});
+        const response=await fetch(request);
+        if(!response.ok)throw new Error('Gagal update aset: '+path);
+        await cache.put(path,response);
+      }));
+    })
   );
 });
 
@@ -28,7 +35,7 @@ self.addEventListener('fetch',event=>{
 
   if(request.mode==='navigate'){
     event.respondWith(
-      fetch(request)
+      fetch(request,{cache:'no-store'})
         .then(response=>{
           const copy=response.clone();
           caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));
