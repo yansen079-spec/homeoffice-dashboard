@@ -587,15 +587,19 @@ body.seasonal-newyear{
 #liveSales70 .live70-product:hover{background:#ffffff16;border-color:#ffffff35}
 @media(max-width:600px){#liveSales70 .live70-product-count{font-size:11px}}
 
-/* ===== V70.4 YESTERDAY SALES SNAPSHOT ===== */
-#liveSales70 .live70-yesterday{margin-top:15px;padding:12px 13px;border:1px solid #ffffff24;border-radius:13px;background:#ffffff0a}
-#liveSales70 .live70-yesterday-title{font-size:12px;font-weight:850;color:#f4f8ff;display:flex;gap:8px;justify-content:space-between;align-items:center}
-#liveSales70 .live70-yesterday-title span{font-size:10px;font-weight:500;color:#9eb6d4}
-#liveSales70 .live70-yesterday-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:10px}
-#liveSales70 .live70-yesterday-grid small{display:block;font-size:10px;color:#9fb4d0;margin-bottom:4px}
-#liveSales70 .live70-yesterday-grid strong{font-size:clamp(13px,1.1vw,17px);color:#e9f2ff;font-weight:850;overflow-wrap:anywhere}
-#liveSales70 .live70-yesterday-best{border-top:1px solid #ffffff1b;margin-top:10px;padding-top:8px;color:#c4d5ee;font-size:10px;line-height:1.35;overflow-wrap:anywhere}
-@media(max-width:900px){#liveSales70 .live70-yesterday{margin-top:12px}}
+/* ===== V70.5 TODAY VS YESTERDAY COMPARISON ===== */
+#liveSales70 .live70-chart-legend{display:flex;align-items:center;gap:17px;flex-wrap:wrap;margin-top:5px;min-height:17px;font-size:11px;color:#d3e4f9}
+#liveSales70 .live70-chart-legend>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#liveSales70 .live70-chart-legend small{color:#93aacc;font-size:10px}
+#liveSales70 .live70-legend-dot{width:9px;height:9px;display:inline-block;border-radius:50%}
+#liveSales70 .live70-today-dot{background:#3af0ae;box-shadow:0 0 8px #3af0ae77}
+#liveSales70 .live70-yesterday-dot{background:#74a7ff;box-shadow:0 0 7px #74a7ff55}
+@media(min-width:901px){
+  #liveSales70 .live70-summary{min-height:86px!important}
+  #liveSales70 .live70-chartarea{height:190px!important;min-height:190px!important;max-height:190px!important}
+  #liveSales70 #live70Svg{height:190px!important;max-height:190px!important}
+}
+@media(max-width:600px){#liveSales70 .live70-chart-legend{gap:9px}}
 
 /* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
 .live70{background:linear-gradient(115deg,#0c172d,#152656 95%);color:#f8fbff;border-radius:22px;padding:22px 25px;margin-bottom:20px;box-shadow:0 16px 32px #0c17301b;overflow:hidden}
@@ -1027,15 +1031,11 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
             <div class="live70-summary"><div><div class="live70-caption">PENJUALAN HARI INI</div><strong id="live70Revenue">Rp 0</strong><div class="live70-secondary"><span id="live70Orders">0 transaksi</span> · <span id="live70Change">Dibanding kemarin: —</span></div></div>
               <div class="live70-controls"><button type="button" data-live70-minutes="15">15m</button><button type="button" data-live70-minutes="30" class="active">30m</button><button type="button" data-live70-minutes="60">1j</button></div>
             </div>
-            <div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Omzet penjualan setiap interval waktu" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
-            <div class="live70-foot"><span>Grafik omzet per interval · naik/turun mengikuti penjualan aktual</span><span id="live70Last">—</span></div>
+            <div class="live70-chart-legend"><span><i class="live70-legend-dot live70-today-dot"></i> Hari ini</span><span><i class="live70-legend-dot live70-yesterday-dot"></i> Kemarin</span><small>Perbandingan hingga jam sekarang</small></div><div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Perbandingan omzet tiap interval waktu hari ini dan kemarin" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
+            <div class="live70-foot"><span>Omzet per interval · garis hijau hari ini, biru kemarin · arahkan ke titik untuk detail</span><span id="live70Last">—</span></div>
           </div>
           <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div>
-            <div class="live70-yesterday" aria-label="Ringkasan transaksi kemarin">
-              <div class="live70-yesterday-title">🕘 Transaksi Kemarin <span id="live70YesterdayDate">—</span></div>
-              <div class="live70-yesterday-grid"><div><small>Total Omzet</small><strong id="live70YesterdayRevenue">—</strong></div><div><small>Jumlah Transaksi</small><strong id="live70YesterdayOrders">—</strong></div></div>
-              <div class="live70-yesterday-best" id="live70YesterdayBest">Produk terlaris: —</div>
-            </div></aside>
+</aside>
         </div>
       </div>
 
@@ -4330,23 +4330,12 @@ function renderLiveSalesV70(){
   if(!currentEmployee||currentEmployee.role!=='admin')return;
   const root=document.getElementById('liveSales70');if(!root)return;
   const today=ymd();
-  const rows=salesTransactions.filter(x=>x.transaction_date===today);
   const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const yesterdayDate=[yesterday.getFullYear(),String(yesterday.getMonth()+1).padStart(2,'0'),String(yesterday.getDate()).padStart(2,'0')].join('-');
-  const prior=salesTransactions.filter(x=>x.transaction_date===yesterdayDate);
+  const priorDate=[yesterday.getFullYear(),String(yesterday.getMonth()+1).padStart(2,'0'),String(yesterday.getDate()).padStart(2,'0')].join('-');
+  const rows=salesTransactions.filter(x=>x.transaction_date===today);
+  const prior=salesTransactions.filter(x=>x.transaction_date===priorDate);
   const total=rows.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
   const prev=prior.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
-  const yesterdayDateEl=document.getElementById('live70YesterdayDate');
-  if(yesterdayDateEl)yesterdayDateEl.textContent=yesterday.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
-  const yesterdayRevenueEl=document.getElementById('live70YesterdayRevenue');
-  const yesterdayOrdersEl=document.getElementById('live70YesterdayOrders');
-  if(yesterdayRevenueEl)yesterdayRevenueEl.textContent=rupiah(prev);
-  if(yesterdayOrdersEl)yesterdayOrdersEl.textContent=prior.length.toLocaleString('id-ID');
-  const priorProducts=new Map();
-  prior.forEach(x=>{const name=String(x.product_name||'Tidak diketahui').trim()||'Tidak diketahui';const key=name.toLocaleLowerCase('id-ID');const r=priorProducts.get(key)||{name,count:0};r.count++;priorProducts.set(key,r)});
-  const yesterdayTop=[...priorProducts.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'id')).slice(0,1)[0];
-  const yesterdayBestEl=document.getElementById('live70YesterdayBest');
-  if(yesterdayBestEl)yesterdayBestEl.textContent=yesterdayTop?'Terlaris kemarin: '+yesterdayTop.name+' ('+yesterdayTop.count+' terjual)':'Belum ada penjualan kemarin';
   document.getElementById('live70Revenue').textContent=rupiah(total);
   document.getElementById('live70Orders').textContent=rows.length.toLocaleString('id-ID')+' transaksi';
   const delta=document.getElementById('live70Change');
@@ -4354,44 +4343,98 @@ function renderLiveSalesV70(){
   delta.style.color=prev>0?(total>=prev?'#50ecad':'#ff9f9f'):'#bed1e9';
   document.getElementById('live70Status').textContent=live70SalesError?'Data gagal dimuat':!live70SalesReady?'Memuat transaksi':rows.length?'Data transaksi aktif':'Belum ada transaksi';
   const rank=new Map();
-  rows.forEach(x=>{const name=String(x.product_name||'Tidak diketahui').trim()||'Tidak diketahui';const key=name.toLocaleLowerCase('id-ID');const existing=rank.get(key)||{name,count:0,revenue:0};existing.count+=1;existing.revenue+=Math.max(0,Number(x.amount)||0);rank.set(key,existing)});
+  rows.forEach(x=>{
+    const name=String(x.product_name||'Tidak diketahui').trim()||'Tidak diketahui';
+    const key=name.toLocaleLowerCase('id-ID');
+    const item=rank.get(key)||{name,count:0,revenue:0};
+    item.count++;item.revenue+=Math.max(0,Number(x.amount)||0);
+    rank.set(key,item);
+  });
   const top=[...rank.values()].sort((a,b)=>b.count-a.count||b.revenue-a.revenue).slice(0,3);
   document.getElementById('live70Top').innerHTML=top.length?top.map((x,i)=>'<div class="live70-product"><span class="live70-rank">'+(i+1)+'</span><span class="live70-product-name">'+esc(x.name)+'</span><span class="live70-product-count">'+x.count+' terjual</span></div>').join(''):'<div style="font-size:12px;color:#a9bed8">Belum ada produk terjual hari ini.</div>';
   const svg=document.getElementById('live70Svg'),empty=document.getElementById('live70Empty');
-  if(!live70SalesReady||live70SalesError){svg.innerHTML='';empty.style.display='grid';empty.textContent=live70SalesError?'Gagal membaca transaksi. Periksa koneksi dan izin data.':'Memuat transaksi...';return}
-  if(!rows.length){svg.innerHTML='';empty.style.display='grid';empty.textContent='Belum ada penjualan hari ini. Grafik akan muncul setelah transaksi tercatat.';return}
-  // imported sales without a genuine transaction timestamp cannot be plotted at import time.
-  const timed=rows.filter(x=>x.created_at&&!x.source_row);
-  const untimed=rows.filter(x=>!timed.includes(x));
-  const dateNow=new Date(),minuteNow=dateNow.getHours()*60+dateNow.getMinutes();
+  if(!live70SalesReady||live70SalesError){
+    svg.innerHTML='';
+    empty.style.display='grid';
+    empty.textContent=live70SalesError?'Gagal membaca transaksi. Periksa koneksi dan izin data.':'Memuat transaksi...';
+    return;
+  }
+  // Compare equal wall-clock time intervals. Only genuine created_at transaction times
+  // can be charted. Excel imports with source_row do not have an actual purchase time.
+  const now=new Date();
+  const minuteNow=now.getHours()*60+now.getMinutes();
   const bucketCount=Math.max(1,Math.ceil((minuteNow+1)/live70BucketMinutes));
-  const points=Array.from({length:bucketCount},(_,i)=>({minute:i*live70BucketMinutes,value:0,items:[]}));
-  timed.forEach(x=>{
-    const d=new Date(x.created_at);if(!Number.isFinite(d.getTime()))return;
-    // Respect the local timezone and exclude rows whose creation time is not today.
-    if([d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')!==today)return;
-    const idx=Math.floor((d.getHours()*60+d.getMinutes())/live70BucketMinutes);
-    if(points[idx]){points[idx].value+=Math.max(0,Number(x.amount)||0);points[idx].items.push(x)}
-  });
-  const max=Math.max(1,...points.map(x=>x.value));
-  // Fit the SVG coordinate system to the actual chart box, without distorting labels.
+  const points=Array.from({length:bucketCount},(_,i)=>({minute:i*live70BucketMinutes,today:0,yesterday:0,todayItems:[],priorItems:[]}));
+  let untimedToday=0,untimedPrior=0,plottedToday=0,plottedPrior=0;
+  function addSeries(data,date,key,listKey){
+    for(const sale of data){
+      if(!sale.created_at||sale.source_row){if(key==='today')untimedToday++;else untimedPrior++;continue}
+      const d=new Date(sale.created_at);
+      if(!Number.isFinite(d.getTime())){if(key==='today')untimedToday++;else untimedPrior++;continue}
+      const localDate=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+      if(localDate!==date){if(key==='today')untimedToday++;else untimedPrior++;continue}
+      const index=Math.floor((d.getHours()*60+d.getMinutes())/live70BucketMinutes);
+      if(!points[index])continue;
+      points[index][key]+=Math.max(0,Number(sale.amount)||0);
+      points[index][listKey].push(sale);
+      if(key==='today')plottedToday++;else plottedPrior++;
+    }
+  }
+  addSeries(rows,today,'today','todayItems');
+  addSeries(prior,priorDate,'yesterday','priorItems');
   const box=svg.parentElement;
   const w=Math.max(300,Math.round(box.clientWidth||900));
   const h=Math.max(170,Math.round(box.clientHeight||205));
   const l=55,r=16,t=16,b=30,plotW=w-l-r,plotH=h-t-b;
   svg.setAttribute('viewBox','0 0 '+w+' '+h);
   svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  const max=Math.max(1,...points.flatMap(p=>[p.today,p.yesterday]));
   const x=i=>l+(points.length===1?plotW/2:i*plotW/(points.length-1));
   const y=v=>t+plotH-(v/max)*plotH;
-  const coords=points.map((p,i)=>[x(i),y(p.value)]);
-  let parts=['<defs><linearGradient id="live70Fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#36e7a4" stop-opacity=".38"/><stop offset="100%" stop-color="#36e7a4" stop-opacity=".01"/></linearGradient><filter id="live70Glow" x="-15%" y="-75%" width="130%" height="250%"><feGaussianBlur stdDeviation="3"/></filter></defs>'];
-  for(let k=0;k<=4;k++){const v=max*k/4,yy=y(v);parts.push('<line x1="'+l+'" y1="'+yy+'" x2="'+(w-r)+'" y2="'+yy+'" stroke="#ffffff22" stroke-dasharray="4 5"/>');parts.push('<text x="'+(l-9)+'" y="'+(yy+4)+'" text-anchor="end" fill="#b2c5df" font-size="12">'+(v>=1000000?(v/1000000).toFixed(1)+'jt':v>=1000?Math.round(v/1000)+'rb':Math.round(v))+'</text>')}
-  if(coords.length){let path=coords.map((c,i)=>(i?'L':'M')+c[0].toFixed(1)+','+c[1].toFixed(1)).join(' ');const area=path+' L'+coords[coords.length-1][0]+','+y(0)+' L'+coords[0][0]+','+y(0)+' Z';parts.push('<path d="'+area+'" fill="url(#live70Fill)"/>');parts.push('<path d="'+path+'" fill="none" stroke="#3af0ae" opacity=".42" stroke-width="8" filter="url(#live70Glow)"/>');parts.push('<path d="'+path+'" fill="none" stroke="#3af0ae" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>')}
-  points.forEach((p,i)=>{const xx=x(i),yy=y(p.value);if(points.length<=30||i%Math.ceil(points.length/25)===0||i===points.length-1){parts.push('<circle cx="'+xx+'" cy="'+yy+'" r="4" fill="#5ff7bb"><title>'+String(Math.floor(p.minute/60)).padStart(2,'0')+':'+String(p.minute%60).padStart(2,'0')+' | '+rupiah(p.value)+' | '+p.items.length+' transaksi'+(p.items.length?' | '+p.items.slice(0,3).map(z=>String(z.product_name||'Produk')+' '+rupiah(z.amount)).join(', '):'')+'</title></circle>')}if(i===0||i===points.length-1||i%Math.max(1,Math.ceil(points.length/8))===0){parts.push('<text x="'+xx+'" y="'+(h-8)+'" text-anchor="middle" fill="#b2c5df" font-size="12">'+String(Math.floor(p.minute/60)).padStart(2,'0')+':'+String(p.minute%60).padStart(2,'0')+'</text>')}});
+  const coordsFor=key=>points.map((p,i)=>[x(i),y(p[key])]);
+  const todayCoords=coordsFor('today'),priorCoords=coordsFor('yesterday');
+  let parts=['<defs><linearGradient id="live70Fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#36e7a4" stop-opacity=".32"/><stop offset="100%" stop-color="#36e7a4" stop-opacity=".01"/></linearGradient><filter id="live70Glow" x="-15%" y="-75%" width="130%" height="250%"><feGaussianBlur stdDeviation="3"/></filter></defs>'];
+  for(let k=0;k<=4;k++){
+    const v=max*k/4,yy=y(v);
+    parts.push('<line x1="'+l+'" y1="'+yy+'" x2="'+(w-r)+'" y2="'+yy+'" stroke="#ffffff22" stroke-dasharray="4 5"/>');
+    parts.push('<text x="'+(l-9)+'" y="'+(yy+4)+'" text-anchor="end" fill="#b2c5df" font-size="12">'+(v>=1000000?(v/1000000).toFixed(1)+'jt':v>=1000?Math.round(v/1000)+'rb':Math.round(v))+'</text>');
+  }
+  const pathOf=coords=>coords.map((c,i)=>(i?'L':'M')+c[0].toFixed(1)+','+c[1].toFixed(1)).join(' ');
+  if(plottedPrior){
+    const path=pathOf(priorCoords);
+    parts.push('<path d="'+path+'" fill="none" stroke="#74a7ff" opacity=".16" stroke-width="7" filter="url(#live70Glow)"/>');
+    parts.push('<path d="'+path+'" fill="none" stroke="#74a7ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4"/>');
+  }
+  if(plottedToday){
+    const path=pathOf(todayCoords);
+    const area=path+' L'+todayCoords[todayCoords.length-1][0]+','+y(0)+' L'+todayCoords[0][0]+','+y(0)+' Z';
+    parts.push('<path d="'+area+'" fill="url(#live70Fill)"/>');
+    parts.push('<path d="'+path+'" fill="none" stroke="#3af0ae" opacity=".42" stroke-width="8" filter="url(#live70Glow)"/>');
+    parts.push('<path d="'+path+'" fill="none" stroke="#3af0ae" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>');
+  }
+  const hourText=minute=>String(Math.floor(minute/60)).padStart(2,'0')+':'+String(minute%60).padStart(2,'0');
+  const dotStep=Math.max(1,Math.ceil(points.length/28));
+  const labelStep=Math.max(1,Math.ceil(points.length/7));
+  points.forEach((p,i)=>{
+    const xx=x(i);
+    if(i===0||i===points.length-1||i%labelStep===0)parts.push('<text x="'+xx+'" y="'+(h-8)+'" text-anchor="middle" fill="#b2c5df" font-size="11">'+hourText(p.minute)+'</text>');
+    if(i%dotStep===0||i===points.length-1){
+      if(plottedPrior)parts.push('<circle cx="'+xx+'" cy="'+y(p.yesterday)+'" r="2.6" fill="#74a7ff"/>');
+      if(plottedToday)parts.push('<circle cx="'+xx+'" cy="'+y(p.today)+'" r="3" fill="#3af0ae"/>');
+    }
+    // Transparent hit areas display exact same-hour comparison on hover.
+    const width=Math.max(10,plotW/points.length);
+    const start=Math.max(l,xx-width/2);
+    const title=hourText(p.minute)+'–'+hourText(Math.min(1439,p.minute+live70BucketMinutes))+' | Hari ini '+rupiah(p.today)+' ('+p.todayItems.length+' transaksi) | Kemarin '+rupiah(p.yesterday)+' ('+p.priorItems.length+' transaksi)';
+    parts.push('<rect x="'+start+'" y="'+t+'" width="'+width+'" height="'+plotH+'" fill="transparent"><title>'+title+'</title></rect>');
+  });
   svg.innerHTML=parts.join('');
-  empty.style.display=timed.some(x=>{const d=new Date(x.created_at);return Number.isFinite(d.getTime())&&[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')===today})?'none':'grid';
-  if(empty.style.display==='grid')empty.textContent='Total penjualan tersedia, tetapi waktu transaksi aktual belum tersedia untuk menggambar grafik.';
-  document.getElementById('live70Last').textContent=(untimed.length?untimed.length+' transaksi tanpa waktu pembelian · ':'')+'Diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const hasTimed=plottedToday+plottedPrior>0;
+  empty.style.display=hasTimed?'none':'grid';
+  if(!hasTimed)empty.textContent=rows.length||prior.length?'Ada transaksi, tetapi belum tersedia waktu pembelian asli untuk menggambar grafik.':'Belum ada penjualan hari ini atau kemarin.';
+  const notes=[];
+  if(untimedToday||untimedPrior)notes.push((untimedToday+untimedPrior)+' transaksi tanpa jam pembelian tidak diplot');
+  document.getElementById('live70Last').textContent=(notes.length?notes.join(' · ')+' · ':'')+'Diperbarui '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 }
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-live70-minutes]');if(!btn)return;live70BucketMinutes=Number(btn.dataset.live70Minutes);document.querySelectorAll('[data-live70-minutes]').forEach(x=>x.classList.toggle('active',x===btn));renderLiveSalesV70()});
 setInterval(()=>{if(currentEmployee?.role==='admin'&&!document.hidden)renderLiveSalesV70()},60000);
