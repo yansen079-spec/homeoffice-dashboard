@@ -542,6 +542,40 @@ body.seasonal-newyear{
 @media(max-width:520px){#businessfinance .bossdash{grid-template-columns:1fr!important}}
 /* ===== END V42.24.1 ===== */
 
+/* ===== V70.1 BALANCED LIVE SALES PANEL ===== */
+@media(min-width:901px){
+  #dashboard #liveSales70.live70{
+    height:380px!important;
+    min-height:0!important;
+    max-height:380px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    padding:17px 22px!important;
+  }
+  #liveSales70 .live70-heading{flex:0 0 auto;margin-bottom:9px}
+  #liveSales70 .live70-layout{
+    flex:1 1 auto;
+    min-height:0;
+    align-items:stretch;
+    grid-template-columns:minmax(0,3.5fr) minmax(235px,1fr);
+    gap:16px;
+  }
+  #liveSales70 .live70-chartmain{display:flex;flex-direction:column;min-height:0;min-width:0}
+  #liveSales70 .live70-summary{flex:0 0 auto}
+  #liveSales70 .live70-summary strong{font-size:clamp(30px,3vw,42px)}
+  #liveSales70 .live70-chartarea{flex:1 1 auto;min-height:0;margin-top:5px;overflow:hidden}
+  #liveSales70 #live70Svg{height:100%!important;min-height:0}
+  #liveSales70 .live70-foot{flex:0 0 auto;font-size:10px;margin-top:5px}
+  #liveSales70 .live70-products{min-height:0;padding-left:16px}
+  #liveSales70 .live70-products h3{margin:4px 0 12px}
+  #liveSales70 .live70-product{padding:10px 8px;margin-bottom:7px}
+}
+@media(max-width:900px){
+  #dashboard #liveSales70.live70{height:auto!important;max-height:none!important;min-height:0!important}
+  #liveSales70 .live70-chartarea{min-height:180px}
+  #liveSales70 #live70Svg{height:215px}
+}
+
 /* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
 .live70{background:linear-gradient(115deg,#0c172d,#152656 95%);color:#f8fbff;border-radius:22px;padding:22px 25px;margin-bottom:20px;box-shadow:0 16px 32px #0c17301b;overflow:hidden}
 .live70-heading{display:flex;gap:9px;align-items:center;color:#60f2bd;font-size:12px;letter-spacing:1.1px;font-weight:900;margin-bottom:12px}
