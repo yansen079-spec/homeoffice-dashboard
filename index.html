@@ -541,6 +541,36 @@ body.seasonal-newyear{
 @media(max-width:900px){#businessfinance .bfgrid{grid-template-columns:1fr!important}}
 @media(max-width:520px){#businessfinance .bossdash{grid-template-columns:1fr!important}}
 /* ===== END V42.24.1 ===== */
+
+/* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
+.live70{background:linear-gradient(115deg,#0c172d,#152656 95%);color:#f8fbff;border-radius:22px;padding:22px 25px;margin-bottom:20px;box-shadow:0 16px 32px #0c17301b;overflow:hidden}
+.live70-heading{display:flex;gap:9px;align-items:center;color:#60f2bd;font-size:12px;letter-spacing:1.1px;font-weight:900;margin-bottom:12px}
+.live70-dot{width:9px;height:9px;border-radius:50%;background:#31e5a1;box-shadow:0 0 12px #31e5a188}
+.live70-tag{letter-spacing:0;background:#0f594d66;border:1px solid #53c8a146;padding:5px 9px;border-radius:20px;font-size:11px}
+.live70-detail{margin-left:auto;border:1px solid #ffffff40;border-radius:10px;background:#ffffff10;color:#fff;padding:8px 11px;cursor:pointer;font-weight:750;letter-spacing:0}
+.live70-layout{display:grid;grid-template-columns:minmax(0,3.5fr) minmax(245px,1fr);gap:20px}
+.live70-chartmain{min-width:0}
+.live70-summary{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.live70-caption{font-size:14px;font-weight:850;letter-spacing:.2px;margin-bottom:5px}
+.live70-summary strong{font-size:clamp(31px,4vw,52px);line-height:1.1;letter-spacing:-1px;display:block}
+.live70-secondary{font-size:12px;color:#bed1e9;margin-top:8px}
+.live70-controls{display:flex;gap:4px;background:#ffffff12;padding:4px;border-radius:10px}
+.live70-controls button{border:0;background:transparent;color:#c9d8ee;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:12px}
+.live70-controls button.active{background:#235b77;color:white;font-weight:800}
+.live70-chartarea{position:relative;min-height:230px;margin-top:8px}
+#live70Svg{display:block;width:100%;height:255px;overflow:visible}
+.live70-empty{position:absolute;inset:0;display:grid;place-items:center;color:#adc2dc;font-size:13px;text-align:center;pointer-events:none}
+.live70-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#a5b9d6;font-size:11px;margin-top:3px}
+.live70-products{border-left:1px solid #ffffff25;padding-left:20px;min-width:0}
+.live70-products h3{font-size:15px;margin:5px 0 17px;color:#fff}
+.live70-product{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:9px;background:#ffffff0d;border:1px solid #ffffff16;padding:13px 9px;border-radius:12px}
+.live70-rank{display:grid;place-items:center;background:#ffffff24;border-radius:50%;height:24px;font-size:12px;font-weight:900}
+.live70-product-name{font-size:12px;font-weight:800;overflow-wrap:anywhere}
+.live70-product-count{font-size:11px;color:#57efb2;white-space:nowrap;font-weight:800}
+.live70-note{font-size:10px;color:#94a9ca;line-height:1.5;margin-top:13px}
+@media(max-width:900px){.live70-layout{grid-template-columns:1fr}.live70-products{border-left:0;border-top:1px solid #ffffff25;padding:14px 0 0}.live70-products #live70Top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.live70-product{margin:0;grid-template-columns:20px 1fr}.live70-product-count{grid-column:2}}
+@media(max-width:600px){.live70{padding:17px 14px}.live70-products #live70Top{grid-template-columns:1fr}.live70-product{grid-template-columns:24px minmax(0,1fr) auto}.live70-product-count{grid-column:auto}#live70Svg{height:205px}.live70-chartarea{min-height:200px}}
+
 </style>
 <style>
 .digital-product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.digital-product-card{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:18px}.digital-product-head{display:flex;justify-content:space-between;gap:12px}.digital-stock-number{font-size:34px;font-weight:900;margin:12px 0 2px}.digital-product-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.digital-unit{border:1px solid #e6eaf0;border-radius:12px;padding:12px;background:#f8fafc;margin:8px 0}.digital-unit-cred{font-family:monospace;white-space:pre-wrap;word-break:break-word;margin-top:7px}@media(max-width:600px){.digital-product-grid{grid-template-columns:1fr}}
@@ -935,19 +965,21 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
         </div>
       </div>
 
-      <div class="act53-wrap adminOnly" id="bossActionCenter">
-        <div class="act53-head">
-          <div>
-            <div class="act53-kicker">ACTION CENTER</div>
-            <h3>⚡ Prioritas Hari Ini</h3>
-            <p>Yang perlu ditindak Bos sekarang — klik untuk langsung buka halaman terkait.</p>
+      <div class="live70 adminOnly" id="liveSales70" aria-label="Grafik penjualan hari ini">
+        <div class="live70-heading"><span class="live70-dot"></span> LIVE SALES <span class="live70-tag" id="live70Status">Menunggu data</span><button class="live70-detail" type="button" onclick="go('salesrecap')">Detail penjualan ↗</button></div>
+        <div class="live70-layout">
+          <div class="live70-chartmain">
+            <div class="live70-summary"><div><div class="live70-caption">PENJUALAN HARI INI</div><strong id="live70Revenue">Rp 0</strong><div class="live70-secondary"><span id="live70Orders">0 transaksi</span> · <span id="live70Change">Dibanding kemarin: —</span></div></div>
+              <div class="live70-controls"><button type="button" data-live70-minutes="15">15m</button><button type="button" data-live70-minutes="30" class="active">30m</button><button type="button" data-live70-minutes="60">1j</button></div>
+            </div>
+            <div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Omzet penjualan setiap interval waktu" viewBox="0 0 900 260" preserveAspectRatio="none"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
+            <div class="live70-foot"><span>Grafik omzet per interval · naik/turun mengikuti penjualan aktual</span><span id="live70Last">—</span></div>
           </div>
-          <div class="act53-badge"><span id="act53Count">0</span> perhatian</div>
+          <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div></aside>
         </div>
-        <div class="act53-grid" id="act53List"></div>
       </div>
 
-      <div class="quick employeeOnly">
+            <div class="quick employeeOnly">
         <div class="card bigaction"><b>Jam Masuk</b><div class="muted">Catat kehadiran hari ini</div><button class="btn primary" id="clockIn" style="margin-top:14px">Absen Masuk</button></div>
         <div class="card bigaction"><b>Jam Pulang</b><div class="muted">Selesaikan absensi hari ini</div><button class="btn" id="clockOut" style="margin-top:14px">Absen Pulang</button></div>
       </div>
@@ -4229,6 +4261,65 @@ function renderBossActionCenterV53(){
       </div>`;
 }
 
+
+/* ===== V70 LIVE SALES ===== */
+let live70BucketMinutes=30;
+let live70SalesReady=false;
+let live70SalesError=false;
+function renderLiveSalesV70(){
+  if(!currentEmployee||currentEmployee.role!=='admin')return;
+  const root=document.getElementById('liveSales70');if(!root)return;
+  const today=ymd();
+  const rows=salesTransactions.filter(x=>x.transaction_date===today);
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayDate=[yesterday.getFullYear(),String(yesterday.getMonth()+1).padStart(2,'0'),String(yesterday.getDate()).padStart(2,'0')].join('-');
+  const prior=salesTransactions.filter(x=>x.transaction_date===yesterdayDate);
+  const total=rows.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
+  const prev=prior.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
+  document.getElementById('live70Revenue').textContent=rupiah(total);
+  document.getElementById('live70Orders').textContent=rows.length.toLocaleString('id-ID')+' transaksi';
+  const delta=document.getElementById('live70Change');
+  delta.textContent=prev>0?((total-prev>=0?'▲ +':'▼ ')+((total-prev)/prev*100).toFixed(1).replace('.',',')+'% dibanding kemarin'):'Kemarin: '+rupiah(prev);
+  delta.style.color=prev>0?(total>=prev?'#50ecad':'#ff9f9f'):'#bed1e9';
+  document.getElementById('live70Status').textContent=live70SalesError?'Data gagal dimuat':!live70SalesReady?'Memuat transaksi':rows.length?'Data transaksi aktif':'Belum ada transaksi';
+  const rank=new Map();
+  rows.forEach(x=>{const name=String(x.product_name||'Tidak diketahui').trim()||'Tidak diketahui';const key=name.toLocaleLowerCase('id-ID');const existing=rank.get(key)||{name,count:0,revenue:0};existing.count+=1;existing.revenue+=Math.max(0,Number(x.amount)||0);rank.set(key,existing)});
+  const top=[...rank.values()].sort((a,b)=>b.count-a.count||b.revenue-a.revenue).slice(0,3);
+  document.getElementById('live70Top').innerHTML=top.length?top.map((x,i)=>'<div class="live70-product"><span class="live70-rank">'+(i+1)+'</span><span class="live70-product-name">'+esc(x.name)+'</span><span class="live70-product-count">'+x.count+' terjual</span></div>').join(''):'<div style="font-size:12px;color:#a9bed8">Belum ada produk terjual hari ini.</div>';
+  const svg=document.getElementById('live70Svg'),empty=document.getElementById('live70Empty');
+  if(!live70SalesReady||live70SalesError){svg.innerHTML='';empty.style.display='grid';empty.textContent=live70SalesError?'Gagal membaca transaksi. Periksa koneksi dan izin data.':'Memuat transaksi...';return}
+  if(!rows.length){svg.innerHTML='';empty.style.display='grid';empty.textContent='Belum ada penjualan hari ini. Grafik akan muncul setelah transaksi tercatat.';return}
+  // imported sales without a genuine transaction timestamp cannot be plotted at import time.
+  const timed=rows.filter(x=>x.created_at&&!x.source_row);
+  const untimed=rows.filter(x=>!timed.includes(x));
+  const dateNow=new Date(),minuteNow=dateNow.getHours()*60+dateNow.getMinutes();
+  const bucketCount=Math.max(1,Math.ceil((minuteNow+1)/live70BucketMinutes));
+  const points=Array.from({length:bucketCount},(_,i)=>({minute:i*live70BucketMinutes,value:0,items:[]}));
+  timed.forEach(x=>{
+    const d=new Date(x.created_at);if(!Number.isFinite(d.getTime()))return;
+    // Respect the local timezone and exclude rows whose creation time is not today.
+    if([d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')!==today)return;
+    const idx=Math.floor((d.getHours()*60+d.getMinutes())/live70BucketMinutes);
+    if(points[idx]){points[idx].value+=Math.max(0,Number(x.amount)||0);points[idx].items.push(x)}
+  });
+  const max=Math.max(1,...points.map(x=>x.value));
+  const w=900,h=260,l=74,r=20,t=16,b=32,plotW=w-l-r,plotH=h-t-b;
+  const x=i=>l+(points.length===1?plotW/2:i*plotW/(points.length-1));
+  const y=v=>t+plotH-(v/max)*plotH;
+  const coords=points.map((p,i)=>[x(i),y(p.value)]);
+  let parts=['<defs><linearGradient id="live70Fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#36e7a4" stop-opacity=".48"/><stop offset="100%" stop-color="#36e7a4" stop-opacity=".02"/></linearGradient></defs>'];
+  for(let k=0;k<=4;k++){const v=max*k/4,yy=y(v);parts.push('<line x1="'+l+'" y1="'+yy+'" x2="'+(w-r)+'" y2="'+yy+'" stroke="#ffffff22" stroke-dasharray="4 5"/>');parts.push('<text x="'+(l-9)+'" y="'+(yy+4)+'" text-anchor="end" fill="#b2c5df" font-size="12">'+(v>=1000000?(v/1000000).toFixed(1)+'jt':v>=1000?Math.round(v/1000)+'rb':Math.round(v))+'</text>')}
+  if(coords.length){let path=coords.map((c,i)=>(i?'L':'M')+c[0].toFixed(1)+','+c[1].toFixed(1)).join(' ');const area=path+' L'+coords[coords.length-1][0]+','+y(0)+' L'+coords[0][0]+','+y(0)+' Z';parts.push('<path d="'+area+'" fill="url(#live70Fill)"/>');parts.push('<path d="'+path+'" fill="none" stroke="#3af0ae" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>')}
+  points.forEach((p,i)=>{const xx=x(i),yy=y(p.value);if(points.length<=30||i%Math.ceil(points.length/25)===0||i===points.length-1){parts.push('<circle cx="'+xx+'" cy="'+yy+'" r="4" fill="#5ff7bb"><title>'+String(Math.floor(p.minute/60)).padStart(2,'0')+':'+String(p.minute%60).padStart(2,'0')+' | '+rupiah(p.value)+' | '+p.items.length+' transaksi'+(p.items.length?' | '+p.items.slice(0,3).map(z=>String(z.product_name||'Produk')+' '+rupiah(z.amount)).join(', '):'')+'</title></circle>')}if(i===0||i===points.length-1||i%Math.max(1,Math.ceil(points.length/8))===0){parts.push('<text x="'+xx+'" y="'+(h-8)+'" text-anchor="middle" fill="#b2c5df" font-size="12">'+String(Math.floor(p.minute/60)).padStart(2,'0')+':'+String(p.minute%60).padStart(2,'0')+'</text>')}});
+  svg.innerHTML=parts.join('');
+  empty.style.display=timed.some(x=>{const d=new Date(x.created_at);return Number.isFinite(d.getTime())&&[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')===today})?'none':'grid';
+  if(empty.style.display==='grid')empty.textContent='Total penjualan tersedia, tetapi waktu transaksi aktual belum tersedia untuk menggambar grafik.';
+  document.getElementById('live70Last').textContent=(untimed.length?untimed.length+' transaksi tanpa waktu pembelian · ':'')+'Diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-live70-minutes]');if(!btn)return;live70BucketMinutes=Number(btn.dataset.live70Minutes);document.querySelectorAll('[data-live70-minutes]').forEach(x=>x.classList.toggle('active',x===btn));renderLiveSalesV70()});
+setInterval(()=>{if(currentEmployee?.role==='admin'&&!document.hidden)renderLiveSalesV70()},60000);
+/* ===== END V70 LIVE SALES ===== */
+
 function renderBossDashboard(){
   if(!currentEmployee || currentEmployee.role!=='admin') return;
 
@@ -4255,7 +4346,7 @@ function renderBossDashboard(){
   $('#bPaidDays').textContent=paidDays;
   $('#bPayroll').textContent=rupiah(payroll);
   renderBossWarehouseSummaryV43();
-  renderBossActionCenterV53();
+  renderLiveSalesV70();
 
   const summary=$('#bossEmployeeSummary');
   summary.innerHTML=activeEmployees.length?activeEmployees.map(e=>{
@@ -4563,8 +4654,9 @@ async function loadSalesSafe(){
     if(currentEmployee.role!=='admin')q=q.eq('uploaded_by',currentEmployee.id);
     const {data,error}=await q; if(error)throw error;
     salesTransactions=(data||[]).map(x=>({...x,uploader_name:x.employees?.full_name||'-'}));
-    renderSales();renderSalesDashboard();
-  }catch(e){console.error('sales',e)}
+    live70SalesReady=true;live70SalesError=false;
+    renderSales();renderSalesDashboard();renderLiveSalesV70();
+  }catch(e){live70SalesReady=true;live70SalesError=true;renderLiveSalesV70();console.error('sales',e)}
 }
 function salesFilteredRows(){
   let rows=[...salesTransactions];
