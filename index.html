@@ -4290,7 +4290,7 @@ function renderLiveSalesV70(){
   if(!live70SalesReady||live70SalesError){svg.innerHTML='';empty.style.display='grid';empty.textContent=live70SalesError?'Gagal membaca transaksi. Periksa koneksi dan izin data.':'Memuat transaksi...';return}
   if(!rows.length){svg.innerHTML='';empty.style.display='grid';empty.textContent='Belum ada penjualan hari ini. Grafik akan muncul setelah transaksi tercatat.';return}
   // imported sales without a genuine transaction timestamp cannot be plotted at import time.
-  const timed=rows.filter(x=>x.created_at&&!x.source_file);
+  const timed=rows.filter(x=>x.created_at&&!x.source_row);
   const untimed=rows.filter(x=>!timed.includes(x));
   const dateNow=new Date(),minuteNow=dateNow.getHours()*60+dateNow.getMinutes();
   const bucketCount=Math.max(1,Math.ceil((minuteNow+1)/live70BucketMinutes));
