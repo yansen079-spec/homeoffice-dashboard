@@ -601,6 +601,7 @@ body.seasonal-newyear{
 }
 @media(max-width:600px){#liveSales70 .live70-chart-legend{gap:9px}}
 
+#liveSales70 .live70-build{color:#91a9cb;font-size:10px;font-weight:650;letter-spacing:0}#liveSales70 #live70CompareNote{color:#91a9cb;font-size:10px}
 /* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
 .live70{background:linear-gradient(115deg,#0c172d,#152656 95%);color:#f8fbff;border-radius:22px;padding:22px 25px;margin-bottom:20px;box-shadow:0 16px 32px #0c17301b;overflow:hidden}
 .live70-heading{display:flex;gap:9px;align-items:center;color:#60f2bd;font-size:12px;letter-spacing:1.1px;font-weight:900;margin-bottom:12px}
@@ -1025,13 +1026,13 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
       </div>
 
       <div class="live70 adminOnly" id="liveSales70" aria-label="Grafik penjualan hari ini">
-        <div class="live70-heading"><span class="live70-dot"></span> LIVE SALES <span class="live70-tag" id="live70Status">Menunggu data</span><button class="live70-detail" type="button" onclick="go('salesrecap')">Detail penjualan ↗</button></div>
+        <div class="live70-heading"><span class="live70-dot"></span> LIVE SALES <span class="live70-tag" id="live70Status">Menunggu data</span> <span class="live70-build">V70.6 · 2 grafik</span><button class="live70-detail" type="button" onclick="go('salesrecap')">Detail penjualan ↗</button></div>
         <div class="live70-layout">
           <div class="live70-chartmain">
             <div class="live70-summary"><div><div class="live70-caption">PENJUALAN HARI INI</div><strong id="live70Revenue">Rp 0</strong><div class="live70-secondary"><span id="live70Orders">0 transaksi</span> · <span id="live70Change">Dibanding kemarin: —</span></div></div>
               <div class="live70-controls"><button type="button" data-live70-minutes="15">15m</button><button type="button" data-live70-minutes="30" class="active">30m</button><button type="button" data-live70-minutes="60">1j</button></div>
             </div>
-            <div class="live70-chart-legend"><span><i class="live70-legend-dot live70-today-dot"></i> Hari ini</span><span><i class="live70-legend-dot live70-yesterday-dot"></i> Kemarin</span><small>Perbandingan hingga jam sekarang</small></div><div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Perbandingan omzet tiap interval waktu hari ini dan kemarin" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
+            <div class="live70-chart-legend"><span><i class="live70-legend-dot live70-today-dot"></i> Hari ini</span><span><i class="live70-legend-dot live70-yesterday-dot"></i> Kemarin</span><small>Perbandingan hingga jam sekarang</small><small id="live70CompareNote"></small></div><div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Perbandingan omzet tiap interval waktu hari ini dan kemarin" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
             <div class="live70-foot"><span>Omzet per interval · garis hijau hari ini, biru kemarin · arahkan ke titik untuk detail</span><span id="live70Last">—</span></div>
           </div>
           <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div>
@@ -4429,6 +4430,8 @@ function renderLiveSalesV70(){
     parts.push('<rect x="'+start+'" y="'+t+'" width="'+width+'" height="'+plotH+'" fill="transparent"><title>'+title+'</title></rect>');
   });
   svg.innerHTML=parts.join('');
+  const comparisonNote=document.getElementById('live70CompareNote');
+  if(comparisonNote)comparisonNote.textContent=plottedPrior?'Kemarin: '+plottedPrior+' transaksi terplot':prior.length?'Kemarin: '+prior.length+' transaksi tanpa waktu pembelian asli':'Kemarin belum ada transaksi';
   const hasTimed=plottedToday+plottedPrior>0;
   empty.style.display=hasTimed?'none':'grid';
   if(!hasTimed)empty.textContent=rows.length||prior.length?'Ada transaksi, tetapi belum tersedia waktu pembelian asli untuk menggambar grafik.':'Belum ada penjualan hari ini atau kemarin.';
