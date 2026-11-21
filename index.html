@@ -6654,5 +6654,118 @@ document.addEventListener('click', async function(e){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
 </script>
+
+<!-- V71 Quick Actions: hidden until Ctrl+K; existing page layouts unchanged -->
+<style>
+#qa71Overlay{position:fixed;inset:0;z-index:99998;background:rgba(7,16,34,.62);backdrop-filter:blur(5px);display:none;align-items:flex-start;justify-content:center;padding: min(17vh,140px) 14px 18px}
+#qa71Overlay.qa71-open{display:flex}
+#qa71Dialog{width:min(530px,100%);max-height:72vh;display:flex;flex-direction:column;overflow:hidden;background:#101e39;color:#e9f2ff;border:1px solid #345071;border-radius:18px;box-shadow:0 24px 75px rgba(0,0,0,.42);font-family:inherit}
+#qa71SearchRow{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid #2a3b59}
+#qa71Search{flex:1;min-width:0;border:0!important;outline:none!important;background:transparent!important;color:#f4f9ff!important;font:inherit;font-size:15px;box-shadow:none!important}
+#qa71Search::placeholder{color:#91a9cb}
+#qa71SearchRow kbd{padding:4px 7px;border:1px solid #435471;border-radius:6px;color:#9eb3ce;font-size:11px}
+#qa71List{overflow:auto;padding:8px;min-height:65px}
+#qa71List button{appearance:none;display:flex;align-items:center;width:100%;border:0;border-radius:10px;padding:11px 12px;gap:12px;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit}
+#qa71List button:hover,#qa71List button.qa71-active{background:#213e5d}
+.qa71-icon{display:grid;place-items:center;width:32px;height:32px;background:#23445a;color:#6ff2ba;border-radius:9px;font-size:16px;flex-shrink:0}
+.qa71-name{flex:1;min-width:0;font-size:13px;font-weight:650}
+.qa71-meta{font-size:11px;color:#819bbb}
+#qa71Footer{padding:10px 16px;border-top:1px solid #293a58;font-size:11px;color:#9ab1ce;display:flex;justify-content:space-between;gap:6px}
+#qa71Empty{padding:22px;text-align:center;font-size:13px;color:#a7bbd2}
+@media(prefers-reduced-motion:reduce){#qa71Overlay{backdrop-filter:none}}
+</style>
+<div id="qa71Overlay" aria-hidden="true">
+  <div id="qa71Dialog" role="dialog" aria-modal="true" aria-label="Quick Actions">
+    <div id="qa71SearchRow"><span aria-hidden="true" style="color:#74e9bb">⌕</span><input id="qa71Search" type="search" placeholder="Cari halaman atau tindakan..." autocomplete="off" aria-label="Cari Quick Actions"><kbd>ESC</kbd></div>
+    <div id="qa71List" role="listbox" aria-label="Hasil pencarian"></div>
+    <div id="qa71Footer"><span>↑ ↓ Pilih • Enter Buka</span><span>Ctrl + K</span></div>
+  </div>
+</div>
+<script>
+(function(){
+  const overlay=document.getElementById('qa71Overlay');
+  const search=document.getElementById('qa71Search');
+  const list=document.getElementById('qa71List');
+  let selected=0,items=[],lastFocus=null;
+  const isVisible=el=>el&&!el.classList.contains('hidden')&&getComputedStyle(el).display!=='none';
+  function available(){
+    if(!window.currentEmployee && typeof currentEmployee==='undefined')return [];
+    if(!document.getElementById('app')||document.getElementById('app').classList.contains('hidden'))return [];
+    const role=typeof currentEmployee!=='undefined'?currentEmployee?.role:null;
+    if(!role)return [];
+    const result=[];
+    document.querySelectorAll('.nav button[data-page]').forEach(button=>{
+      if(!isVisible(button))return;
+      const page=button.dataset.page;
+      if(!document.getElementById(page))return;
+      const name=button.textContent.replace(/^[^A-Za-z0-9]+/,'').trim();
+      result.push({name:name||page,icon:'↗',page:page,keywords:page});
+    });
+    if(role==='admin'){
+      const quick=[
+        {name:'Tambah Stok Digital',icon:'+',page:'digitalstock',button:'addDigitalItem',keywords:'stok produk tambah akun'},
+        {name:'Target Omzet Bulanan',icon:'◎',page:'dashboard',focus:'monthlyGoalCard',keywords:'target bulan omzet'},
+        {name:'Buka Rekap Penjualan',icon:'▤',page:'salesrecap',keywords:'transaksi pemasukan'},
+      ];
+      for(const x of quick){
+        const nav=document.querySelector('.nav button[data-page="'+x.page+'"]');
+        if(!nav||!isVisible(nav))continue;
+        if(x.button&&!document.getElementById(x.button))continue;
+        result.push(x);
+      }
+    }
+    return result;
+  }
+  function matches(){
+    const q=search.value.toLocaleLowerCase('id-ID').trim();
+    const all=available();
+    return q?all.filter(x=>(x.name+' '+(x.keywords||'')).toLocaleLowerCase('id-ID').includes(q)):all;
+  }
+  function draw(){
+    items=matches();selected=Math.min(selected,Math.max(0,items.length-1));list.replaceChildren();
+    if(!items.length){const none=document.createElement('div');none.id='qa71Empty';none.textContent='Tidak ada menu yang cocok.';list.appendChild(none);return}
+    items.forEach((x,i)=>{
+      const btn=document.createElement('button');btn.type='button';btn.setAttribute('role','option');btn.setAttribute('aria-selected',String(i===selected));btn.className=i===selected?'qa71-active':'';
+      const icon=document.createElement('span');icon.className='qa71-icon';icon.textContent=x.icon;
+      const name=document.createElement('span');name.className='qa71-name';name.textContent=x.name;
+      const type=document.createElement('span');type.className='qa71-meta';type.textContent=x.button?'AKSI':'BUKA';
+      btn.append(icon,name,type);btn.addEventListener('mouseenter',()=>{selected=i;highlight()});btn.addEventListener('click',()=>run(x));
+      list.appendChild(btn);
+    });
+  }
+  function highlight(){[...list.querySelectorAll('button')].forEach((b,i)=>{b.classList.toggle('qa71-active',i===selected);b.setAttribute('aria-selected',String(i===selected))});list.querySelectorAll('button')[selected]?.scrollIntoView({block:'nearest'})}
+  function open(){
+    if(!available().length)return;
+    lastFocus=document.activeElement;selected=0;search.value='';overlay.classList.add('qa71-open');overlay.setAttribute('aria-hidden','false');draw();search.focus();
+  }
+  function close(){overlay.classList.remove('qa71-open');overlay.setAttribute('aria-hidden','true');search.value='';if(lastFocus&&lastFocus.isConnected)lastFocus.focus()}
+  function run(item){
+    const valid=available().some(x=>x.name===item.name&&x.page===item.page);
+    if(!valid)return;
+    close();
+    if(typeof go!=='function')return;
+    go(item.page);
+    if(item.button){
+      const target=document.getElementById(item.button);
+      if(target&&!target.classList.contains('hidden'))target.click();
+    }else if(item.focus){
+      document.getElementById(item.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  }
+  search.addEventListener('input',()=>{selected=0;draw()});
+  overlay.addEventListener('mousedown',e=>{if(e.target===overlay)close()});
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLocaleLowerCase('en-US')==='k'){
+      if(!available().length)return;
+      e.preventDefault();overlay.classList.contains('qa71-open')?close():open();return;
+    }
+    if(!overlay.classList.contains('qa71-open'))return;
+    if(e.key==='Escape'){e.preventDefault();close();return}
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(items.length){selected=(selected+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;highlight()}return}
+    if(e.key==='Enter'){e.preventDefault();if(items[selected])run(items[selected]);return}
+    if(e.key==='Tab'){e.preventDefault();search.focus()}
+  });
+})();
+</script>
 </body>
 </html>
