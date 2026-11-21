@@ -985,7 +985,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
       <button data-page="reports" class="adminOnly">▤ Laporan</button>
       <button data-page="payroll" class="adminOnly">💰 Penggajian</button>
       <button data-page="sellercenter" class="adminOnly">🛒 Seller Center</button>
-      <button data-page="digitalstock" id="digitalStockNav">⬡ Gudang Digital</button>
+      <button data-page="digitalstock" id="digitalStockNav">⬡ Produk Saya</button>
       <button data-page="accountvault" class="adminOnly">🔐 Data Akun</button>
 <button data-page="salesrecap" id="salesRecapNav" class="salesOnly hidden">▤ Rekap Penjualan</button>
       <button data-page="businessfinance" class="adminOnly">💰 Keuangan Usaha</button>
@@ -1065,10 +1065,10 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
       <div class="dash43-section adminOnly" id="dashWarehouseToday">
         <div class="dash43-section-head">
           <div>
-            <h3>📊 Ringkasan Gudang Digital</h3>
+            <h3>📊 Ringkasan Produk Saya</h3>
             <p>Informasi cepat kondisi stok YANSTORE saat ini.</p>
           </div>
-          <button class="btn" onclick="go('digitalstock')">Lihat Gudang Digital →</button>
+          <button class="btn" onclick="go('digitalstock')">Lihat Produk Saya →</button>
         </div>
         <div class="dash43-warehouse-grid">
           <div class="dash43-warehouse-card mint">
@@ -1092,7 +1092,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
 
       <div id="salesDashboardBlock" class="salesOnly hidden dash43-section">
         <div class="dash43-section-head">
-          <div><h3>💰 Penjualan Hari Ini</h3><p>Gabungan rekap Excel + penjualan otomatis dari Gudang Digital.</p></div>
+          <div><h3>💰 Penjualan Hari Ini</h3><p>Gabungan rekap Excel + penjualan otomatis dari Produk Saya.</p></div>
           <button class="btn" onclick="go('salesrecap')">Buka Rekap →</button>
         </div>
         <div class="sales-kpis dash43-sales-kpis">
@@ -1383,7 +1383,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
     </section>
     <section id="digitalstock" class="page hidden">
       <div class="top">
-        <div><h1 id="digitalStockTitle">Gudang Digital</h1><div class="muted" id="digitalStockSubtitle"></div></div>
+        <div><h1 id="digitalStockTitle">Produk Saya</h1><div class="muted" id="digitalStockSubtitle"></div></div>
         <div class="digital-tools adminOnly">
           <button class="btn" id="batchDigitalBtn">⇪ Batch Paste</button>
           <button class="btn primary" id="addDigitalItem">+ Tambah Stok Digital</button>
@@ -1784,7 +1784,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
     </section>
     <section id="salesrecap" class="page hidden">
       <div class="top">
-        <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Rekap penjualan harian, termasuk transaksi otomatis dari Gudang Digital.</div></div>
+        <div><h1>Rekap Penjualan</h1><div class="muted" id="salesRecapSubtitle">Rekap penjualan harian, termasuk transaksi otomatis dari Produk Saya.</div></div>
       </div>
 
       <div class="sales-kpis">
@@ -2251,7 +2251,7 @@ PIN: 7788" style="min-height:150px;white-space:pre-wrap"></textarea></label>
 
 <div class="modal" id="digitalBatchModal">
   <div class="box" style="max-width:1000px">
-    <h3>Batch Paste Gudang Digital</h3>
+    <h3>Batch Paste Produk Saya</h3>
     <div class="muted">Copy blok data dari Google Sheets/Excel lalu paste di bawah.</div>
     <div class="grid" style="margin-top:12px">
       <label class="field">Kategori<select id="batchCategory"><option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option><option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option><option>Drama Box</option><option>CapCut</option><option>Lainnya</option></select></label>
@@ -2470,8 +2470,8 @@ async function boot(user){
   $('#routineNav').textContent=emp.role==='admin'?'☑ Job Harian Karyawan':'☑ Job Harian Saya';
   $('#routineTitle').textContent=emp.role==='admin'?'Job Harian Karyawan':'Job Harian Saya';
   $('#routineSubtitle').textContent=emp.role==='admin'?'Atur pekerjaan rutin yang otomatis muncul setiap hari.':'Checklist pekerjaan rutin kamu hari ini.';
-  $('#digitalStockNav').textContent=emp.role==='admin'?'⬡ Gudang Digital':'⬡ Ambil Stok Buyer';
-  $('#digitalStockTitle').textContent=emp.role==='admin'?'Gudang Digital YANSTORE':'Ambil Stok untuk Buyer';
+  $('#digitalStockNav').textContent=emp.role==='admin'?'⬡ Produk Saya':'⬡ Ambil Stok Buyer';
+  $('#digitalStockTitle').textContent=emp.role==='admin'?'Produk Saya':'Ambil Stok untuk Buyer';
   $('#digitalStockSubtitle').textContent=emp.role==='admin'?'Kelola item digital satu-per-satu.':'Ambil satu item untuk buyer, lalu tandai setelah dikirim.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
@@ -2677,7 +2677,7 @@ function renderBossNotifications(){
     const units=digitalItems.filter(x=>x.product_id===p.id),av=digitalStatusCountsVFix[p.id]?.available??units.filter(x=>x.status==='available').length;
     const threshold=digitalThresholdV65(p.id);
     if(av===0)add('dout:'+p.id,'🚨','Stok digital HABIS',p.product_name+' tidak punya stok tersedia.','digitalstock','Segera tambah stok',units);
-    else if(av<=threshold)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun (batas '+threshold+').','digitalstock','Gudang Digital',units);
+    else if(av<=threshold)add('dlow:'+p.id+':'+av,'💻','Stok digital menipis',p.product_name+' tinggal '+av+' akun (batas '+threshold+').','digitalstock','Produk Saya',units);
   });
 
   if(typeof digitalItems!=='undefined'){
@@ -2704,7 +2704,7 @@ function renderBossNotifications(){
       .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))
       .slice(0,50)
       .forEach(x=>{
-        add('money:'+x.id,'💵','Uang masuk '+rupiah(x.amount),(x.product_name||'Produk')+' • '+(x.customer_name||'Buyer'),'salesrecap',x.source_file==='Gudang Digital Otomatis'?'Pesanan Gudang Digital':'Transaksi penjualan',x.created_at||x);
+        add('money:'+x.id,'💵','Uang masuk '+rupiah(x.amount),(x.product_name||'Produk')+' • '+(x.customer_name||'Buyer'),'salesrecap',x.source_file==='Gudang Digital Otomatis'?'Pesanan Produk Saya':'Transaksi penjualan',x.created_at||x);
       });
 
     const latest=[...salesToday].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0];
