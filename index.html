@@ -1721,6 +1721,25 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
         <div class="muted" style="margin-top:10px">Tes ini memakai notifikasi sistem perangkat. Push otomatis saat aplikasi tertutup akan kita sambungkan ke server setelah tes perangkat berhasil.</div>
       </div>
 
+
+      <div class="set47-card" id="backupCenterV72" style="margin-top:16px">
+        <div class="set47-card-head">
+          <div class="set47-card-icon green">🛡️</div>
+          <div><h3>Backup Center</h3><p>Unduh salinan data operasional YANSTORE ke perangkatmu.</p></div>
+        </div>
+        <p class="muted" style="font-size:12px;line-height:1.6;margin:10px 0">
+          Mencadangkan katalog produk, stok dan riwayat perubahan, transaksi penjualan, serta status stok digital (tanpa isi akun).
+          <b>Tidak mencakup password, token, kredensial stok, data pembeli, atau data pribadi karyawan.</b>
+        </p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px">
+          <button id="backup72Download" type="button" class="btn primary">⬇ Unduh Backup JSON</button>
+          <span id="backup72Status" class="muted" role="status" aria-live="polite" style="font-size:12px">Belum ada backup yang dibuat di perangkat ini.</span>
+        </div>
+        <div class="muted" style="margin-top:10px;font-size:11px;line-height:1.55">
+          Backup ini berupa ekspor data terbatas, <b>bukan cadangan lengkap database</b> dan belum bisa dipulihkan otomatis. Simpan file di tempat privat; jangan bagikan secara publik.
+        </div>
+      </div>
+
       <div class="set47-savebar">
         <div><b>Simpan perubahan pengaturan kantor</b><span>Perubahan akan langsung dipakai pada absensi dan rekap.</span></div>
         <button class="btn primary" id="saveSettings">✓ Simpan Pengaturan</button>
@@ -6766,6 +6785,80 @@ document.addEventListener('click', async function(e){
     if(e.key==='Tab'){e.preventDefault();search.focus()}
   });
 })();
+</script>
+<script>
+
+/* V72 Safe Backup Center: explicit allowlisted fields, read-only, admin-only */
+(function(){
+ const specs=[
+  {table:'product_stock',fields:['id','product_name','stock','minimum_stock','active','created_at','updated_at']},
+  {table:'stock_history',fields:['id','product_id','old_stock','new_stock','change_amount','created_at']},
+  {table:'digital_products',fields:['id','category','product_name','active','created_at']},
+  {table:'digital_inventory',fields:['id','product_id','category','product_name','status','created_at']},
+  {table:'sales_transactions',fields:['id','transaction_date','product_name','amount','created_at','import_key','source_file']}
+ ];
+ function status(msg){const el=document.getElementById('backup72Status');if(el)el.textContent=msg}
+ function clean(row,keys){const out={};for(const k of keys)if(Object.prototype.hasOwnProperty.call(row,k))out[k]=row[k];return out}
+ async function readAll(spec){
+  let offset=0;
+  const rows=[];
+  while(true){
+   // '*' is fetched only transiently. Downloaded JSON contains strictly allowlisted fields.
+   const {data,error}=await sb.from(spec.table).select('*').order('id',{ascending:true}).range(offset,offset+499);
+   if(error)throw Error(spec.table+': '+error.message);
+   const chunk=data||[];
+   for(const row of chunk)rows.push(clean(row,spec.fields));
+   offset+=chunk.length;
+   if(chunk.length<500)return rows;
+   if(offset>=100000)throw Error('Batas 100.000 baris pada '+spec.table+'; backup dibatalkan supaya tidak menghasilkan file tidak lengkap.');
+  }
+ }
+ async function download(){
+  const button=document.getElementById('backup72Download');
+  if(!button||button.disabled)return;
+  if(typeof currentEmployee==='undefined'||currentEmployee?.role!=='admin'){status('Akses hanya untuk admin.');return}
+  const confirmation=confirm('Unduh salinan data operasional ke perangkat ini? File mungkin tetap memuat informasi bisnis internal. Pastikan perangkat dan lokasi penyimpanannya aman.');
+  if(!confirmation)return;
+  button.disabled=true;
+  const original=button.textContent;button.textContent='Menyiapkan backup...';
+  let url;
+  try{
+   const payload={format:'yanstore-operational-export',schema_version:1,created_at:new Date().toISOString(),
+     scope:'limited_allowlisted_operational_data',automated_restore_supported:false,
+     exclusions:['credentials','passwords','tokens','digital_inventory_secrets','customer_personal_data','employee_personal_data','full_database_restore'],
+     tables:{},counts:{}};
+   for(const spec of specs){
+    status('Menyalin '+spec.table+'...');
+    const rows=await readAll(spec);
+    payload.tables[spec.table]=rows;payload.counts[spec.table]=rows.length;
+   }
+   if(typeof currentEmployee==='undefined'||currentEmployee?.role!=='admin')throw Error('Sesi admin berubah. Proses dihentikan.');
+   const content=JSON.stringify(payload,null,2);
+   const blob=new Blob([content],{type:'application/json;charset=utf-8'});
+   const filename='YANSTORE-backup-operasional-'+new Date().toISOString().slice(0,10)+'.json';
+   url=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+   const count=Object.values(payload.counts).reduce((total,n)=>total+n,0);
+   status('File backup disiapkan: '+count.toLocaleString('id-ID')+' data dari '+specs.length+' kategori. Pastikan file tersimpan.');
+   try{localStorage.setItem('yanstore_backup72_last',new Date().toISOString())}catch(e){}
+  }catch(e){
+   console.error('Backup Center',e);
+   status('Backup gagal: '+String(e.message||e)+'. Tidak ada file parsial yang dibuat.');
+  }finally{
+   button.disabled=false;button.textContent=original;
+   if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+ }
+ function setup(){
+  const button=document.getElementById('backup72Download');
+  if(!button||button.dataset.ready)return;
+  button.dataset.ready='1';button.addEventListener('click',download);
+  try{const last=localStorage.getItem('yanstore_backup72_last');if(last)status('Terakhir menyiapkan backup: '+new Date(last).toLocaleString('id-ID'))}catch(e){}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
+})();
+
 </script>
 </body>
 </html>
