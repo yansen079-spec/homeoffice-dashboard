@@ -587,6 +587,16 @@ body.seasonal-newyear{
 #liveSales70 .live70-product:hover{background:#ffffff16;border-color:#ffffff35}
 @media(max-width:600px){#liveSales70 .live70-product-count{font-size:11px}}
 
+/* ===== V70.4 YESTERDAY SALES SNAPSHOT ===== */
+#liveSales70 .live70-yesterday{margin-top:15px;padding:12px 13px;border:1px solid #ffffff24;border-radius:13px;background:#ffffff0a}
+#liveSales70 .live70-yesterday-title{font-size:12px;font-weight:850;color:#f4f8ff;display:flex;gap:8px;justify-content:space-between;align-items:center}
+#liveSales70 .live70-yesterday-title span{font-size:10px;font-weight:500;color:#9eb6d4}
+#liveSales70 .live70-yesterday-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:10px}
+#liveSales70 .live70-yesterday-grid small{display:block;font-size:10px;color:#9fb4d0;margin-bottom:4px}
+#liveSales70 .live70-yesterday-grid strong{font-size:clamp(13px,1.1vw,17px);color:#e9f2ff;font-weight:850;overflow-wrap:anywhere}
+#liveSales70 .live70-yesterday-best{border-top:1px solid #ffffff1b;margin-top:10px;padding-top:8px;color:#c4d5ee;font-size:10px;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:900px){#liveSales70 .live70-yesterday{margin-top:12px}}
+
 /* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
 .live70{background:linear-gradient(115deg,#0c172d,#152656 95%);color:#f8fbff;border-radius:22px;padding:22px 25px;margin-bottom:20px;box-shadow:0 16px 32px #0c17301b;overflow:hidden}
 .live70-heading{display:flex;gap:9px;align-items:center;color:#60f2bd;font-size:12px;letter-spacing:1.1px;font-weight:900;margin-bottom:12px}
@@ -1020,7 +1030,12 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
             <div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Omzet penjualan setiap interval waktu" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
             <div class="live70-foot"><span>Grafik omzet per interval · naik/turun mengikuti penjualan aktual</span><span id="live70Last">—</span></div>
           </div>
-          <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div></aside>
+          <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div>
+            <div class="live70-yesterday" aria-label="Ringkasan transaksi kemarin">
+              <div class="live70-yesterday-title">🕘 Transaksi Kemarin <span id="live70YesterdayDate">—</span></div>
+              <div class="live70-yesterday-grid"><div><small>Total Omzet</small><strong id="live70YesterdayRevenue">—</strong></div><div><small>Jumlah Transaksi</small><strong id="live70YesterdayOrders">—</strong></div></div>
+              <div class="live70-yesterday-best" id="live70YesterdayBest">Produk terlaris: —</div>
+            </div></aside>
         </div>
       </div>
 
@@ -4321,6 +4336,17 @@ function renderLiveSalesV70(){
   const prior=salesTransactions.filter(x=>x.transaction_date===yesterdayDate);
   const total=rows.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
   const prev=prior.reduce((n,x)=>n+Math.max(0,Number(x.amount)||0),0);
+  const yesterdayDateEl=document.getElementById('live70YesterdayDate');
+  if(yesterdayDateEl)yesterdayDateEl.textContent=yesterday.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+  const yesterdayRevenueEl=document.getElementById('live70YesterdayRevenue');
+  const yesterdayOrdersEl=document.getElementById('live70YesterdayOrders');
+  if(yesterdayRevenueEl)yesterdayRevenueEl.textContent=rupiah(prev);
+  if(yesterdayOrdersEl)yesterdayOrdersEl.textContent=prior.length.toLocaleString('id-ID');
+  const priorProducts=new Map();
+  prior.forEach(x=>{const name=String(x.product_name||'Tidak diketahui').trim()||'Tidak diketahui';const key=name.toLocaleLowerCase('id-ID');const r=priorProducts.get(key)||{name,count:0};r.count++;priorProducts.set(key,r)});
+  const yesterdayTop=[...priorProducts.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'id')).slice(0,1)[0];
+  const yesterdayBestEl=document.getElementById('live70YesterdayBest');
+  if(yesterdayBestEl)yesterdayBestEl.textContent=yesterdayTop?'Terlaris kemarin: '+yesterdayTop.name+' ('+yesterdayTop.count+' terjual)':'Belum ada penjualan kemarin';
   document.getElementById('live70Revenue').textContent=rupiah(total);
   document.getElementById('live70Orders').textContent=rows.length.toLocaleString('id-ID')+' transaksi';
   const delta=document.getElementById('live70Change');
