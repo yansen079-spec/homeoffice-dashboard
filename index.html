@@ -542,38 +542,40 @@ body.seasonal-newyear{
 @media(max-width:520px){#businessfinance .bossdash{grid-template-columns:1fr!important}}
 /* ===== END V42.24.1 ===== */
 
-/* ===== V70.1 BALANCED LIVE SALES PANEL ===== */
+/* ===== V70.2 COMPACT FIX: keep chart legible and fully visible ===== */
 @media(min-width:901px){
   #dashboard #liveSales70.live70{
-    height:380px!important;
-    min-height:0!important;
-    max-height:380px!important;
-    display:flex!important;
-    flex-direction:column!important;
-    padding:17px 22px!important;
+    box-sizing:border-box!important;
+    height:410px!important;min-height:410px!important;max-height:410px!important;
+    display:block!important;padding:17px 22px!important;
   }
-  #liveSales70 .live70-heading{flex:0 0 auto;margin-bottom:9px}
+  #liveSales70 .live70-heading{height:30px;margin-bottom:10px}
   #liveSales70 .live70-layout{
-    flex:1 1 auto;
-    min-height:0;
-    align-items:stretch;
-    grid-template-columns:minmax(0,3.5fr) minmax(235px,1fr);
-    gap:16px;
+    display:grid!important;grid-template-columns:minmax(0,3.5fr) minmax(235px,1fr)!important;
+    gap:18px!important;height:calc(100% - 40px)!important;min-height:0!important;
+    align-items:start!important;
   }
-  #liveSales70 .live70-chartmain{display:flex;flex-direction:column;min-height:0;min-width:0}
-  #liveSales70 .live70-summary{flex:0 0 auto}
-  #liveSales70 .live70-summary strong{font-size:clamp(30px,3vw,42px)}
-  #liveSales70 .live70-chartarea{flex:1 1 auto;min-height:0;margin-top:5px;overflow:hidden}
-  #liveSales70 #live70Svg{height:100%!important;min-height:0}
-  #liveSales70 .live70-foot{flex:0 0 auto;font-size:10px;margin-top:5px}
-  #liveSales70 .live70-products{min-height:0;padding-left:16px}
-  #liveSales70 .live70-products h3{margin:4px 0 12px}
-  #liveSales70 .live70-product{padding:10px 8px;margin-bottom:7px}
+  #liveSales70 .live70-chartmain{display:block!important;min-width:0!important;min-height:0!important}
+  #liveSales70 .live70-summary{min-height:91px!important;align-items:flex-start!important}
+  #liveSales70 .live70-summary strong{font-size:clamp(30px,3vw,42px)!important}
+  #liveSales70 .live70-chartarea{
+    display:block!important;height:205px!important;min-height:205px!important;
+    max-height:205px!important;margin-top:3px!important;overflow:hidden!important;
+  }
+  #liveSales70 #live70Svg{display:block!important;width:100%!important;height:205px!important;min-height:0!important;max-height:205px!important}
+  #liveSales70 .live70-foot{font-size:10px!important;margin-top:4px!important}
+  #liveSales70 .live70-products{min-height:0!important;padding-left:16px!important}
+  #liveSales70 .live70-products h3{margin:4px 0 12px!important}
+  #liveSales70 .live70-product{padding:10px 8px!important;margin-bottom:7px!important}
 }
 @media(max-width:900px){
-  #dashboard #liveSales70.live70{height:auto!important;max-height:none!important;min-height:0!important}
-  #liveSales70 .live70-chartarea{min-height:180px}
-  #liveSales70 #live70Svg{height:215px}
+  #dashboard #liveSales70.live70{height:auto!important;min-height:0!important;max-height:none!important}
+  #liveSales70 .live70-chartarea{height:230px!important;min-height:230px!important;overflow:hidden!important}
+  #liveSales70 #live70Svg{width:100%!important;height:230px!important}
+}
+@media(max-width:600px){
+  #liveSales70 .live70-chartarea{height:190px!important;min-height:190px!important}
+  #liveSales70 #live70Svg{height:190px!important}
 }
 
 /* ===== V70 LIVE SALES: real transaction series, no simulated figures ===== */
@@ -1006,7 +1008,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
             <div class="live70-summary"><div><div class="live70-caption">PENJUALAN HARI INI</div><strong id="live70Revenue">Rp 0</strong><div class="live70-secondary"><span id="live70Orders">0 transaksi</span> · <span id="live70Change">Dibanding kemarin: —</span></div></div>
               <div class="live70-controls"><button type="button" data-live70-minutes="15">15m</button><button type="button" data-live70-minutes="30" class="active">30m</button><button type="button" data-live70-minutes="60">1j</button></div>
             </div>
-            <div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Omzet penjualan setiap interval waktu" viewBox="0 0 900 260" preserveAspectRatio="none"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
+            <div class="live70-chartarea"><svg id="live70Svg" role="img" aria-label="Omzet penjualan setiap interval waktu" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg><div class="live70-empty" id="live70Empty">Memuat transaksi...</div></div>
             <div class="live70-foot"><span>Grafik omzet per interval · naik/turun mengikuti penjualan aktual</span><span id="live70Last">—</span></div>
           </div>
           <aside class="live70-products"><h3>🔥 Produk Terlaris Hari Ini</h3><div id="live70Top">Menunggu transaksi...</div><div class="live70-note">Berdasarkan jumlah transaksi tercatat hari ini</div></aside>
