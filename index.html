@@ -2185,27 +2185,36 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
 </div>
 
 <div class="modal" id="slipModal">
-  <div class="box" style="max-width:900px">
-    <div id="salarySlip" class="slipbox">
-      <div class="sliphead">
-        <div><div class="sliptitle" id="slipOffice">HOME OFFICE YANSTORE</div><div class="muted">SLIP GAJI KARYAWAN</div></div>
-        <div style="text-align:right"><b id="slipPeriod">-</b><div class="muted">Periode</div></div>
-      </div>
-      <div class="sliprow"><span>Nama Karyawan</span><b id="slipName">-</b></div>
-      <div class="sliprow"><span>Gaji / Hari</span><b id="slipDaily">Rp0</b></div>
-      <div class="sliprow"><span>Hari Dibayar</span><b id="slipPaidDays">0 hari</b></div>
-      <div class="sliprow"><span>Gaji Kotor</span><b id="slipBase">Rp0</b></div>
-      <div class="sliprow"><span>Keterlambatan</span><b id="slipLate">0 kejadian</b></div>
-      <div class="sliprow"><span>Potongan Terlambat</span><b id="slipPenalty">Rp0</b></div>
-      <div class="sliprow"><span>Izin</span><b id="slipIzin">0 hari</b></div>
-      <div class="sliprow"><span>Sakit</span><b id="slipSakit">0 hari</b></div>
-      <div class="sliprow"><span>Cuti</span><b id="slipCuti">0 hari</b></div>
-      <div class="sliprow sliptotal"><span>GAJI BERSIH</span><b id="slipNet">Rp0</b></div>
-      <div class="muted" style="margin-top:20px">Izin, cuti, dan sakit tidak dikenakan potongan. Potongan keterlambatan mengikuti pengaturan payroll.</div>
-      <div class="actions noPrint" style="margin-top:22px"><button class="btn modalCancel">Tutup</button><button class="btn primary" id="printSlip">🖨 Cetak / Simpan PDF</button></div>
-    </div>
-  </div>
-</div>
+<style>
+#slipModal .box{max-width:1100px;width:100%;max-height:92vh;overflow:auto}
+#slipModal .slip74layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+#slipModal .slip74fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#slipModal .slip74fields label{font-size:12px;font-weight:600;display:grid;gap:5px;min-width:0}
+#slipModal .slip74fields input,#slipModal textarea{width:100%;min-width:0;box-sizing:border-box}
+#salarySlip{background:#fff!important;color:#17233b!important;box-sizing:border-box;padding:24px;border:1px solid #dce5f1;border-radius:16px;overflow-wrap:anywhere}
+#salarySlip .s74head{border-bottom:3px solid #2563eb;padding-bottom:16px;margin-bottom:16px}
+#salarySlip .s74brand{font-size:22px;font-weight:850;color:#173b82!important}
+#salarySlip .s74label{font-size:10px;letter-spacing:1.4px;font-weight:750;color:#64748b!important}
+#salarySlip .s74line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #e5eaf2;font-size:13px}
+#salarySlip .s74line b{text-align:right;color:#17233b!important}
+#salarySlip .s74section{font-weight:750;font-size:12px;color:#1d4ed8!important;margin:17px 0 4px}
+#salarySlip .s74total{background:#eff6ff!important;border:1px solid #bfdbfe;padding:14px;margin-top:16px;border-radius:10px;display:flex;justify-content:space-between;gap:8px;color:#173b82!important;font-weight:800}
+#salarySlip .s74note{white-space:pre-wrap;font-size:12px;color:#475569!important;margin-top:14px}
+#salarySlip .s74sign{text-align:right;margin-top:22px;font-size:12px;color:#17233b!important}
+@media(max-width:800px){#slipModal .slip74layout{grid-template-columns:1fr}}
+@media(max-width:420px){#slipModal .slip74fields{grid-template-columns:1fr}}
+@media print{ @page{size:A4;margin:14mm} body:has(#slipModal.open) > *:not(#slipModal){display:none!important} #slipModal.open{position:static!important;display:block!important;padding:0!important;background:white!important;overflow:visible!important} #slipModal.open .box{position:static!important;max-height:none!important;max-width:none!important;overflow:visible!important;padding:0!important;box-shadow:none!important;background:white!important} #slipModal .noPrint{display:none!important} #slipModal .slip74layout{display:block!important} #salarySlip{position:static!important;width:100%!important;max-width:none!important;margin:0!important;padding:12px!important;border:0!important;print-color-adjust:exact;-webkit-print-color-adjust:exact} }
+</style>
+<div class="box">
+<div class="noPrint"><h2 style="margin:0 0 6px">Editor Slip Gaji</h2><p class="muted">Sesuaikan rincian sebelum dicetak. Perubahan hanya berlaku pada slip ini, bukan data payroll.</p></div>
+<div class="slip74layout">
+<div class="noPrint"><div class="slip74fields"><label style="grid-column:1/-1">Pilih karyawan<select id="s74Employee"></select></label><label>Nama perusahaan<input id="s74_office" type="text" maxlength="160"></label><label>Nama karyawan<input id="s74_name" type="text" maxlength="160"></label><label>Jabatan<input id="s74_job" type="text" maxlength="160"></label><label>Periode gaji<input id="s74_period" type="text" maxlength="160"></label><label>Tanggal pembayaran (rencana / aktual)<input id="s74_date" type="date" maxlength="160"></label><label>Nomor slip<input id="s74_number" type="text" maxlength="160"></label><label>Gaji harian (Rp)<input id="s74_daily" type="number" min="0" max="999999999999" step="1"></label><label>Hari dibayar<input id="s74_days" type="number" min="0" max="999999999999" step="1"></label><label>Bonus (Rp)<input id="s74_bonus" type="number" min="0" max="999999999999" step="1"></label><label>Tunjangan (Rp)<input id="s74_allowance" type="number" min="0" max="999999999999" step="1"></label><label>Potongan terlambat (Rp)<input id="s74_late" type="number" min="0" max="999999999999" step="1"></label><label>Potongan izin (Rp)<input id="s74_leave" type="number" min="0" max="999999999999" step="1"></label><label>Potongan sakit (Rp)<input id="s74_sick" type="number" min="0" max="999999999999" step="1"></label><label>Potongan cuti (Rp)<input id="s74_cuti" type="number" min="0" max="999999999999" step="1"></label><label>Potongan lainnya (Rp)<input id="s74_other" type="number" min="0" max="999999999999" step="1"></label><label>Nama penanggung jawab<input id="s74_sign" type="text" maxlength="160"></label></div><label class="field" style="margin-top:12px">Catatan<textarea id="s74_note" rows="3" maxlength="500"></textarea></label><div class="actions"><button type="button" class="btn" id="s74Reset">Reset dari payroll</button><button type="button" class="btn modalCancel">Tutup</button><button type="button" class="btn primary" id="printSlip">Cetak / Simpan PDF</button></div><div id="s74Warning" role="status" class="muted"></div></div>
+<div id="salarySlip"><div class="s74head"><div class="s74brand" id="p74_office"></div><div class="s74label">SLIP GAJI KARYAWAN · RAHASIA</div></div>
+<div class="s74line"><span>Nomor slip</span><b id="p74_number"></b></div><div class="s74line"><span>Nama karyawan</span><b id="p74_name"></b></div><div class="s74line"><span>Jabatan</span><b id="p74_job"></b></div><div class="s74line"><span>Periode</span><b id="p74_period"></b></div><div class="s74line"><span>Tanggal pembayaran</span><b id="p74_date"></b></div>
+<div class="s74section">PENDAPATAN</div><div class="s74line"><span>Gaji harian</span><b id="p74_daily"></b></div><div class="s74line"><span>Hari dibayar</span><b id="p74_days"></b></div><div class="s74line"><span>Gaji pokok</span><b id="p74_base"></b></div><div class="s74line"><span>Bonus</span><b id="p74_bonus"></b></div><div class="s74line"><span>Tunjangan</span><b id="p74_allowance"></b></div><div class="s74line"><span>Total pendapatan</span><b id="p74_gross"></b></div>
+<div class="s74section">POTONGAN</div><div class="s74line"><span>Keterlambatan</span><b id="p74_late"></b></div><div class="s74line"><span>Izin</span><b id="p74_leave"></b></div><div class="s74line"><span>Sakit</span><b id="p74_sick"></b></div><div class="s74line"><span>Cuti</span><b id="p74_cuti"></b></div><div class="s74line"><span>Lainnya</span><b id="p74_other"></b></div><div class="s74line"><span>Total potongan</span><b id="p74_deduct"></b></div>
+<div class="s74total"><span>GAJI BERSIH</span><span id="p74_net"></span></div><div class="s74note" id="p74_note"></div><div class="s74sign">Penanggung jawab<div style="height:30px"></div><b id="p74_sign"></b></div></div>
+</div></div></div>
 
 <div class="modal" id="stockProductModal">
   <div class="box">
@@ -3513,31 +3522,44 @@ $('#saveSettings').onclick=async()=>{
 
 
 
-function buildSalarySlip(){
-  if(!currentEmployee || currentEmployee.role!=='admin') return;
-  let selected=$('#payrollEmployee').value;
-  if(!selected){alert('Pilih satu karyawan terlebih dahulu.');return}
-  let rows=getPayrollRows();
-  let x=rows.find(r=>r.emp.id===selected);
+function slip74Admin(){return !!currentEmployee&&currentEmployee.role==='admin'}
+function slip74Input(k){return document.getElementById('s74_'+k)}
+function slip74Preview(){
+  if(!slip74Admin())return false;
+  const keys=["office","name","job","period","date","number","daily","days","bonus","allowance","late","leave","sick","cuti","other","sign","note"];
+  const nums=['daily','days','bonus','allowance','late','leave','sick','cuti','other'];
+  const v={};let valid=true;
+  for(const k of keys){const e=slip74Input(k);if(nums.includes(k)){v[k]=Number(e.value||0);if(!Number.isSafeInteger(v[k])||v[k]<0||!e.validity.valid){valid=false;v[k]=0}}else v[k]=e.value.trim()}
+  v.base=v.daily*v.days;v.gross=v.base+v.bonus+v.allowance;v.deduct=v.late+v.leave+v.sick+v.cuti+v.other;v.net=Math.max(0,v.gross-v.deduct);
+  if(!Number.isSafeInteger(v.gross)||!Number.isSafeInteger(v.deduct)||!v.name||!v.office||!v.period||v.deduct>v.gross)valid=false;
+  for(const k of Object.keys(v)){const p=document.getElementById('p74_'+k);if(p)p.textContent=k==='days'?v[k]+' hari':typeof v[k]==='number'?rupiah(v[k]):v[k]||'—'}
+  document.getElementById('s74Warning').textContent=valid?'Preview diperbarui otomatis. Tidak menandai gaji sebagai dibayar.':'Periksa identitas, nominal dan potongan (tidak boleh melebihi pendapatan).';
+  document.getElementById('printSlip').disabled=!valid;return valid;
+}
+function slip74Load(id){
+  if(!slip74Admin())return;
+  const sel=$('#payrollEmployee');const previous=sel.value;let x;
+  try{sel.value=id;x=getPayrollRows().find(r=>String(r.emp.id)===String(id))}finally{sel.value=previous}
   if(!x){alert('Data karyawan tidak ditemukan.');return}
-  let month=$('#payrollMonth').value||payrollDefaultMonthV50();
-  $('#slipOffice').textContent=(officeSettings&&officeSettings.office_name)||'HomeOffice';
-  $('#slipPeriod').textContent='Periode '+payrollCycleLabelV50(month)+' • Gajian tanggal 28';
-  $('#slipName').textContent=x.emp.full_name;
-  $('#slipDaily').textContent=rupiah(x.daily);
-  $('#slipPaidDays').textContent=x.paidDays+' hari';
-  $('#slipBase').textContent=rupiah(x.gross);
-  $('#slipLate').textContent=x.late+' kejadian × '+rupiah(payrollSettings?.late_penalty||5000);
-  $('#slipPenalty').textContent=rupiah(x.penalty);
-  $('#slipIzin').textContent=x.izin+' hari';
-  $('#slipSakit').textContent=x.sakit+' hari';
-  $('#slipCuti').textContent=(x.cuti||0)+' hari';
-  $('#slipNet').textContent=rupiah(x.net);
-  openModal('#slipModal');
+  const month=$('#payrollMonth').value||payrollDefaultMonthV50();
+  const values={office:officeSettings?.office_name||'HomeOffice',name:x.emp.full_name,job:x.emp.job_title||'Karyawan',period:payrollCycleLabelV50(month),date:month+'-28',number:'SLIP-'+month+'-'+String(id).slice(-8),daily:x.daily,days:x.paidDays,bonus:0,allowance:0,late:x.latePenalty,leave:x.izinPenalty,sick:x.sakitPenalty,cuti:x.cutiPenalty,other:0,sign:currentEmployee.full_name||'',note:''};
+  for(const [k,v] of Object.entries(values))slip74Input(k).value=v??'';
+  slip74Preview();
+}
+function buildSalarySlip(){
+  if(!slip74Admin())return;
+  const staff=employees.filter(x=>x.role==='employee');if(!staff.length){alert('Belum ada karyawan.');return}
+  const select=document.getElementById('s74Employee');select.replaceChildren();
+  for(const emp of staff){const opt=document.createElement('option');opt.value=emp.id;opt.textContent=emp.full_name;select.append(opt)}
+  select.value=$('#payrollEmployee').value||String(staff[0].id);if(!select.value)select.selectedIndex=0;
+  slip74Load(select.value);openModal('#slipModal');
 }
 $('#openSlip').onclick=buildSalarySlip;
-$('#printSlip').onclick=()=>window.print();
-
+$('#s74Employee').onchange=()=>slip74Load($('#s74Employee').value);
+$('#s74Reset').onclick=()=>{if(slip74Admin()&&confirm('Reset perubahan slip ke data payroll?'))slip74Load($('#s74Employee').value)};
+$('#slipModal').addEventListener('input',e=>{if(e.target.id.startsWith('s74_'))slip74Preview()});
+$('#printSlip').onclick=()=>{if(slip74Preview())window.print()};
+$('#logout').addEventListener('click',()=>{ $('#slipModal').classList.remove('open');document.querySelectorAll('#slipModal input,#slipModal textarea').forEach(e=>e.value='');document.querySelectorAll('#salarySlip [id]').forEach(e=>e.textContent='');$('#s74Employee').replaceChildren() });
 
 function openPayrollSettings(){
   $('#psLate').value=Number(payrollSettings?.late_penalty||0);
