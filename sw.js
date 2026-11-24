@@ -1,4 +1,4 @@
-const CACHE_NAME='homeoffice-pwa-v72-backup-center-20261121';
+const CACHE_NAME='homeoffice-pwa-v75-slip-clean-20261124';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install',event=>{
