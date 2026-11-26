@@ -2538,18 +2538,28 @@ async function boot(user){
   $('#digitalStockSubtitle').textContent=emp.role==='admin'?'Kelola item digital satu-per-satu.':'Ambil satu item untuk buyer, lalu tandai setelah dikirim.';
   $$('.adminOnly').forEach(x=>x.classList.toggle('hidden',emp.role!=='admin'));
   $$('.employeeOnly').forEach(x=>x.classList.toggle('hidden',emp.role==='admin'));
-  if(emp.role==='admin')await loadBossNotificationReadsSafe();
-  go('dashboard'); await refreshData();
-  await loadAttendanceArchiveSafe();
-  await loadStockSafe();
-  await loadRoutineSafe();
-  await loadDigitalSafe();
-  await loadSalesSafe();
-  await loadSellerCenterSafe();
-  if(emp.role==='admin')await loadPayrollDailyPaymentsSafe();
-  renderBossNotifications();
-  setupSalesRealtime();
-  setupFullRealtime();
+  go('dashboard');
+  const failures=[];
+  const run=async(name,fn)=>{try{await fn();}catch(e){failures.push(name);console.error('Dashboard load:',name,e);}};
+  if(emp.role==='admin')await run('Notifikasi',loadBossNotificationReadsSafe);
+  await run('Data utama',refreshData);
+  await Promise.allSettled([
+    run('Arsip absensi',loadAttendanceArchiveSafe),
+    run('Stok',loadStockSafe),
+    run('Job harian',loadRoutineSafe),
+    run('Produk digital',loadDigitalSafe),
+    run('Penjualan',loadSalesSafe),
+    ...(emp.role==='admin'?[run('Seller Center',loadSellerCenterSafe),run('Payroll',loadPayrollDailyPaymentsSafe)]:[])
+  ]);
+  await run('Notifikasi dashboard',renderBossNotifications);
+  await run('Realtime penjualan',setupSalesRealtime);
+  await run('Realtime dashboard',setupFullRealtime);
+  if(failures.length){
+    const n=document.createElement('div');n.className='notice';n.setAttribute('role','status');
+    n.textContent='Sebagian data belum berhasil dimuat: '+failures.join(', ')+'. ';
+    const retry=document.createElement('button');retry.className='btn';retry.textContent='Muat ulang';retry.onclick=()=>location.reload();n.appendChild(retry);
+    document.getElementById('dashboard')?.prepend(n);
+  }
 }
 
 function go(id){
@@ -3218,7 +3228,9 @@ function renderAll(){
  $('#dT').textContent=td.filter(x=>x.status==='Terlambat').length;
  $('#dI').textContent=td.filter(x=>['Izin','Sakit'].includes(x.status)).length;
  $('#dE').textContent=employees.filter(x=>x.role==='employee'&&x.active).length;
- renderAttendance();renderEmployees();renderNotice();renderProfile();renderRecap();renderLeave();renderReports();renderPayroll();renderBossDashboard();renderSettings();renderBossNotifications();
+ const renderers=[renderAttendance,renderNotice,renderProfile,renderLeave,renderSettings];
+ if(currentEmployee?.role==='admin')renderers.push(renderEmployees,renderRecap,renderReports,renderPayroll,renderBossDashboard,renderBossNotifications);
+ for(const render of renderers){try{render();}catch(e){console.error('Dashboard render:',render.name,e);}}
 }
 
 function attendanceDurationV44(checkIn,checkOut){
