@@ -1402,7 +1402,7 @@ body.yan-dark{background:#071427!important;color:#e8f0ff!important;color-scheme:
       <div class="top">
         <div><h1 id="digitalStockTitle">Produk Saya</h1><div class="muted" id="digitalStockSubtitle"></div></div>
         <div class="digital-tools adminOnly">
-          <button class="btn" id="batchDigitalBtn">⇪ Batch Paste</button>
+          <button class="btn" id="batchDigitalBtn">⇪ Tambah Stok Massal</button>
           <button class="btn primary" id="addDigitalItem">+ Tambah Stok Digital</button>
         </div>
       </div>
@@ -2314,7 +2314,7 @@ PIN: 7788" style="min-height:150px;white-space:pre-wrap"></textarea></label>
 
 <div class="modal" id="digitalBatchModal">
   <div class="box" style="max-width:1000px">
-    <h3>Batch Paste Produk Saya</h3>
+    <h3>Tambah Stok Massal</h3>
     <div class="muted">Copy blok data dari Google Sheets/Excel lalu paste di bawah.</div>
     <div class="grid" style="margin-top:12px">
       <label class="field">Kategori<select id="batchCategory"><option>Netflix</option><option>HBO MAX</option><option>Spotify</option><option>Gmail</option><option>YouTube</option><option>VIU</option><option>Canva</option><option>Disney</option><option>Drama Box</option><option>CapCut</option><option>Lainnya</option></select></label>
@@ -5227,13 +5227,15 @@ $('#batchDigitalBtn').onclick=()=>{
 };
 
 $('#previewBatch').onclick=()=>{
-  digitalBatchPreview=parseBatchDigital($('#batchText').value,$('#batchCategory').value,$('#batchProduct').value.trim());
+  const parsed=parseBatchDigital($('#batchText').value,$('#batchCategory').value,$('#batchProduct').value.trim());
+  const seen=new Set();
+  digitalBatchPreview=parsed.filter(x=>{const key=JSON.stringify([x.category,x.product_name,x.secret_value.trim()]);if(seen.has(key))return false;seen.add(key);return true;});
   $('#batchPreviewRows').innerHTML=digitalBatchPreview.map((x,i)=>{
     const em=(x.secret_value.match(/email:\s*(.*)/i)||[])[1]||'-';
     const pw=(x.secret_value.match(/pass:\s*(.*)/i)||[])[1]||'-';
     return `<tr><td>${i+1}</td><td>${esc(x.category)}</td><td>${esc(x.product_name)}</td><td>${esc(em)}</td><td>${esc(pw)}</td><td>${esc(x.note||'-')}</td></tr>`;
   }).join('');
-  $('#batchPreviewInfo').textContent=digitalBatchPreview.length+' item siap diimport.';
+  $('#batchPreviewInfo').textContent=digitalBatchPreview.length+' item siap diimport. '+(parsed.length-digitalBatchPreview.length)+' duplikat dalam batch dilewati.';
   $('#batchPreviewWrap').classList.remove('hidden');
   $('#importBatch').disabled=digitalBatchPreview.length===0;
 };
@@ -5491,14 +5493,35 @@ window.viewDigitalProductV34=async id=>{
     }
   }
 
-  const body=u.length?u.map((x,i)=>`<div class="digital-unit"><b>#${i+1}</b> <span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span><div class="digital-unit-cred">${esc(localSecrets[x.id]||'Credential tersembunyi')}</div><div class="muted">${esc(x.note||'-')} ${x.buyer_ref?'• Buyer: '+esc(x.buyer_ref):''}</div>${x.start_date?`<div class="muted" style="margin-top:5px">Masa aktif: <b>${formatDateV347(x.start_date)}</b> → <b>${formatDateV347(x.expiry_date)}</b></div>`:''}${currentEmployee.role==='admin'&&x.status==='available'?`<div style="margin-top:10px"><button class="btn" style="border-color:#fecaca;background:#fff1f2;color:#dc2626" onclick="deleteDigitalStockUnitV362('${x.id}','${p.id}')">🗑️ Hapus Stok</button></div>`:''}</div>`).join(''):'<div class="muted">Belum ada unit stok.</div>';
+  const body=u.length?u.map((x,i)=>`<div class="digital-unit">${currentEmployee.role==='admin'&&x.status==='available'?`<label style="display:inline-flex;align-items:center;gap:6px;margin-right:10px"><input type="checkbox" class="bulkStockCheck" value="${esc(x.id)}"> Pilih</label>`:''}<b>#${i+1}</b> <span class="badge ${x.status==='available'?'hadir':x.status==='claimed'?'telat':'izin'}">${x.status==='available'?'Tersedia':x.status==='claimed'?'Diambil':'Terkirim'}</span><div class="digital-unit-cred">${esc(localSecrets[x.id]||'Credential tersembunyi')}</div><div class="muted">${esc(x.note||'-')} ${x.buyer_ref?'• Buyer: '+esc(x.buyer_ref):''}</div>${x.start_date?`<div class="muted" style="margin-top:5px">Masa aktif: <b>${formatDateV347(x.start_date)}</b> → <b>${formatDateV347(x.expiry_date)}</b></div>`:''}${currentEmployee.role==='admin'&&x.status==='available'?`<div style="margin-top:10px"><button class="btn" style="border-color:#fecaca;background:#fff1f2;color:#dc2626" onclick="deleteDigitalStockUnitV362('${x.id}','${p.id}')">🗑️ Hapus Stok</button></div>`:''}</div>`).join(''):'<div class="muted">Belum ada unit stok.</div>';
 
   const m=document.createElement('div');
   m.className='modal open';
-  m.innerHTML=`<div class="box"><h3>${esc(p.product_name)}</h3><div class="muted">${esc(p.category)} • ${u.length} unit</div>${body}<div class="actions"><button class="btn" id="v34close">Tutup</button></div></div>`;
+  m.innerHTML=`<div class="box"><h3>${esc(p.product_name)}</h3><div class="muted">${esc(p.category)} • ${u.length} unit</div>${currentEmployee.role==='admin'?`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0"><label><input type="checkbox" id="bulkStockAll"> Pilih semua tersedia</label><button class="btn danger" id="bulkStockDelete" disabled>Hapus terpilih (0)</button></div>`:''}${body}<div class="actions"><button class="btn" id="v34close">Tutup</button></div></div>`;
 
   document.body.appendChild(m);
   m.querySelector('#v34close').onclick=()=>m.remove();
+  const all=m.querySelector('#bulkStockAll'),del=m.querySelector('#bulkStockDelete');
+  if(all&&del){
+    const checks=[...m.querySelectorAll('.bulkStockCheck')];
+    const sync=()=>{const n=checks.filter(c=>c.checked).length;all.checked=checks.length>0&&n===checks.length;all.indeterminate=n>0&&n<checks.length;del.disabled=!n;del.textContent='Hapus terpilih ('+n+')';};
+    all.disabled=!checks.length;
+    all.onchange=()=>{checks.forEach(c=>c.checked=all.checked);sync();};
+    checks.forEach(c=>c.onchange=sync);
+    del.onclick=async()=>{
+      if(currentEmployee?.role!=='admin')return;
+      const ids=checks.filter(c=>c.checked).map(c=>c.value);
+      if(!ids.length||!confirm('Hapus '+ids.length+' stok tersedia? Tindakan ini tidak dapat dibatalkan.'))return;
+      m.querySelectorAll('button,input').forEach(el=>el.disabled=true);
+      let ok=0;
+      for(const itemId of ids){try{const r=await sb.rpc('delete_digital_stock_unit_v362',{p_item_id:itemId});if(!r.error)ok++;}catch(e){}}
+      m.remove();
+      alert(ok+' berhasil dihapus, '+(ids.length-ok)+' gagal.');
+      await loadDigitalSafe();
+      await viewDigitalProductV34(id);
+    };
+    sync();
+  }
 };
 
 function ensureDynamicDigitalCategoryV349(){
