@@ -5373,6 +5373,7 @@ async function loadDigitalBestSellersV1(){
       .from('digital_inventory')
       .select('product_id,status,created_at')
       .order('created_at',{ascending:false})
+      .order('id',{ascending:false})
       .range(from,from+pageSize-1);
 
     if(r.error)throw r.error;
@@ -5430,13 +5431,20 @@ async function loadDigitalSafe(){
     if(pr.error)throw pr.error;
     digitalProductsV34=pr.data||[];
 
-    let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:false}).limit(10000);
-    if(currentEmployee.role!=='admin')q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
-
-    const r=await q;
-    if(r.error)throw r.error;
-
-    digitalItems=r.data||[];
+    // PostgREST caps individual responses; fetch all visible inventory in stable pages.
+    const inventoryRows=[];
+    const pageSize=500;
+    for(let from=0;;from+=pageSize){
+      let q=sb.from('digital_inventory').select('*').order('created_at',{ascending:false}).order('id',{ascending:false}).range(from,from+pageSize-1);
+      if(currentEmployee.role!=='admin')q=q.or(`status.eq.available,claimed_by.eq.${currentEmployee.id}`);
+      const r=await q;
+      if(r.error)throw r.error;
+      const rows=r.data||[];
+      inventoryRows.push(...rows);
+      if(rows.length<pageSize)break;
+    }
+    digitalItems=[...new Map(inventoryRows.map(x=>[x.id,x])).values()];
+    digitalStatusCountsVFix={};
     digitalSecrets={};
     let qTotal=sb.from('digital_inventory').select('*',{count:'exact',head:true});
     let qAvailable=sb.from('digital_inventory').select('*',{count:'exact',head:true}).eq('status','available');
